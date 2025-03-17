@@ -19,7 +19,6 @@
     "lighthouse": "lhci autorun"
   },
   "dependencies": {
-    "@radix-ui/themes": "^3.2.1",
     "@tanstack/react-query": "^5.68.0",
     "axios": "^1.8.3",
     "next": "15.2.2",
