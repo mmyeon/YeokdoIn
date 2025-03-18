@@ -51,7 +51,9 @@ const WeightSelection = () => {
         </div>
 
         <div className="mt-4">
-          <span className="block text-lg font-semibold">선택된 퍼센트</span>
+          <span className="block text-lg font-semibold">
+            프로그램 중량 설정 (%)
+          </span>
           {selectedPercentages.map((item) => (
             <div key={item.id} className="flex items-center mt-2">
               <span className="w-12">
@@ -99,7 +101,10 @@ const WeightSelection = () => {
           },
         }}
       >
-        <button className="mt-4 px-4 py-2 bg-blue-500 text-white rounded">
+        <button
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-100"
+          disabled={selectedPercentages.length == 0}
+        >
           무게 계산하기
         </button>
       </Link>
