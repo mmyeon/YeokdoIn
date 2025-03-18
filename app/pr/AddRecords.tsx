@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type StorageKey = "cleanRecord" | "snatchRecord";
 
@@ -24,7 +24,6 @@ function handleBlur(e: React.FocusEvent<HTMLInputElement>) {
 }
 
 function deleteStorageItems(keys: string[]) {
-  console.log("deleteStorageItems 호출됨", keys);
   keys.forEach((key) => {
     const itemKey = `${key}Record`;
     removeStorageItem(itemKey as StorageKey);
@@ -34,6 +33,8 @@ function deleteStorageItems(keys: string[]) {
 export default function AddRecords() {
   const cleanJerkPRRef = useRef<HTMLInputElement>(null);
   const snatchPRRef = useRef<HTMLInputElement>(null);
+  const [cleanRecordError, setCleanRecordError] = useState<string>("");
+  const [snatchRecordError, setSnatchRecordError] = useState<string>("");
   const searchParams = useSearchParams();
   const selected = searchParams.get("selected");
   const selectedList = selected ? selected.split(",") : [];
@@ -45,6 +46,7 @@ export default function AddRecords() {
     if (cleanJerkPRRef.current) {
       cleanJerkPRRef.current.value = getStorageItem("cleanRecord") || "";
     }
+
     if (snatchPRRef.current) {
       snatchPRRef.current.value = getStorageItem("snatchRecord") || "";
     }
@@ -58,6 +60,19 @@ export default function AddRecords() {
   function handleDelete(keys: string[]) {
     deleteStorageItems(keys);
     resetInputFields();
+  }
+
+  function handleInputValue(e: React.ChangeEvent<HTMLInputElement>) {
+    const { id, value } = e.target;
+    const isNumber = /^\d+$/.test(value);
+
+    if (id === "snatchRecord") {
+      setSnatchRecordError(isNumber ? "" : "숫자만 입력해 주세요.");
+    } else {
+      setCleanRecordError(isNumber ? "" : "숫자만 입력해 주세요.");
+    }
+
+    e.target.value = value.replace(/\D/g, "");
   }
 
   return (
@@ -74,14 +89,20 @@ export default function AddRecords() {
             >
               Snatch Record (Kg)
             </label>
+
             <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
               id="snatchRecord"
-              type="number"
+              type="text"
               ref={snatchPRRef}
               placeholder="Snatch PR 입력해 주세요."
               onBlur={handleBlur}
+              onChange={handleInputValue}
             />
+
+            <span className="text-xs text-red-600 w-full block">
+              {snatchRecordError || "\u00A0"}
+            </span>
           </div>
         )}
 
@@ -93,14 +114,20 @@ export default function AddRecords() {
             >
               Clean & Jerk Record (Kg)
             </label>
+
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
               id="cleanRecord"
-              type="number"
+              type="text"
               placeholder="Clean & Jerk PR 입력해 주세요."
               ref={cleanJerkPRRef}
               onBlur={handleBlur}
+              onChange={handleInputValue}
             />
+
+            <span className="text-xs text-red-600 w-full block">
+              {cleanRecordError || "\u00A0"}
+            </span>
           </div>
         )}
 
