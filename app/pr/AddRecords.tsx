@@ -30,7 +30,11 @@ function deleteStorageItems(keys: string[]) {
   });
 }
 
-export default function AddRecords() {
+export default function AddRecords({
+  changeViewMode,
+}: {
+  changeViewMode: () => void;
+}) {
   const cleanJerkPRRef = useRef<HTMLInputElement>(null);
   const snatchPRRef = useRef<HTMLInputElement>(null);
   const [cleanRecordError, setCleanRecordError] = useState<string>("");
@@ -77,10 +81,7 @@ export default function AddRecords() {
 
   return (
     <div className="flex justify-center items-center h-screen">
-      <form
-        className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4  max-w-xs"
-        onSubmit={(e) => e.preventDefault()}
-      >
+      <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4  max-w-xs">
         {hasSnatch && (
           <div className="mb-6">
             <label
@@ -143,11 +144,12 @@ export default function AddRecords() {
           <button
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
             type="button"
+            onClick={changeViewMode}
           >
             훈련 중량 선택
           </button>
         </div>
-      </form>
+      </div>
     </div>
   );
 }
