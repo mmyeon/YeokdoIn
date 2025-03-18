@@ -1,16 +1,19 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 type StorageKey = "cleanRecord" | "snatchRecord";
 
+const INPUT_ERROR_MESSAGE = "숫자만 입력해 주세요.";
+
 const getStorageItem = (key: StorageKey) => {
   const value = localStorage.getItem(key);
-  return value ? JSON.parse(value) : null;
+  return value ? JSON.parse(value) : "";
 };
 
 const setStorageItem = (key: StorageKey, value: unknown) => {
+  if (value === "") return;
   localStorage.setItem(key, JSON.stringify(value));
 };
 
@@ -18,27 +21,13 @@ const removeStorageItem = (key: StorageKey) => {
   localStorage.removeItem(key);
 };
 
-function handleBlur(e: React.FocusEvent<HTMLInputElement>) {
-  const { id, value } = e.target;
-  setStorageItem(id as StorageKey, value);
-}
-
-function deleteStorageItems(keys: string[]) {
-  keys.forEach((key) => {
-    const itemKey = `${key}Record`;
-    removeStorageItem(itemKey as StorageKey);
-  });
-}
-
 export default function AddRecords({
   changeViewMode,
 }: {
   changeViewMode: () => void;
 }) {
-  const cleanJerkPRRef = useRef<HTMLInputElement>(null);
-  const snatchPRRef = useRef<HTMLInputElement>(null);
-  const [cleanRecordError, setCleanRecordError] = useState<string>("");
-  const [snatchRecordError, setSnatchRecordError] = useState<string>("");
+  const [cleanRecord, setCleanRecord] = useState<string>("");
+  const [snatchRecord, setSnatchRecord] = useState<string>("");
   const searchParams = useSearchParams();
   const selected = searchParams.get("selected");
   const selectedList = selected ? selected.split(",") : [];
@@ -47,36 +36,32 @@ export default function AddRecords({
   const hasSnatch = selectedList.includes("snatch");
 
   useEffect(() => {
-    if (cleanJerkPRRef.current) {
-      cleanJerkPRRef.current.value = getStorageItem("cleanRecord") || "";
-    }
-
-    if (snatchPRRef.current) {
-      snatchPRRef.current.value = getStorageItem("snatchRecord") || "";
-    }
+    setCleanRecord(getStorageItem("cleanRecord"));
+    setSnatchRecord(getStorageItem("snatchRecord"));
   }, []);
 
-  function resetInputFields() {
-    cleanJerkPRRef.current!.value = "";
-    snatchPRRef.current!.value = "";
-  }
-
   function handleDelete(keys: string[]) {
-    deleteStorageItems(keys);
-    resetInputFields();
+    keys.forEach((key) => {
+      const itemKey = `${key}Record` as StorageKey;
+      removeStorageItem(itemKey);
+    });
+    setCleanRecord("");
+    setSnatchRecord("");
   }
 
   function handleInputValue(e: React.ChangeEvent<HTMLInputElement>) {
     const { id, value } = e.target;
-    const isNumber = /^\d+$/.test(value);
 
     if (id === "snatchRecord") {
-      setSnatchRecordError(isNumber ? "" : "숫자만 입력해 주세요.");
+      setSnatchRecord(value.replace(/\D/g, ""));
     } else {
-      setCleanRecordError(isNumber ? "" : "숫자만 입력해 주세요.");
+      setCleanRecord(value.replace(/\D/g, ""));
     }
+  }
 
-    e.target.value = value.replace(/\D/g, "");
+  function handleBlur(e: React.FocusEvent<HTMLInputElement>) {
+    const { id, value } = e.target;
+    setStorageItem(id as StorageKey, value);
   }
 
   return (
@@ -95,14 +80,14 @@ export default function AddRecords({
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
               id="snatchRecord"
               type="text"
-              ref={snatchPRRef}
+              value={snatchRecord}
               placeholder="Snatch PR 입력해 주세요."
               onBlur={handleBlur}
               onChange={handleInputValue}
             />
 
             <span className="text-xs text-red-600 w-full block">
-              {snatchRecordError || "\u00A0"}
+              {!snatchRecord ? INPUT_ERROR_MESSAGE : "\u00A0"}
             </span>
           </div>
         )}
@@ -120,30 +105,32 @@ export default function AddRecords({
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
               id="cleanRecord"
               type="text"
+              value={cleanRecord}
               placeholder="Clean & Jerk PR 입력해 주세요."
-              ref={cleanJerkPRRef}
               onBlur={handleBlur}
               onChange={handleInputValue}
             />
 
             <span className="text-xs text-red-600 w-full block">
-              {cleanRecordError || "\u00A0"}
+              {!cleanRecord ? INPUT_ERROR_MESSAGE : "\u00A0"}
             </span>
           </div>
         )}
 
         <div className="flex flex-row gap-4 w-full">
           <button
-            className="bg-red-400 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            className="bg-red-400 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-red-100"
             type="button"
+            disabled={snatchRecord === "" && cleanRecord === ""}
             onClick={() => handleDelete(selectedList)}
           >
             기록 삭제
           </button>
 
           <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-blue-100"
             type="button"
+            disabled={snatchRecord === "" || cleanRecord === ""}
             onClick={changeViewMode}
           >
             훈련 중량 선택
