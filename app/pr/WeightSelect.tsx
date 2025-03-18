@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 const BABEL_WEIGHTS = [15, 20, 25, 30]; // 바 무게 옵션
@@ -6,6 +7,8 @@ const PERCENTAGES = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]; // 퍼센트 
 const DEFAULT_PERCENTAGES = 65;
 
 const WeightSelection = () => {
+  const searchParams = useSearchParams();
+  const selected = searchParams.get("selected");
   const [barWeight, setBarWeight] = useState(15);
   const [selectedPercentages, setSelectedPercentages] = useState<
     { id: number; percent: number }[]
@@ -94,6 +97,7 @@ const WeightSelection = () => {
         href={{
           pathname: "/pr/calculate",
           query: {
+            selected,
             barWeight: barWeight,
             programWeights: selectedPercentages
               .map((item) => item.percent)
