@@ -63,7 +63,7 @@ function getPlateCombination(
 const PRWeightCalculator = () => {
   const { getLocalStorageItem } = useLocalStorage();
   const selectedLift = getLocalStorageItem("selectedLift");
-  const barWeight = getLocalStorageItem("barWeight");
+  const barbelWeight = getLocalStorageItem("barbelWeight");
   const weightPercents = JSON.parse(
     getLocalStorageItem("programWeights") || "[]",
   ) as WeightPercentage[];
@@ -87,10 +87,10 @@ const PRWeightCalculator = () => {
               Number(weightPercent.percent)) /
               100,
           ),
-          Number(barWeight),
+          Number(barbelWeight),
         ),
       })),
-    [activeTab, barWeight, weightPercents, getLocalStorageItem],
+    [activeTab, barbelWeight, weightPercents, getLocalStorageItem],
   );
 
   return (

@@ -2,7 +2,7 @@ export type StorageKey =
   | "cleanRecord"
   | "snatchRecord"
   | "selectedLift"
-  | "barWeight"
+  | "barbelWeight"
   | "programWeights";
 
 export function useLocalStorage() {

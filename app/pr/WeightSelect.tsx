@@ -9,7 +9,7 @@ export type WeightPercentage = {
   percent: number;
 };
 
-const BABEL_WEIGHTS = [15, 20, 25, 30]; // 바 무게 옵션
+const BARBEL_WEIGHTS = [15, 20, 25, 30]; // 바 무게 옵션
 const PERCENTAGES = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]; // 퍼센트 옵션
 const DEFAULT_PERCENTAGES = 65;
 
@@ -42,16 +42,16 @@ const WeightSelection = () => {
         <div className="flex gap-4 items-center">
           <span className="block text-lg font-semibold">바벨 무게</span>
           <select
-            name="barWeight"
-            id="barWeight"
+            name="barbelWeight"
+            id="barbelWeight"
             className="border p-2 rounded mt-2"
             defaultValue={15}
             onChange={(e) => {
-              setLocalStorageItem("barWeight", e.target.value);
+              setLocalStorageItem("barbelWeight", e.target.value);
             }}
           >
             <>
-              {BABEL_WEIGHTS.map((weight) => (
+              {BARBEL_WEIGHTS.map((weight) => (
                 <option key={weight} value={weight}>
                   {weight}kg
                 </option>
