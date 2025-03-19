@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { WeightPercentage } from "../WeightSelect";
+import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 
 type TabInfo = {
   type: "clean" | "snatch";
@@ -60,38 +61,36 @@ function getPlateCombination(
 }
 
 const PRWeightCalculator = () => {
-  const selectedLift = localStorage.getItem("selectedLift");
-  const barWeight = localStorage.getItem("barWeight");
+  const { getLocalStorageItem } = useLocalStorage();
+  const selectedLift = getLocalStorageItem("selectedLift");
+  const barWeight = getLocalStorageItem("barWeight");
   const weightPercents = JSON.parse(
-    localStorage.getItem("programWeights") || "[]",
+    getLocalStorageItem("programWeights") || "[]",
   ) as WeightPercentage[];
   const tabItems = selectedLift ? selectedLift.split(",") : [];
   const [activeTab, setActiveTab] = useState<"clean" | "snatch">(
     tabItems.includes("snatch") ? "snatch" : "clean",
   );
 
-  // const cleanPR = localStorage.getItem("cleanRecord")!;
-  // const snatchPR = Number(localStorage.getItem("snatchRecord"))!;
-
   const weightList: WeightList[] = useMemo(
     () =>
       weightPercents.map((weightPercent) => ({
         ...weightPercent,
         totalWeight: Math.ceil(
-          (Number(JSON.parse(localStorage.getItem(`${activeTab}Record`)!)) *
+          (Number(JSON.parse(getLocalStorageItem(`${activeTab}Record`)!)) *
             Number(weightPercent.percent)) /
             100,
         ),
         plates: getPlateCombination(
           Math.ceil(
-            (Number(JSON.parse(localStorage.getItem(`${activeTab}Record`)!)) *
+            (Number(JSON.parse(getLocalStorageItem(`${activeTab}Record`)!)) *
               Number(weightPercent.percent)) /
               100,
           ),
           Number(barWeight),
         ),
       })),
-    [activeTab, barWeight, weightPercents],
+    [activeTab, barWeight, weightPercents, getLocalStorageItem],
   );
 
   return (

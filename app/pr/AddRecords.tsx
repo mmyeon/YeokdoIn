@@ -1,47 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-type StorageKey = "cleanRecord" | "snatchRecord";
+import { useState } from "react";
+import { StorageKey, useLocalStorage } from "../hooks/useLocalStorage";
 
 const INPUT_ERROR_MESSAGE = "숫자만 입력해 주세요.";
-
-const getStorageItem = (key: StorageKey) => {
-  const value = localStorage.getItem(key);
-  return value ? JSON.parse(value) : "";
-};
-
-const setStorageItem = (key: StorageKey, value: unknown) => {
-  if (value === "") return;
-  localStorage.setItem(key, JSON.stringify(value));
-};
-
-const removeStorageItem = (key: StorageKey) => {
-  localStorage.removeItem(key);
-};
 
 export default function AddRecords({
   changeViewMode,
 }: {
   changeViewMode: () => void;
 }) {
-  const [cleanRecord, setCleanRecord] = useState<string>("");
-  const [snatchRecord, setSnatchRecord] = useState<string>("");
-  const selectedLift = localStorage.getItem("selectedLift");
+  const { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } =
+    useLocalStorage();
+  const [cleanRecord, setCleanRecord] = useState<string>(
+    getLocalStorageItem("cleanRecord"),
+  );
+  const [snatchRecord, setSnatchRecord] = useState<string>(
+    getLocalStorageItem("snatchRecord"),
+  );
+  const selectedLift = getLocalStorageItem("selectedLift");
   const lift = selectedLift ? selectedLift.split(",") : [];
 
   const hasClean = lift.includes("clean");
   const hasSnatch = lift.includes("snatch");
 
-  useEffect(() => {
-    setCleanRecord(getStorageItem("cleanRecord"));
-    setSnatchRecord(getStorageItem("snatchRecord"));
-  }, []);
-
   function handleDelete(keys: string[]) {
     keys.forEach((key) => {
       const itemKey = `${key}Record` as StorageKey;
-      removeStorageItem(itemKey);
+      removeLocalStorageItem(itemKey);
     });
     setCleanRecord("");
     setSnatchRecord("");
@@ -59,7 +45,7 @@ export default function AddRecords({
 
   function handleBlur(e: React.FocusEvent<HTMLInputElement>) {
     const { id, value } = e.target;
-    setStorageItem(id as StorageKey, value);
+    setLocalStorageItem(id as StorageKey, value);
   }
 
   return (

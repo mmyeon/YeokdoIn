@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useLocalStorage } from "./hooks/useLocalStorage";
 
 const BUTTONS = [
   { label: "Snatch", value: "snatch" },
@@ -9,10 +10,8 @@ const BUTTONS = [
   { label: "Snatch + Clean", value: "snatch,clean" },
 ];
 
-// TODO: 사용되는 로컬 스토리지 키 한 곳에서 관리
-export type LOCAL_STORAGE_KEYS = "selectedLift";
-
 export default function Home() {
+  const { setLocalStorageItem } = useLocalStorage();
   return (
     <div className="flex flex-col items-center justify-center">
       <Image
@@ -30,7 +29,7 @@ export default function Home() {
           <Link
             key={value}
             href="/pr"
-            onClick={() => localStorage.setItem("selectedLift", value)}
+            onClick={() => setLocalStorageItem("selectedLift", value)}
           >
             <button className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
               {label}

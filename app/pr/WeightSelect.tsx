@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 
 export type WeightPercentage = {
   id: number;
@@ -16,6 +17,7 @@ const WeightSelection = () => {
   const [selectedPercentages, setSelectedPercentages] = useState<
     WeightPercentage[]
   >([]);
+  const { setLocalStorageItem } = useLocalStorage();
 
   const handleAddPercentage = () => {
     setSelectedPercentages([
@@ -45,7 +47,7 @@ const WeightSelection = () => {
             className="border p-2 rounded mt-2"
             defaultValue={15}
             onChange={(e) => {
-              localStorage.setItem("barWeight", e.target.value);
+              setLocalStorageItem("barWeight", e.target.value);
             }}
           >
             <>
@@ -101,7 +103,7 @@ const WeightSelection = () => {
       <Link
         href="/pr/calculate"
         onClick={() =>
-          localStorage.setItem(
+          setLocalStorageItem(
             "programWeights",
             JSON.stringify(selectedPercentages),
           )
