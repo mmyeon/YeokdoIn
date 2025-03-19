@@ -52,7 +52,9 @@ const WeightSelection = () => {
             name="barbelWeight"
             id="barbelWeight"
             className="border p-2 rounded mt-2"
-            defaultValue={15}
+            defaultValue={
+              getLocalStorageItem("barbelWeight") || BARBEL_OPTIONS[0]
+            }
             onChange={(e) => {
               setLocalStorageItem("barbelWeight", e.target.value);
             }}
