@@ -9,7 +9,7 @@ export type WeightPercentage = {
   percent: number;
 };
 
-const BARBEL_WEIGHTS = [15, 20, 25, 30]; // 바 무게 옵션
+export const BARBEL_OPTIONS = [15, 20, 25, 30]; // 바 무게 옵션
 const PERCENTAGES = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]; // 퍼센트 옵션
 const DEFAULT_PERCENTAGES = 65;
 
@@ -17,7 +17,7 @@ const WeightSelection = () => {
   const [selectedPercentages, setSelectedPercentages] = useState<
     WeightPercentage[]
   >([]);
-  const { setLocalStorageItem } = useLocalStorage();
+  const { setLocalStorageItem, getLocalStorageItem } = useLocalStorage();
 
   const handleAddPercentage = () => {
     setSelectedPercentages([
@@ -36,6 +36,13 @@ const WeightSelection = () => {
     setSelectedPercentages((prev) => prev.filter((item) => item.id !== id));
   };
 
+  const cleanRecord = getLocalStorageItem("cleanRecord");
+  const snatchRecord = getLocalStorageItem("snatchRecord");
+
+  const availableBarbelOptions = BARBEL_OPTIONS.filter(
+    (weight) => weight <= Math.max(Number(cleanRecord), Number(snatchRecord)),
+  );
+
   return (
     <div className="p-4 flex flex-col gap-4 justify-center items-center">
       <div>
@@ -51,7 +58,7 @@ const WeightSelection = () => {
             }}
           >
             <>
-              {BARBEL_WEIGHTS.map((weight) => (
+              {availableBarbelOptions.map((weight) => (
                 <option key={weight} value={weight}>
                   {weight}kg
                 </option>

@@ -60,6 +60,7 @@ export default function AddRecords({
               Snatch Record (Kg)
             </label>
 
+            {/* TODO: 바벨 무게 최소값이 15니까, 개인 기록이 바벨 무게 이상 입력되어야 함 */}
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
               id="snatchRecord"
