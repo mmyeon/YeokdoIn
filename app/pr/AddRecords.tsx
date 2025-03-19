@@ -48,6 +48,8 @@ export default function AddRecords({
     setLocalStorageItem(id as StorageKey, value);
   }
 
+  const isDeleteDisabled = !snatchRecord && !cleanRecord;
+
   return (
     <div className="flex justify-center items-center h-screen">
       <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4  max-w-xs">
@@ -102,18 +104,9 @@ export default function AddRecords({
           </div>
         )}
 
-        <div className="flex flex-row gap-4 w-full">
+        <div className="mt-6 flex justify-center">
           <button
-            className="bg-red-400 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-red-100"
-            type="button"
-            disabled={snatchRecord === "" && cleanRecord === ""}
-            onClick={() => handleDelete(lift)}
-          >
-            기록 삭제
-          </button>
-
-          <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-blue-100"
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-blue-100 w-full"
             type="button"
             disabled={
               (hasSnatch && snatchRecord === "") ||
@@ -122,6 +115,20 @@ export default function AddRecords({
             onClick={changeViewMode}
           >
             훈련 중량 선택
+          </button>
+        </div>
+
+        {/* TODO: 삭제 확인 다이얼로그 추가 */}
+        <div className="mt-4 flex justify-center">
+          <button
+            className={`text-red-500 text-sm hover:underline transition ${
+              isDeleteDisabled ? "opacity-50" : ""
+            }`}
+            type="button"
+            disabled={isDeleteDisabled}
+            onClick={() => handleDelete(lift)}
+          >
+            기록 삭제
           </button>
         </div>
       </div>
