@@ -1,7 +1,7 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
+import { WeightPercentage } from "../WeightSelect";
 
 type TabInfo = {
   type: "clean" | "snatch";
@@ -13,11 +13,10 @@ const tabInfo: TabInfo[] = [
   { type: "snatch", label: "Snatch" },
 ]; // 탭 정보
 
-type WeightList = {
-  percent: string;
+interface WeightList extends WeightPercentage {
   totalWeight: number;
   plates: PlateOption[];
-};
+}
 
 type PlateOption = {
   weight: number;
@@ -61,32 +60,32 @@ function getPlateCombination(
 }
 
 const PRWeightCalculator = () => {
-  const searchParams = useSearchParams();
-  const selected = searchParams.get("selected");
-  const barWeight = searchParams.get("barWeight");
-  const programWeights = searchParams.get("programWeights");
-  const tabItems = selected ? selected.split(",") : [];
+  const selectedLift = localStorage.getItem("selectedLift");
+  const barWeight = localStorage.getItem("barWeight");
+  const weightPercents = JSON.parse(
+    localStorage.getItem("programWeights") || "[]",
+  ) as WeightPercentage[];
+  const tabItems = selectedLift ? selectedLift.split(",") : [];
   const [activeTab, setActiveTab] = useState<"clean" | "snatch">(
     tabItems.includes("snatch") ? "snatch" : "clean",
   );
 
-  const weightPercents = programWeights ? programWeights.split(",") : [];
   // const cleanPR = localStorage.getItem("cleanRecord")!;
   // const snatchPR = Number(localStorage.getItem("snatchRecord"))!;
 
   const weightList: WeightList[] = useMemo(
     () =>
       weightPercents.map((weightPercent) => ({
-        percent: weightPercent,
+        ...weightPercent,
         totalWeight: Math.ceil(
           (Number(JSON.parse(localStorage.getItem(`${activeTab}Record`)!)) *
-            Number(weightPercent)) /
+            Number(weightPercent.percent)) /
             100,
         ),
         plates: getPlateCombination(
           Math.ceil(
             (Number(JSON.parse(localStorage.getItem(`${activeTab}Record`)!)) *
-              Number(weightPercent)) /
+              Number(weightPercent.percent)) /
               100,
           ),
           Number(barWeight),

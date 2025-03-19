@@ -1,19 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useState } from "react";
+
+export type WeightPercentage = {
+  id: number;
+  percent: number;
+};
 
 const BABEL_WEIGHTS = [15, 20, 25, 30]; // 바 무게 옵션
 const PERCENTAGES = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]; // 퍼센트 옵션
 const DEFAULT_PERCENTAGES = 65;
 
 const WeightSelection = () => {
-  const searchParams = useSearchParams();
-  const selected = searchParams.get("selected");
-  const [barWeight, setBarWeight] = useState(15);
   const [selectedPercentages, setSelectedPercentages] = useState<
-    { id: number; percent: number }[]
+    WeightPercentage[]
   >([]);
 
   const handleAddPercentage = () => {
@@ -42,8 +43,10 @@ const WeightSelection = () => {
             name="barWeight"
             id="barWeight"
             className="border p-2 rounded mt-2"
-            value={barWeight}
-            onChange={(e) => setBarWeight(Number(e.target.value))}
+            defaultValue={15}
+            onChange={(e) => {
+              localStorage.setItem("barWeight", e.target.value);
+            }}
           >
             <>
               {BABEL_WEIGHTS.map((weight) => (
@@ -96,16 +99,13 @@ const WeightSelection = () => {
       </div>
 
       <Link
-        href={{
-          pathname: "/pr/calculate",
-          query: {
-            selected,
-            barWeight: barWeight,
-            programWeights: selectedPercentages
-              .map((item) => item.percent)
-              .join(","),
-          },
-        }}
+        href="/pr/calculate"
+        onClick={() =>
+          localStorage.setItem(
+            "programWeights",
+            JSON.stringify(selectedPercentages),
+          )
+        }
       >
         <button
           className="mt-4 px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-100"

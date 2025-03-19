@@ -1,6 +1,5 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 type StorageKey = "cleanRecord" | "snatchRecord";
@@ -28,12 +27,11 @@ export default function AddRecords({
 }) {
   const [cleanRecord, setCleanRecord] = useState<string>("");
   const [snatchRecord, setSnatchRecord] = useState<string>("");
-  const searchParams = useSearchParams();
-  const selected = searchParams.get("selected");
-  const selectedList = selected ? selected.split(",") : [];
+  const selectedLift = localStorage.getItem("selectedLift");
+  const lift = selectedLift ? selectedLift.split(",") : [];
 
-  const hasClean = selectedList.includes("clean");
-  const hasSnatch = selectedList.includes("snatch");
+  const hasClean = lift.includes("clean");
+  const hasSnatch = lift.includes("snatch");
 
   useEffect(() => {
     setCleanRecord(getStorageItem("cleanRecord"));
@@ -122,7 +120,7 @@ export default function AddRecords({
             className="bg-red-400 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-red-100"
             type="button"
             disabled={snatchRecord === "" && cleanRecord === ""}
-            onClick={() => handleDelete(selectedList)}
+            onClick={() => handleDelete(lift)}
           >
             기록 삭제
           </button>
