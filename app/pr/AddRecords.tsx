@@ -130,7 +130,10 @@ export default function AddRecords({
           <button
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-blue-100"
             type="button"
-            disabled={snatchRecord === "" || cleanRecord === ""}
+            disabled={
+              (hasSnatch && snatchRecord === "") ||
+              (hasClean && cleanRecord === "")
+            }
             onClick={changeViewMode}
           >
             훈련 중량 선택

@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -32,8 +34,8 @@ const WeightSelection = () => {
   };
 
   return (
-    <>
-      <div className="p-4">
+    <div className="p-4 flex flex-col gap-4 justify-center items-center">
+      <div>
         <div className="flex gap-4 items-center">
           <span className="block text-lg font-semibold">바벨 무게</span>
           <select
@@ -86,7 +88,7 @@ const WeightSelection = () => {
         </div>
 
         <button
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded w-full"
           onClick={handleAddPercentage}
         >
           + 추가
@@ -112,7 +114,7 @@ const WeightSelection = () => {
           무게 계산하기
         </button>
       </Link>
-    </>
+    </div>
   );
 };
 
