@@ -11,120 +11,114 @@ export type WeightPercentage = {
 
 export const BARBEL_OPTIONS = [15, 20, 25, 30]; // 바 무게 옵션
 const PERCENTAGES = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]; // 퍼센트 옵션
-const DEFAULT_PERCENTAGES = 65;
 
 const WeightSelection = () => {
-  const [selectedPercentages, setSelectedPercentages] = useState<
+  const [selectedPercentage, setSelectedPercentage] = useState<string>("");
+  const [selectedPercentageList, setSelectedPercentageList] = useState<
     WeightPercentage[]
   >([]);
-  const { setLocalStorageItem, getLocalStorageItem } = useLocalStorage();
+  const { setLocalStorageItem } = useLocalStorage();
 
-  const handleAddPercentage = () => {
-    setSelectedPercentages([
-      ...selectedPercentages,
-      { id: Date.now(), percent: DEFAULT_PERCENTAGES },
+  const handleSelect = (percent: string) => {
+    setSelectedPercentage(percent);
+  };
+
+  const updateSelectedPercentageList = () => {
+    setSelectedPercentageList((prev) => [
+      ...prev,
+      { id: Date.now(), percent: Number(selectedPercentage) },
     ]);
   };
 
-  const handlePercentageChange = (id: number, value: number) => {
-    setSelectedPercentages((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, percent: value } : item)),
-    );
-  };
-
   const handleDeletePercentage = (id: number) => {
-    setSelectedPercentages((prev) => prev.filter((item) => item.id !== id));
+    setSelectedPercentageList((prev) => prev.filter((item) => item.id !== id));
   };
-
-  const cleanRecord = getLocalStorageItem("cleanRecord");
-  const snatchRecord = getLocalStorageItem("snatchRecord");
-
-  const availableBarbelOptions = BARBEL_OPTIONS.filter(
-    (weight) => weight <= Math.max(Number(cleanRecord), Number(snatchRecord)),
-  );
 
   return (
-    <div className="p-4 flex flex-col gap-4 justify-center items-center">
+    <div className="p-4 flex flex-col gap-4 justify-center items-center h-screen">
       <div>
-        <div className="flex gap-4 items-center">
-          <span className="block text-lg font-semibold">바벨 무게</span>
-          <select
-            name="barbelWeight"
-            id="barbelWeight"
-            className="border p-2 rounded mt-2"
-            defaultValue={
-              getLocalStorageItem("barbelWeight") || BARBEL_OPTIONS[0]
-            }
-            onChange={(e) => {
-              setLocalStorageItem("barbelWeight", e.target.value);
-            }}
-          >
-            <>
-              {availableBarbelOptions.map((weight) => (
-                <option key={weight} value={weight}>
-                  {weight}kg
-                </option>
-              ))}
-            </>
-          </select>
-        </div>
-
-        <div className="mt-4">
-          <span className="block text-lg font-semibold">
-            프로그램 중량 설정 (%)
-          </span>
-          {selectedPercentages.map((item) => (
-            <div key={item.id} className="flex items-center mt-2">
-              <span className="w-12">
-                {selectedPercentages.indexOf(item) + 1}
-              </span>
-              <select
-                className="border p-2 rounded w-24"
-                value={item.percent}
-                onChange={(e) =>
-                  handlePercentageChange(item.id, Number(e.target.value))
-                }
-              >
-                {PERCENTAGES.map((percent) => (
-                  <option key={percent} value={percent}>
-                    {percent}%
-                  </option>
-                ))}
-              </select>
-              <button
-                className="ml-2 text-red-500 font-bold"
-                onClick={() => handleDeletePercentage(item.id)}
-              >
-                ❌
-              </button>
-            </div>
-          ))}
-        </div>
-
-        <button
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded w-full"
-          onClick={handleAddPercentage}
-        >
-          + 추가
-        </button>
+        <h1 className="text-lg font-bold">훈련 프로그램을 설정해볼까요?</h1>
+        <span>바벨 무게와 훈련 강도를 입력해 주세요.</span>
       </div>
 
-      <Link
-        href="/pr/calculate"
-        onClick={() =>
-          setLocalStorageItem(
-            "programWeights",
-            JSON.stringify(selectedPercentages),
-          )
-        }
-      >
-        <button
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-100"
-          disabled={selectedPercentages.length == 0}
+      <div className="flex flex-col gap-4 max-w-md w-full">
+        <div className="flex flex-col">
+          <label className="font-semibold">바벨 무게(kg)</label>
+
+          <input
+            type="number"
+            className="border p-2 rounded mt-2"
+            onBlur={(e) => setLocalStorageItem("barbelWeight", e.target.value)}
+            placeholder="바벨 무게를 입력해 주세요."
+          />
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <label htmlFor="percentage-select" className="font-semibold">
+            훈련 강도(%)
+          </label>
+
+          <div className="flex gap-4 justify-center">
+            <select
+              className="border flex-1"
+              id="percentage-select"
+              onChange={(e) => handleSelect(e.target.value)}
+            >
+              <option value="">훈련 강도를 선택해 주세요.</option>
+
+              {PERCENTAGES.map((percent) => (
+                <option key={percent} value={percent}>
+                  {percent}%
+                </option>
+              ))}
+            </select>
+
+            <button
+              className="px-4 py-2 bg-blue-500 text-white rounded"
+              onClick={updateSelectedPercentageList}
+              disabled={!selectedPercentage}
+            >
+              추가
+            </button>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <span className="font-semibold">선택된 훈련 강도</span>
+
+          <div className="flex gap-2 flex-wrap">
+            {selectedPercentageList.map((item) => (
+              <div
+                key={item.id}
+                className="w-fit bg-gray-600 px-3.5 py-1  text-white rounded-xl text-sm flex gap-2 font-bold"
+              >
+                {item.percent}%{" "}
+                <button onClick={() => handleDeletePercentage(item.id)}>
+                  X
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <Link
+          href="/pr/calculate"
+          className="w-full"
+          onClick={() =>
+            setLocalStorageItem(
+              "programWeights",
+              JSON.stringify(selectedPercentageList),
+            )
+          }
         >
-          무게 계산하기
-        </button>
-      </Link>
+          <button
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-100 w-full"
+            disabled={selectedPercentageList.length == 0}
+          >
+            다음
+          </button>
+        </Link>
+      </div>
     </div>
   );
 };
