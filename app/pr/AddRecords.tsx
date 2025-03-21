@@ -10,8 +10,7 @@ export default function AddRecords({
 }: {
   changeViewMode: () => void;
 }) {
-  const { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } =
-    useLocalStorage();
+  const { getLocalStorageItem, setLocalStorageItem } = useLocalStorage();
   const [cleanRecord, setCleanRecord] = useState<string>(
     getLocalStorageItem("cleanRecord"),
   );
@@ -23,15 +22,6 @@ export default function AddRecords({
 
   const hasClean = lift.includes("clean");
   const hasSnatch = lift.includes("snatch");
-
-  function handleDelete(keys: string[]) {
-    keys.forEach((key) => {
-      const itemKey = `${key}Record` as StorageKey;
-      removeLocalStorageItem(itemKey);
-    });
-    setCleanRecord("");
-    setSnatchRecord("");
-  }
 
   function handleInputValue(e: React.ChangeEvent<HTMLInputElement>) {
     const { id, value } = e.target;
@@ -48,27 +38,28 @@ export default function AddRecords({
     setLocalStorageItem(id as StorageKey, value);
   }
 
-  const isDeleteDisabled = !snatchRecord && !cleanRecord;
-
   return (
     <div className="flex justify-center items-center h-screen">
       <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4  max-w-xs">
+        <h1 className="mb-4 text-lg font-bold">당신의 PR을 알려주세요!</h1>
+        <span>PR을 기준으로 훈련 중량을 계산해드려요.</span>
+
         {hasSnatch && (
           <div className="mb-6">
             <label
               className="block text-gray-700 text-sm font-bold mb-2"
               htmlFor="snatchRecord"
             >
-              Snatch Record (Kg)
+              Snatch PR (kg)
             </label>
 
-            {/* TODO: 바벨 무게 최소값이 15니까, 개인 기록이 바벨 무게 이상 입력되어야 함 */}
+            {/* TODO: select로 바꿀 지 고민해보기. 가능 무게 : 바벨 무게 중 clean, snatch 무게 중 적은 무게에서 플레이트 무게인 5kg 뺀 무게. 완전 초보인 경우 처리 방법 고민 */}
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
               id="snatchRecord"
               type="text"
               value={snatchRecord}
-              placeholder="Snatch PR 입력해 주세요."
+              placeholder="Snatch PR 입력해주세요."
               onBlur={handleBlur}
               onChange={handleInputValue}
             />
@@ -85,7 +76,7 @@ export default function AddRecords({
               className="block text-gray-700 text-sm font-bold mb-2"
               htmlFor="cleanRecord"
             >
-              Clean & Jerk Record (Kg)
+              Clean & Jerk PR (kg)
             </label>
 
             <input
@@ -114,21 +105,7 @@ export default function AddRecords({
             }
             onClick={changeViewMode}
           >
-            훈련 중량 선택
-          </button>
-        </div>
-
-        {/* TODO: 삭제 확인 다이얼로그 추가 */}
-        <div className="mt-4 flex justify-center">
-          <button
-            className={`text-red-500 text-sm hover:underline transition ${
-              isDeleteDisabled ? "opacity-50" : ""
-            }`}
-            type="button"
-            disabled={isDeleteDisabled}
-            onClick={() => handleDelete(lift)}
-          >
-            기록 삭제
+            다음
           </button>
         </div>
       </div>
