@@ -6,8 +6,8 @@ import { useLocalStorage } from "./hooks/useLocalStorage";
 
 const BUTTONS = [
   { label: "Snatch", value: "snatch" },
-  { label: "Clean", value: "clean" },
-  { label: "Snatch + Clean", value: "snatch,clean" },
+  { label: "Clean And Jerk", value: "clean-and-jerk" },
+  { label: "Both (Snatch + Clean)", value: "both" },
 ];
 
 export default function Home() {

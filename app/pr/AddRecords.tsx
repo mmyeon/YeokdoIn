@@ -18,10 +18,9 @@ export default function AddRecords({
     getLocalStorageItem("snatchRecord"),
   );
   const selectedLift = getLocalStorageItem("selectedLift");
-  const lift = selectedLift ? selectedLift.split(",") : [];
 
-  const hasClean = lift.includes("clean");
-  const hasSnatch = lift.includes("snatch");
+  const hasClean = selectedLift === "clean-and-jerk";
+  const hasSnatch = selectedLift === "snatch";
 
   function handleInputValue(e: React.ChangeEvent<HTMLInputElement>) {
     const { id, value } = e.target;
@@ -43,6 +42,56 @@ export default function AddRecords({
       <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4  max-w-xs">
         <h1 className="mb-4 text-lg font-bold">당신의 PR을 알려주세요!</h1>
         <span>PR을 기준으로 훈련 중량을 계산해드려요.</span>
+
+        {selectedLift === "both" && (
+          <>
+            <div className="mb-6">
+              <label
+                className="block text-gray-700 text-sm font-bold mb-2"
+                htmlFor="cleanRecord"
+              >
+                Clean & Jerk PR (kg)
+              </label>
+
+              <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+                id="cleanRecord"
+                type="text"
+                value={cleanRecord}
+                placeholder="Clean & Jerk PR 입력해 주세요."
+                onBlur={handleBlur}
+                onChange={handleInputValue}
+              />
+
+              <span className="text-xs text-red-600 w-full block">
+                {!cleanRecord ? INPUT_ERROR_MESSAGE : "\u00A0"}
+              </span>
+            </div>
+
+            <div className="mb-6">
+              <label
+                className="block text-gray-700 text-sm font-bold mb-2"
+                htmlFor="snatchRecord"
+              >
+                Snatch PR (kg)
+              </label>
+
+              <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+                id="snatchRecord"
+                type="text"
+                value={snatchRecord}
+                placeholder="Snatch PR 입력해주세요."
+                onBlur={handleBlur}
+                onChange={handleInputValue}
+              />
+
+              <span className="text-xs text-red-600 w-full block">
+                {!snatchRecord ? INPUT_ERROR_MESSAGE : "\u00A0"}
+              </span>
+            </div>
+          </>
+        )}
 
         {hasSnatch && (
           <div className="mb-6">
