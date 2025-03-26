@@ -1,16 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { personalRecordAtom, selectedLiftAtom } from "../atoms/liftsAtom";
+import { personalRecordAtom, selectedLiftAtom } from "../../atoms/liftsAtom";
 import { useAtom, useAtomValue } from "jotai";
+import Link from "next/link";
+import { ROUTES } from "@/routes";
 
 const INPUT_ERROR_MESSAGE = "숫자만 입력해 주세요.";
 
-export default function AddRecords({
-  changeViewMode,
-}: {
-  changeViewMode: () => void;
-}) {
+export default function AddRecords() {
   const [personalRecord, setPersonalRecord] = useAtom(personalRecordAtom);
   const [record, setRecord] = useState(personalRecord);
   const selectedLift = useAtomValue(selectedLiftAtom);
@@ -23,11 +21,6 @@ export default function AddRecords({
       ...prev,
       [key]: value === "" ? "" : Number(value),
     }));
-  };
-
-  const handleNext = () => {
-    changeViewMode();
-    setPersonalRecord(record);
   };
 
   return (
@@ -134,17 +127,19 @@ export default function AddRecords({
         )}
 
         <div className="mt-6 flex justify-center">
-          <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-blue-100 w-full"
-            type="button"
-            disabled={
-              (hasSnatch && record.clean === 0) ||
-              (hasClean && record.snatch === 0)
-            }
-            onClick={handleNext}
-          >
-            다음
-          </button>
+          <Link href={ROUTES.TRAINING.PROGRAM_INPUT}>
+            <button
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-blue-100 w-full"
+              type="button"
+              disabled={
+                (hasSnatch && record.clean === 0) ||
+                (hasClean && record.snatch === 0)
+              }
+              onClick={() => setPersonalRecord(record)}
+            >
+              다음
+            </button>
+          </Link>
         </div>
       </div>
     </div>

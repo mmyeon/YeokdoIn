@@ -2,18 +2,18 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { barWeightAtom, programPercentagesAtom } from "../atoms/liftsAtom";
+import { barWeightAtom, programPercentagesAtom } from "../../atoms/liftsAtom";
 import { useSetAtom } from "jotai";
+import { ROUTES } from "@/routes";
 
 export type WeightPercentage = {
   id: number;
   percent: number;
 };
 
-export const BARBEL_OPTIONS = [15, 20, 25, 30]; // 바 무게 옵션
 const PERCENTAGES = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]; // 퍼센트 옵션
 
-const WeightSelection = () => {
+const ProgramInput = () => {
   const [selectedPercentage, setSelectedPercentage] = useState<string>("");
   const [selectedPercentageList, setSelectedPercentageList] = useState<
     WeightPercentage[]
@@ -105,7 +105,7 @@ const WeightSelection = () => {
         </div>
 
         <Link
-          href="/pr/calculate"
+          href={ROUTES.TRAINING.WEIGHT_CALCULATOR}
           className="w-full"
           onClick={() => setProgramPercentages(selectedPercentageList)}
         >
@@ -121,4 +121,4 @@ const WeightSelection = () => {
   );
 };
 
-export default WeightSelection;
+export default ProgramInput;

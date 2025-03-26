@@ -3,18 +3,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import "jotai-devtools/styles.css";
-import { selectedLiftAtom } from "./atoms/liftsAtom";
-import { useSetAtom } from "jotai";
-
-const BUTTONS = [
-  { label: "Snatch", value: "snatch" },
-  { label: "Clean And Jerk", value: "clean-and-jerk" },
-  { label: "Both (Snatch + Clean)", value: "both" },
-];
+import { ROUTES } from "@/routes";
 
 export default function Home() {
-  const setSelectedLift = useSetAtom(selectedLiftAtom);
-
   return (
     <div className="w-screen h-screen flex items-center justify-center p-5">
       <div className="flex flex-col items-center justify-center w-screen h-screen gap-4 max-w-md">
@@ -26,20 +17,16 @@ export default function Home() {
           priority
         />
 
-        <h1 className="text-2xl font-bold">
-          오늘 어떤 종목을 훈련하실 건가요?
-        </h1>
-        <span>훈련할 종목을 선택해 주세요!</span>
+        <h1 className="text-2xl font-bold">YeokdoIn</h1>
+        <p className="text-center">
+          개인 기록(PR)을 기반으로 훈련 중량을 계산하고, 프로그램을 설정하세요.
+        </p>
 
-        <div className="flex flex-col gap-4 w-full flex-">
-          {BUTTONS.map(({ value, label }) => (
-            <Link key={value} href="/pr" onClick={() => setSelectedLift(value)}>
-              <button className="w-full border-2 border- text-black hover:bg-blue-300  font-bold py-2 px-4 rounded">
-                {label}
-              </button>
-            </Link>
-          ))}
-        </div>
+        <Link href={ROUTES.TRAINING.SELECT_LIFT}>
+          <button className="w-full border-2 text-black hover:bg-blue-300 font-bold py-2 px-4 rounded">
+            시작하기
+          </button>
+        </Link>
       </div>
     </div>
   );

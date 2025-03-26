@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { WeightPercentage } from "../WeightSelect";
 import CalculateCard from "@/app/components/CalculateCard";
 import { useAtomValue } from "jotai";
 import {
@@ -10,6 +9,7 @@ import {
   programPercentagesAtom,
   selectedLiftAtom,
 } from "@/app/atoms/liftsAtom";
+import { WeightPercentage } from "../program-input/page";
 
 type TabInfo = {
   value: "clean" | "snatch";
@@ -90,7 +90,7 @@ const calculateProgramWeight = (
   }));
 };
 
-const PRWeightCalculator = () => {
+const WeightCalculator = () => {
   const selectedLift = useAtomValue(selectedLiftAtom);
   const barWeight = useAtomValue(barWeightAtom);
   const personalRecord = useAtomValue(personalRecordAtom);
@@ -145,4 +145,4 @@ const PRWeightCalculator = () => {
   );
 };
 
-export default PRWeightCalculator;
+export default WeightCalculator;
