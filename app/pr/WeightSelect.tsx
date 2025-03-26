@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useLocalStorage } from "../hooks/useLocalStorage";
+import { barWeightAtom, programPercentagesAtom } from "../atoms/liftsAtom";
+import { useSetAtom } from "jotai";
 
 export type WeightPercentage = {
   id: number;
@@ -17,7 +18,9 @@ const WeightSelection = () => {
   const [selectedPercentageList, setSelectedPercentageList] = useState<
     WeightPercentage[]
   >([]);
-  const { setLocalStorageItem } = useLocalStorage();
+
+  const setBarWeight = useSetAtom(barWeightAtom);
+  const setProgramPercentages = useSetAtom(programPercentagesAtom);
 
   const handleSelect = (percent: string) => {
     setSelectedPercentage(percent);
@@ -48,7 +51,7 @@ const WeightSelection = () => {
           <input
             type="number"
             className="border p-2 rounded mt-2"
-            onBlur={(e) => setLocalStorageItem("barbelWeight", e.target.value)}
+            onBlur={(e) => setBarWeight(Number(e.target.value))}
             placeholder="바벨 무게를 입력해 주세요."
           />
         </div>
@@ -104,12 +107,7 @@ const WeightSelection = () => {
         <Link
           href="/pr/calculate"
           className="w-full"
-          onClick={() =>
-            setLocalStorageItem(
-              "programWeights",
-              JSON.stringify(selectedPercentageList),
-            )
-          }
+          onClick={() => setProgramPercentages(selectedPercentageList)}
         >
           <button
             className="mt-4 px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-100 w-full"

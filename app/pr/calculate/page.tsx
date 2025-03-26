@@ -1,9 +1,15 @@
 "use client";
 
-import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 import { useMemo, useState } from "react";
 import { WeightPercentage } from "../WeightSelect";
 import CalculateCard from "@/app/components/CalculateCard";
+import { useAtomValue } from "jotai";
+import {
+  barWeightAtom,
+  personalRecordAtom,
+  programPercentagesAtom,
+  selectedLiftAtom,
+} from "@/app/atoms/liftsAtom";
 
 type TabInfo = {
   value: "clean" | "snatch";
@@ -61,38 +67,54 @@ function getPlateCombination(
   return plates;
 }
 
+/**
+ * 프로그램 퍼센트와 개인 기록(PR)을 기반으로 각 프로그램의 중량과 플레이트 조합을 계산합니다.
+ *
+ * @param pr - 개인 기록(PR, Personal Record) 값 (예: Snatch 또는 Clean & Jerk)
+ * @param percentages - 프로그램 퍼센트 배열 (각 퍼센트 값과 ID 포함)
+ * @param barWeight - 바벨의 기본 무게 (예: 20kg, 15kg 등)
+ * @returns {WeightList[]} - 각 프로그램 퍼센트에 대한 중량(totalWeight)과 플레이트 조합(plates)을 포함한 객체
+ */
+const calculateProgramWeight = (
+  pr: number,
+  percentages: WeightPercentage[],
+  barWeight: number,
+) => {
+  return percentages.map((program) => ({
+    ...program,
+    totalWeight: Math.ceil((pr * program.percent) / 100),
+    plates: getPlateCombination(
+      Math.ceil((pr * program.percent) / 100),
+      barWeight,
+    ),
+  }));
+};
+
 const PRWeightCalculator = () => {
-  const { getLocalStorageItem } = useLocalStorage();
-  const selectedLift = getLocalStorageItem("selectedLift");
-  const barbelWeight = getLocalStorageItem("barbelWeight");
-  const weightPercents = JSON.parse(
-    getLocalStorageItem("programWeights") || "[]",
-  ) as WeightPercentage[];
+  const selectedLift = useAtomValue(selectedLiftAtom);
+  const barWeight = useAtomValue(barWeightAtom);
+  const personalRecord = useAtomValue(personalRecordAtom);
+
+  const programPercentages = useAtomValue(programPercentagesAtom);
 
   const [activeTab, setActiveTab] = useState<"clean" | "snatch">(
     selectedLift !== "snatch" ? "clean" : "snatch",
   );
 
-  const weightList: WeightList[] = useMemo(
-    () =>
-      weightPercents.map((weightPercent) => ({
-        ...weightPercent,
-        totalWeight: Math.ceil(
-          (Number(JSON.parse(getLocalStorageItem(`${activeTab}Record`)!)) *
-            Number(weightPercent.percent)) /
-            100,
-        ),
-        plates: getPlateCombination(
-          Math.ceil(
-            (Number(JSON.parse(getLocalStorageItem(`${activeTab}Record`)!)) *
-              Number(weightPercent.percent)) /
-              100,
-          ),
-          Number(barbelWeight),
-        ),
-      })),
-    [activeTab, barbelWeight, weightPercents, getLocalStorageItem],
-  );
+  const allWeights = useMemo(() => {
+    return {
+      clean: calculateProgramWeight(
+        personalRecord.clean ?? 0,
+        programPercentages,
+        barWeight,
+      ),
+      snatch: calculateProgramWeight(
+        personalRecord.snatch ?? 0,
+        programPercentages,
+        barWeight,
+      ),
+    };
+  }, [barWeight, personalRecord, programPercentages]);
 
   return (
     <div className="p-4">
@@ -114,10 +136,11 @@ const PRWeightCalculator = () => {
         </div>
       )}
 
-      {/* Clean and Jerk (PR: 55kg) */}
-      <h1 className="text-lg font-bold">{`${tabInfo.find((tab) => tab.value === activeTab)?.label} (PR: ${getLocalStorageItem(`${activeTab}Record`)}kg)`}</h1>
+      <h1 className="text-lg font-bold">{`${tabInfo.find((tab) => tab.value === activeTab)?.label} (PR: ${
+        personalRecord[activeTab]
+      }kg)`}</h1>
 
-      <CalculateCard weightList={weightList} />
+      <CalculateCard weightList={allWeights[activeTab]} />
     </div>
   );
 };

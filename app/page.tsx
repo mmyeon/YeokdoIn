@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useLocalStorage } from "./hooks/useLocalStorage";
 import { DevTools } from "jotai-devtools";
 import "jotai-devtools/styles.css";
+import { selectedLiftAtom } from "./atoms/liftsAtom";
+import { useSetAtom } from "jotai";
 
 const BUTTONS = [
   { label: "Snatch", value: "snatch" },
@@ -13,11 +14,11 @@ const BUTTONS = [
 ];
 
 export default function Home() {
-  const { setLocalStorageItem } = useLocalStorage();
+  const setSelectedLift = useSetAtom(selectedLiftAtom);
 
   return (
     <div className="w-screen h-screen flex items-center justify-center p-5">
-      <DevTools isInitialOpen />
+      <DevTools />
 
       <div className="flex flex-col items-center justify-center w-screen h-screen gap-4 max-w-md">
         <Image
@@ -35,11 +36,7 @@ export default function Home() {
 
         <div className="flex flex-col gap-4 w-full flex-">
           {BUTTONS.map(({ value, label }) => (
-            <Link
-              key={value}
-              href="/pr"
-              onClick={() => setLocalStorageItem("selectedLift", value)}
-            >
+            <Link key={value} href="/pr" onClick={() => setSelectedLift(value)}>
               <button className="w-full border-2 border- text-black hover:bg-blue-300  font-bold py-2 px-4 rounded">
                 {label}
               </button>
