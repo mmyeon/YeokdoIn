@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { DevTools } from "jotai-devtools";
 import "jotai-devtools/styles.css";
 import { selectedLiftAtom } from "./atoms/liftsAtom";
 import { useSetAtom } from "jotai";
@@ -18,8 +17,6 @@ export default function Home() {
 
   return (
     <div className="w-screen h-screen flex items-center justify-center p-5">
-      <DevTools />
-
       <div className="flex flex-col items-center justify-center w-screen h-screen gap-4 max-w-md">
         <Image
           src="/logo.svg"
