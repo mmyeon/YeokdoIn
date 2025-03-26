@@ -21,6 +21,8 @@
   "dependencies": {
     "@tanstack/react-query": "^5.68.0",
     "axios": "^1.8.3",
+    "jotai": "^2.12.2",
+    "jotai-devtools": "^0.11.0",
     "next": "15.2.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useLocalStorage } from "./hooks/useLocalStorage";
+import { DevTools } from "jotai-devtools";
+import "jotai-devtools/styles.css";
 
 const BUTTONS = [
   { label: "Snatch", value: "snatch" },
@@ -15,6 +17,8 @@ export default function Home() {
 
   return (
     <div className="w-screen h-screen flex items-center justify-center p-5">
+      <DevTools isInitialOpen />
+
       <div className="flex flex-col items-center justify-center w-screen h-screen gap-4 max-w-md">
         <Image
           src="/logo.svg"
