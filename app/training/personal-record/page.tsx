@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { personalRecordAtom, selectedLiftAtom } from "../../atoms/liftsAtom";
+import {
+  personalRecordAtom,
+  selectedLiftAtom,
+} from "@/entities/training/atoms/liftsAtom";
 import { useAtom, useAtomValue } from "jotai";
 import Link from "next/link";
 import { ROUTES } from "@/routes";

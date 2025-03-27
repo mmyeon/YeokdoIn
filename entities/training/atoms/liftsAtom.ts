@@ -1,5 +1,5 @@
+import { WeightPercentage } from "@/app/training/program-input/page";
 import { atomWithStorage } from "jotai/utils";
-import { WeightPercentage } from "../training/program-input/page";
 
 type PersonalRecord = {
   clean?: number;

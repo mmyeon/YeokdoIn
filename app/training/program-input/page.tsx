@@ -2,7 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { barWeightAtom, programPercentagesAtom } from "../../atoms/liftsAtom";
+import {
+  barWeightAtom,
+  programPercentagesAtom,
+} from "@/entities/training/atoms/liftsAtom";
 import { useSetAtom } from "jotai";
 import { ROUTES } from "@/routes";
 

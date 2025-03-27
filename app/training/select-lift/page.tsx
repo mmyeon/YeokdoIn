@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import "jotai-devtools/styles.css";
 import { useSetAtom } from "jotai";
-import { selectedLiftAtom } from "@/app/atoms/liftsAtom";
+import { selectedLiftAtom } from "@/entities/training/atoms/liftsAtom";
 import { ROUTES } from "@/routes";
 
 const BUTTONS = [

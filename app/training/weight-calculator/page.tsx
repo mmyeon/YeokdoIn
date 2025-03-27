@@ -1,14 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import CalculateCard from "@/app/components/CalculateCard";
+import CalculateCard from "@/app/training/weight-calculator/CalculateCard";
 import { useAtomValue } from "jotai";
 import {
   barWeightAtom,
   personalRecordAtom,
   programPercentagesAtom,
   selectedLiftAtom,
-} from "@/app/atoms/liftsAtom";
+} from "@/entities/training/atoms/liftsAtom";
 import { WeightPercentage } from "../program-input/page";
 
 type TabInfo = {

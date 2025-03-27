@@ -1,4 +1,4 @@
-import { WeightList } from "../training/weight-calculator/page";
+import { WeightList } from "./page";
 
 const getSizeFromWeight = (weight: number) => {
   if (weight >= 2.5) return 18;
