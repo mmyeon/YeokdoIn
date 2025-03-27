@@ -8,11 +8,7 @@ import {
 } from "@/entities/training/atoms/liftsAtom";
 import { useSetAtom } from "jotai";
 import { ROUTES } from "@/routes";
-
-export type WeightPercentage = {
-  id: number;
-  percent: number;
-};
+import { WeightPercentage } from "@/types/training";
 
 const PERCENTAGES = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]; // 퍼센트 옵션
 

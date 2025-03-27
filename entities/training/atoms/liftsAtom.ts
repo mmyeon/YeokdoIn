@@ -1,10 +1,5 @@
-import { WeightPercentage } from "@/app/training/program-input/page";
 import { atomWithStorage } from "jotai/utils";
-
-type PersonalRecord = {
-  clean?: number;
-  snatch?: number;
-};
+import { PersonalRecord, WeightPercentage } from "@/types/training"; // 분리된 타입 가져오기
 
 export const personalRecordAtom = atomWithStorage<PersonalRecord>(
   "personalRecord",

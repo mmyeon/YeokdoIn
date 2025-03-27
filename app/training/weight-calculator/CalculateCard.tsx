@@ -1,4 +1,4 @@
-import { WeightList } from "./page";
+import { WeightList } from "@/types/training";
 
 const getSizeFromWeight = (weight: number) => {
   if (weight >= 2.5) return 18;

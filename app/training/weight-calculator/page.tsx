@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import CalculateCard from "@/app/training/weight-calculator/CalculateCard";
 import { useAtomValue } from "jotai";
 import {
   barWeightAtom,
@@ -9,7 +8,8 @@ import {
   programPercentagesAtom,
   selectedLiftAtom,
 } from "@/entities/training/atoms/liftsAtom";
-import { WeightPercentage } from "../program-input/page";
+import { PlateOption, WeightPercentage } from "@/types/training";
+import CalculateCard from "./CalculateCard";
 
 type TabInfo = {
   value: "clean" | "snatch";
@@ -20,16 +20,6 @@ const tabInfo: TabInfo[] = [
   { value: "clean", label: "Clean And Jerk" },
   { value: "snatch", label: "Snatch" },
 ]; // 탭 정보
-
-export interface WeightList extends WeightPercentage {
-  totalWeight: number;
-  plates: PlateOption[];
-}
-
-type PlateOption = {
-  weight: number;
-  color: string;
-};
 
 const PLATES_OPTIONS: PlateOption[] = [
   { weight: 25, color: "rgb(126, 50, 55)" },
