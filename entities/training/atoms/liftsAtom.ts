@@ -5,7 +5,10 @@ export const personalRecordAtom = atomWithStorage<PersonalRecord>(
   "personalRecord",
   {},
 );
-export const barWeightAtom = atomWithStorage("barWeight", 0);
+export const barWeightAtom = atomWithStorage<number | undefined>(
+  "barWeight",
+  undefined,
+);
 export const programPercentagesAtom = atomWithStorage<WeightPercentage[]>(
   "programPercentages",
   [],

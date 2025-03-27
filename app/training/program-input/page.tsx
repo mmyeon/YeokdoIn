@@ -6,9 +6,13 @@ import {
   barWeightAtom,
   programPercentagesAtom,
 } from "@/entities/training/atoms/liftsAtom";
-import { useSetAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import { ROUTES } from "@/routes";
 import { WeightPercentage } from "@/types/training";
+import {
+  barWeightSchema,
+  numericStringSchema,
+} from "@/shared/form/validationSchemas";
 
 const PERCENTAGES = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]; // 퍼센트 옵션
 
@@ -17,9 +21,31 @@ const ProgramInput = () => {
   const [selectedPercentageList, setSelectedPercentageList] = useState<
     WeightPercentage[]
   >([]);
+  const [barWeightError, setBarWeightError] = useState<string | null>(null); // 에러 상태 추가
 
-  const setBarWeight = useSetAtom(barWeightAtom);
+  const [barWeight, setBarWeight] = useAtom(barWeightAtom);
   const setProgramPercentages = useSetAtom(programPercentagesAtom);
+
+  const handleBarWeightChange = (value: string) => {
+    const numericValidation = numericStringSchema.safeParse(value);
+
+    if (!numericValidation.success) {
+      setBarWeightError(numericValidation.error.errors[0].message);
+      return;
+    }
+
+    const parsedValue = value === "" ? undefined : Number(value);
+
+    setBarWeight(parsedValue);
+
+    const { success, error } = barWeightSchema.safeParse(parsedValue);
+
+    if (success) {
+      setBarWeightError(null);
+    } else {
+      setBarWeightError(error.errors[0].message);
+    }
+  };
 
   const handleSelect = (percent: string) => {
     setSelectedPercentage(percent);
@@ -48,11 +74,16 @@ const ProgramInput = () => {
           <label className="font-semibold">바벨 무게(kg)</label>
 
           <input
-            type="number"
             className="border p-2 rounded mt-2"
-            onBlur={(e) => setBarWeight(Number(e.target.value))}
+            type="text"
+            value={barWeight ?? ""}
+            onChange={(e) => handleBarWeightChange(e.target.value)}
             placeholder="바벨 무게를 입력해 주세요."
           />
+
+          {barWeightError && (
+            <span className="text-red-500 text-sm mt-1">{barWeightError}</span>
+          )}
         </div>
 
         <div className="flex flex-col gap-4">

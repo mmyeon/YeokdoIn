@@ -8,22 +8,54 @@ import {
 import { useAtom, useAtomValue } from "jotai";
 import Link from "next/link";
 import { ROUTES } from "@/routes";
-
-const INPUT_ERROR_MESSAGE = "숫자만 입력해 주세요.";
+import {
+  numericStringSchema,
+  recordSchema,
+} from "@/shared/form/validationSchemas";
 
 export default function AddRecords() {
   const [personalRecord, setPersonalRecord] = useAtom(personalRecordAtom);
   const [record, setRecord] = useState(personalRecord);
+  const [errors, setErrors] = useState<{ clean?: string; snatch?: string }>({});
   const selectedLift = useAtomValue(selectedLiftAtom);
 
   const hasClean = selectedLift === "clean-and-jerk";
   const hasSnatch = selectedLift === "snatch";
 
   const handleInputChange = (key: "clean" | "snatch", value: string) => {
+    const numericValidation = numericStringSchema.safeParse(value);
+
+    if (!numericValidation.success) {
+      setErrors((prev) => ({
+        ...prev,
+        [key]: numericValidation.error.errors[0]?.message,
+      }));
+      return;
+    }
+
+    const parsedValue = value === "" ? undefined : Number(value);
+
     setRecord((prev) => ({
       ...prev,
-      [key]: value === "" ? "" : Number(value),
+      [key]: parsedValue,
     }));
+
+    const { success, error } = recordSchema.safeParse({
+      ...record,
+      [key]: parsedValue,
+    });
+
+    if (!success) {
+      const fieldErrors = error.issues.filter((issue) => issue.path[0] === key);
+      const errorMessage = fieldErrors[0]?.message;
+
+      setErrors((prev) => ({
+        ...prev,
+        [key]: errorMessage,
+      }));
+    } else {
+      setErrors((prev) => ({ ...prev, [key]: undefined }));
+    }
   };
 
   return (
@@ -52,7 +84,7 @@ export default function AddRecords() {
               />
 
               <span className="text-xs text-red-600 w-full block">
-                {!record.clean ? INPUT_ERROR_MESSAGE : "\u00A0"}
+                {errors.clean || "\u00A0"}
               </span>
             </div>
 
@@ -74,7 +106,7 @@ export default function AddRecords() {
               />
 
               <span className="text-xs text-red-600 w-full block">
-                {!record.snatch ? INPUT_ERROR_MESSAGE : "\u00A0"}
+                {errors.snatch || "\u00A0"}
               </span>
             </div>
           </>
@@ -100,7 +132,7 @@ export default function AddRecords() {
             />
 
             <span className="text-xs text-red-600 w-full block">
-              {!record.snatch ? INPUT_ERROR_MESSAGE : "\u00A0"}
+              {errors.snatch || "\u00A0"}
             </span>
           </div>
         )}
@@ -124,7 +156,7 @@ export default function AddRecords() {
             />
 
             <span className="text-xs text-red-600 w-full block">
-              {!record.clean ? INPUT_ERROR_MESSAGE : "\u00A0"}
+              {errors.clean || "\u00A0"}
             </span>
           </div>
         )}
@@ -134,10 +166,7 @@ export default function AddRecords() {
             <button
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline disabled:bg-blue-100 w-full"
               type="button"
-              disabled={
-                (hasSnatch && record.clean === 0) ||
-                (hasClean && record.snatch === 0)
-              }
+              disabled={!!errors.clean || !!errors.snatch}
               onClick={() => setPersonalRecord(record)}
             >
               다음
