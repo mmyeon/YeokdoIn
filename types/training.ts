@@ -1,7 +1,9 @@
 export type PersonalRecord = {
-  clean?: number;
-  snatch?: number;
+  clean?: string;
+  snatch?: string;
 };
+
+export type Lift = "clean-and-jerk" | "snatch" | "both";
 
 export type WeightPercentage = {
   id: number;
