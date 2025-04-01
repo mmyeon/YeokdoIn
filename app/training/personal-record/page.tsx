@@ -8,10 +8,7 @@ import {
 import { useAtom, useAtomValue } from "jotai";
 import Link from "next/link";
 import { ROUTES } from "@/routes";
-import {
-  numericStringSchema,
-  recordSchema,
-} from "@/shared/form/validationSchemas";
+import { numericStringSchema } from "@/shared/form/validationSchemas";
 import { Input } from "@/components/ui/input/input";
 import { Label } from "@radix-ui/react-label";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,49 +20,43 @@ import { useRouter } from "next/navigation";
 export default function AddRecords() {
   const router = useRouter();
   const [personalRecord, setPersonalRecord] = useAtom(personalRecordAtom);
-  const [record, setRecord] = useState(personalRecord);
-  const [errors, setErrors] = useState<{ clean?: string; snatch?: string }>({});
+  const [snatchError, setSnatchError] = useState<string | null>(null);
+  const [cleanError, setCleanError] = useState<string | null>(null);
   // TODO: 화면 그려진 뒤 값 가져와서 flash 발생함.
   const selectedLift = useAtomValue(selectedLiftAtom);
 
-  const validateAllInputs = () => {
-    const { success, error } = recordSchema.safeParse(record);
-
-    if (!success) {
-      const newErrors: { clean?: string; snatch?: string } = {};
-      error.issues.forEach((issue) => {
-        const key = issue.path[0] as "clean" | "snatch";
-        newErrors[key] = issue.message;
-      });
-      setErrors(newErrors);
-      return false;
-    }
-
-    setErrors({});
-    return true;
-  };
-
   const handleInputChange = (key: "clean" | "snatch", value: string) => {
     const numericValidation = numericStringSchema.safeParse(value);
+
     if (!numericValidation.success) {
-      setErrors((prev) => ({
-        ...prev,
-        [key]: numericValidation.error.errors[0]?.message,
-      }));
+      if (key === "clean") {
+        setCleanError(numericValidation.error.errors[0]?.message);
+      } else if (key === "snatch") {
+        setSnatchError(numericValidation.error.errors[0]?.message);
+      }
       return;
     }
 
-    setRecord((prev) => ({
+    if (key === "clean") {
+      setCleanError(null);
+    } else if (key === "snatch") {
+      setSnatchError(null);
+    }
+
+    setPersonalRecord((prev) => ({
       ...prev,
       [key]: value === "" ? undefined : Number(value),
     }));
   };
 
-  const handleNext = () => {
-    if (!validateAllInputs()) return;
-    setPersonalRecord(record);
-    router.push(ROUTES.TRAINING.PROGRAM_INPUT);
-  };
+  const isButtonDisabled =
+    selectedLift === "clean-and-jerk"
+      ? !personalRecord.clean
+      : selectedLift === "snatch"
+        ? !personalRecord.snatch
+        : selectedLift === "both"
+          ? !(personalRecord.clean && personalRecord.snatch)
+          : true;
 
   return (
     <main className="container mx-auto flex min-h-screen flex-col items-center justify-center p-4">
@@ -101,24 +92,20 @@ export default function AddRecords() {
                 <Input
                   id="clean-and-jerk-pr"
                   type="number"
-                  value={record.clean}
+                  value={personalRecord.clean ?? ""}
                   placeholder="무게를 kg 단위로 입력하세요."
                   onChange={(e) => {
                     handleInputChange("clean", e.target.value);
 
-                    if (errors.clean)
-                      setErrors((prev) => ({
-                        ...prev,
-                        clean: undefined,
-                      }));
+                    if (cleanError) setCleanError(null);
                   }}
                 />
 
                 {/* TODO: border 컬러 적용안되는 이슈 개선 */}
-                {errors.clean && (
+                {cleanError && (
                   <Alert variant="destructive" className="mt-2 rounded-xl">
                     <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>{errors.clean}</AlertDescription>
+                    <AlertDescription>{cleanError}</AlertDescription>
                   </Alert>
                 )}
               </div>
@@ -133,22 +120,18 @@ export default function AddRecords() {
                   id="snatch-pr"
                   type="number"
                   placeholder="무게를 kg 단위로 입력하세요"
-                  value={record.snatch}
+                  value={personalRecord.snatch ?? ""}
                   onChange={(e) => {
                     handleInputChange("snatch", e.target.value);
 
-                    if (errors.snatch)
-                      setErrors((prev) => ({
-                        ...prev,
-                        snatch: undefined,
-                      }));
+                    if (snatchError) setSnatchError(null);
                   }}
                 />
 
-                {errors.snatch && (
+                {snatchError && (
                   <Alert variant="destructive" className="mt-2 rounded-xl">
                     <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>{errors.snatch}</AlertDescription>
+                    <AlertDescription>{snatchError}</AlertDescription>
                   </Alert>
                 )}
               </div>
@@ -158,8 +141,8 @@ export default function AddRecords() {
               type="button"
               // TODO: bg-primary 적용 안됨
               className="w-full h-12 rounded-xl text-base font-semibold bg-primary"
-              disabled={!!errors.clean || !!errors.snatch}
-              onClick={handleNext}
+              disabled={isButtonDisabled}
+              onClick={() => router.push(ROUTES.TRAINING.PROGRAM_INPUT)}
             >
               다음
               <ArrowRight className="h-4 w-4 ml-1" />

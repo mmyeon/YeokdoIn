@@ -5,21 +5,6 @@ export const numericStringSchema = z
   .string()
   .regex(/^\d*$/, "숫자만 입력 가능합니다.");
 
-export const recordSchema = z.object({
-  clean: z
-    .number({
-      required_error: FORM_ERROR_MESSAGES.required,
-      invalid_type_error: FORM_ERROR_MESSAGES.invalidNumberType,
-    })
-    .min(1, FORM_ERROR_MESSAGES.minValue),
-  snatch: z
-    .number({
-      required_error: FORM_ERROR_MESSAGES.required,
-      invalid_type_error: FORM_ERROR_MESSAGES.invalidNumberType,
-    })
-    .min(1, FORM_ERROR_MESSAGES.minValue),
-});
-
 export const barWeightSchema = z
   .number({
     required_error: FORM_ERROR_MESSAGES.required,
