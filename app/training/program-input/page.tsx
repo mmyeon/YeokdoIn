@@ -6,25 +6,36 @@ import {
   barWeightAtom,
   programPercentagesAtom,
 } from "@/entities/training/atoms/liftsAtom";
-import { useAtom, useSetAtom } from "jotai";
+import { useAtom } from "jotai";
 import { ROUTES } from "@/routes";
-import { WeightPercentage } from "@/types/training";
 import {
   barWeightSchema,
   numericStringSchema,
 } from "@/shared/form/validationSchemas";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/input/label";
+import { Input } from "@/components/ui/input/input";
+import { AlertCircle, ArrowLeft, ArrowRight, X } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 
 const PERCENTAGES = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]; // 퍼센트 옵션
 
 const ProgramInput = () => {
-  const [selectedPercentage, setSelectedPercentage] = useState<string>("");
-  const [selectedPercentageList, setSelectedPercentageList] = useState<
-    WeightPercentage[]
-  >([]);
-  const [barWeightError, setBarWeightError] = useState<string | null>(null); // 에러 상태 추가
+  const [percentages, setPercentages] = useAtom(programPercentagesAtom);
+
+  const [barWeightError, setBarWeightError] = useState<string | null>(null);
+  const [percentageError, setPercentageError] = useState<string | null>(null);
 
   const [barWeight, setBarWeight] = useAtom(barWeightAtom);
-  const setProgramPercentages = useSetAtom(programPercentagesAtom);
 
   const handleBarWeightChange = (value: string) => {
     const numericValidation = numericStringSchema.safeParse(value);
@@ -47,107 +58,154 @@ const ProgramInput = () => {
     }
   };
 
-  const handleSelect = (percent: string) => {
-    setSelectedPercentage(percent);
-  };
-
-  const updateSelectedPercentageList = () => {
-    setSelectedPercentageList((prev) => [
+  const addPercentage = (value: number) => {
+    setPercentages((prev) => [
       ...prev,
-      { id: Date.now(), percent: Number(selectedPercentage) },
+      { id: Date.now(), percent: Number(value) },
     ]);
   };
 
   const handleDeletePercentage = (id: number) => {
-    setSelectedPercentageList((prev) => prev.filter((item) => item.id !== id));
+    const updatedPercentages = percentages.filter((item) => item.id !== id);
+    setPercentages(updatedPercentages);
+
+    if (updatedPercentages.length === 0) {
+      setPercentageError("최소 1개의 프로그램을 선택하세요.");
+    }
   };
 
   return (
-    <div className="p-4 flex flex-col gap-4 justify-center items-center h-screen">
-      <div>
-        <h1 className="text-lg font-bold">훈련 프로그램을 설정해볼까요?</h1>
-        <span>바벨 무게와 훈련 강도를 입력해 주세요.</span>
-      </div>
-
-      <div className="flex flex-col gap-4 max-w-md w-full">
-        <div className="flex flex-col">
-          <label className="font-semibold">바벨 무게(kg)</label>
-
-          <input
-            className="border p-2 rounded mt-2"
-            type="text"
-            value={barWeight ?? ""}
-            onChange={(e) => handleBarWeightChange(e.target.value)}
-            placeholder="바벨 무게를 입력해 주세요."
-          />
-
-          {barWeightError && (
-            <span className="text-red-500 text-sm mt-1">{barWeightError}</span>
-          )}
+    <main className="container mx-auto flex min-h-screen flex-col items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="mb-2 flex items-center">
+          <Link href={ROUTES.TRAINING.PERSONAL_RECORD}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground !px-1"
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              뒤로
+            </Button>
+          </Link>
         </div>
 
-        <div className="flex flex-col gap-4">
-          <label htmlFor="percentage-select" className="font-semibold">
-            훈련 강도(%)
-          </label>
-
-          <div className="flex gap-4 justify-center">
-            <select
-              className="border flex-1"
-              id="percentage-select"
-              onChange={(e) => handleSelect(e.target.value)}
-            >
-              <option value="">훈련 강도를 선택해 주세요.</option>
-
-              {PERCENTAGES.map((percent) => (
-                <option key={percent} value={percent}>
-                  {percent}%
-                </option>
-              ))}
-            </select>
-
-            <button
-              className="px-4 py-2 bg-blue-500 text-white rounded"
-              onClick={updateSelectedPercentageList}
-              disabled={!selectedPercentage}
-            >
-              추가
-            </button>
-          </div>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold mb-1">
+            훈련 프로그램을 설정해볼까요?
+          </h1>
+          <p className="text-muted-foreground">
+            바벨 무게와 훈련 강도를 입력해 주세요.
+          </p>
         </div>
 
-        <div className="flex flex-col gap-4">
-          <span className="font-semibold">선택된 훈련 강도</span>
+        <Card className="toss-card">
+          <CardContent className="p-6 space-y-6">
+            <Label htmlFor="clean-and-jerk-pr" className="toss-label">
+              바벨 무게 (kg)
+            </Label>
 
-          <div className="flex gap-2 flex-wrap">
-            {selectedPercentageList.map((item) => (
-              <div
-                key={item.id}
-                className="w-fit bg-gray-600 px-3.5 py-1  text-white rounded-xl text-sm flex gap-2 font-bold"
+            <Input
+              id="clean-and-jerk-pr"
+              type="number"
+              value={barWeight ?? ""}
+              placeholder="무게를 kg 단위로 입력하세요."
+              onChange={(e) => {
+                handleBarWeightChange(e.target.value);
+
+                if (barWeightError) setBarWeightError(null);
+              }}
+            />
+
+            {/* TODO: border 컬러 적용안되는 이슈 개선 */}
+            {barWeightError && (
+              <Alert variant="destructive" className="mt-2 rounded-xl">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{barWeightError}</AlertDescription>
+              </Alert>
+            )}
+
+            <Label htmlFor="clean-and-jerk-pr" className="toss-label">
+              훈련 강도 (%)
+            </Label>
+
+            <Select
+              onValueChange={(value) => {
+                addPercentage(Number(value));
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder={"프로그램 %를 입력하세요."} />
+              </SelectTrigger>
+              <SelectContent>
+                {PERCENTAGES.map((percent) => (
+                  <SelectItem key={percent} value={String(percent)}>
+                    {percent}%
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Label htmlFor="clean-and-jerk-pr" className="toss-label">
+              선택된 프로그램 강도 (%)
+            </Label>
+
+            <div className="flex flex-wrap gap-2 p-4 bg-secondary/50 rounded-xl">
+              {percentages.length === 0 ? (
+                <p className="text-sm text-gray-500">
+                  선택된 프로그램이 없습니다.
+                </p>
+              ) : (
+                percentages.map(({ percent, id }) => (
+                  <Badge
+                    key={`${percent}-${id}`}
+                    className="toss-badge toss-badge-blue flex items-center gap-1 py-1.5 px-3"
+                  >
+                    {percent}%
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-4 w-4 p-0 hover:bg-transparent ml-1"
+                      onClick={() => handleDeletePercentage(id)}
+                    >
+                      <X className="h-3 w-3" />
+                      <span className="sr-only">제거</span>
+                    </Button>
+                  </Badge>
+                  // <div
+                  //   key={item.id}
+                  //   className="w-fit bg-gray-600 px-3.5 py-1  text-white rounded-xl text-sm flex gap-2 font-bold"
+                  // >
+                  //   {item.percent}%{" "}
+                  //   <button onClick={() => handleDeletePercentage(item.id)}>
+                  //     X
+                  //   </button>
+                  // </div>
+                ))
+              )}
+            </div>
+
+            {percentageError && (
+              <Alert variant="destructive" className="mt-2 rounded-xl">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{percentageError}</AlertDescription>
+              </Alert>
+            )}
+
+            <Link href={ROUTES.TRAINING.WEIGHT_CALCULATOR} className="w-full">
+              <Button
+                type="button"
+                className="w-full h-12 rounded-xl text-base font-semibold bg-primary"
+                disabled={percentages.length == 0}
               >
-                {item.percent}%{" "}
-                <button onClick={() => handleDeletePercentage(item.id)}>
-                  X
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <Link
-          href={ROUTES.TRAINING.WEIGHT_CALCULATOR}
-          className="w-full"
-          onClick={() => setProgramPercentages(selectedPercentageList)}
-        >
-          <button
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-100 w-full"
-            disabled={selectedPercentageList.length == 0}
-          >
-            다음
-          </button>
-        </Link>
+                다음
+                <ArrowRight className="h-4 w-4 ml-1" />
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
       </div>
-    </div>
+    </main>
   );
 };
 

@@ -16,4 +16,7 @@ export const programPercentagesAtom = atomWithStorage<WeightPercentage[]>(
   "programPercentages",
   [],
 );
-export const selectedLiftAtom = atomWithStorage<Lift>("selectedLift", "");
+export const selectedLiftAtom = atomWithStorage<Lift>(
+  "selectedLift",
+  "clean-and-jerk",
+);

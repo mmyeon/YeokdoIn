@@ -9,6 +9,10 @@ button {
   cursor: pointer;
 }
 
+button:disabled {
+  cursor: none;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
