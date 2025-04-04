@@ -8,49 +8,38 @@ import {
   programPercentagesAtom,
   selectedLiftAtom,
 } from "@/entities/training/atoms/liftsAtom";
-import { PlateOption, WeightPercentage } from "@/types/training";
-import CalculateCard from "./CalculateCard";
+import {
+  PersonalRecord,
+  Plates,
+  TabInfo,
+  WeightPercentage,
+} from "@/types/training";
+import CalculationCards from "./CalculationCards";
+import { ArrowLeft, Home } from "lucide-react";
+import { ROUTES } from "@/routes";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-type TabInfo = {
-  value: "clean" | "snatch";
-  label: string;
-};
-
-const tabInfo: TabInfo[] = [
-  { value: "clean", label: "Clean And Jerk" },
-  { value: "snatch", label: "Snatch" },
-]; // 탭 정보
-
-const PLATES_OPTIONS: PlateOption[] = [
-  { weight: 25, color: "rgb(126, 50, 55)" },
-  { weight: 20, color: "rgb(7, 73, 114)" },
-  { weight: 15, color: "rgb(208, 183, 85)" },
-  { weight: 10, color: "rgb(65, 104, 78)" },
-  { weight: 5, color: "rgb(120, 54, 45)" },
-  { weight: 2.5, color: "rgb(147, 54, 45)" },
-  { weight: 2, color: "rgb(3, 72, 131)" },
-  { weight: 1.5, color: "rgb(183, 165, 77)" },
-  { weight: 1, color: "rgb(63, 106, 51)" },
-  { weight: 0.5, color: "purple" },
+const TABS: TabInfo[] = [
+  { value: "clean", label: "클린 앤 저크" },
+  { value: "snatch", label: "스내치" },
 ];
 
-function getPlateCombination(
-  totalWeight: number,
-  barbellWeight: number,
-): PlateOption[] {
+const AVAILABLE_PLATES: Plates = [0.5, 1, 1.5, 2, 2.5, 5, 10, 15, 20, 25];
+
+function calculatePlates(totalWeight: number, barbellWeight: number): Plates {
   let remainingWeight = totalWeight - barbellWeight;
   if (remainingWeight <= 0) return []; // 바벨 무게보다 가벼우면 계산할 필요 없음
 
-  // 내림차순 정렬 (무거운 플레이트부터 사용)
-  PLATES_OPTIONS.sort((a, b) => b.weight - a.weight);
-
-  const plates: PlateOption[] = [];
+  const plates: Plates = [];
 
   // 남은 무게를 가장 큰 플레이트부터 반복적으로 채우기
-  for (const plate of PLATES_OPTIONS) {
-    while (remainingWeight >= plate.weight * 2) {
+  for (const plate of AVAILABLE_PLATES) {
+    const doublePlate = plate * 2; // 양쪽에 같은 무게의 플레이트를 사용하므로 두 배로 계산
+    while (remainingWeight >= doublePlate) {
       plates.push(plate);
-      remainingWeight -= plate.weight * 2;
+      remainingWeight -= plate * 2;
     }
   }
 
@@ -70,14 +59,21 @@ const calculateProgramWeight = (
   percentages: WeightPercentage[],
   barWeight: number,
 ) => {
-  return percentages.map((program) => ({
-    ...program,
-    totalWeight: Math.ceil((pr * program.percent) / 100),
-    plates: getPlateCombination(
-      Math.ceil((pr * program.percent) / 100),
-      barWeight,
-    ),
-  }));
+  return percentages.map((program) => {
+    const totalWeight = Math.ceil((pr * program.percent) / 100);
+
+    return {
+      ...program,
+      totalWeight,
+      plates: calculatePlates(totalWeight, barWeight),
+    };
+  });
+};
+
+const getCardTitle = (lift: "clean" | "snatch", pr: PersonalRecord) => {
+  return `${
+    lift === "clean" ? "클린 앤 저크" : "스내치"
+  } (개인 기록: ${pr[lift]}kg)`;
 };
 
 const WeightCalculator = () => {
@@ -94,44 +90,99 @@ const WeightCalculator = () => {
   const allWeights = useMemo(() => {
     return {
       clean: calculateProgramWeight(
-        personalRecord.clean ?? 0,
+        Number(personalRecord.clean) ?? 0,
         programPercentages,
-        barWeight,
+        barWeight ?? 0,
       ),
       snatch: calculateProgramWeight(
-        personalRecord.snatch ?? 0,
+        Number(personalRecord.snatch) ?? 0,
         programPercentages,
-        barWeight,
+        barWeight ?? 0,
       ),
     };
   }, [barWeight, personalRecord, programPercentages]);
 
   return (
-    <div className="p-4">
-      <h2>훈련 중량</h2>
+    <>
+      <main className="container mx-auto flex min-h-screen flex-col items-center p-4">
+        <div className="w-full max-w-3xl ">
+          <div className="mb-2 flex items-center">
+            <Link href={ROUTES.TRAINING.PROGRAM_INPUT}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground p-0 h-auto"
+              >
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                뒤로
+              </Button>
+            </Link>
+          </div>
 
-      {selectedLift === "both" && (
-        <div className="flex border-b mb-4">
-          {tabInfo.map((tab) => (
-            <button
-              key={tab.value}
-              className={`px-4 py-2 ${activeTab === tab.value ? "border-b-2 border-blue-500 text-blue-500" : "text-gray-500"}`}
-              onClick={() =>
-                setActiveTab(tab.value === "snatch" ? "snatch" : "clean")
-              }
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold mb-1">
+              훈련 시작할 준비되셨나요?
+            </h1>
+            <p className="text-muted-foreground">
+              개인 기록을 바탕으로 계산된 훈련 중량을 확인하세요exercises.
+            </p>
+          </div>
+
+          {selectedLift === "both" ? (
+            <Tabs
+              value={activeTab}
+              onValueChange={(e) => console.log(e)}
+              className="w-full"
             >
-              {tab.label}
-            </button>
-          ))}
+              <TabsList className="grid grid-cols-2 h-12 mb-6 w-full">
+                {TABS.map((tab) => (
+                  <TabsTrigger
+                    key={tab.value}
+                    value={tab.value}
+                    className="text-base"
+                  >
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+
+              <TabsContent value="clean">
+                <CalculationCards
+                  weightList={allWeights[activeTab]}
+                  title={`클린 앤 저크 (개인 기록: ${personalRecord.clean}kg)`}
+                />
+              </TabsContent>
+              <TabsContent value="snatch">
+                <CalculationCards
+                  weightList={allWeights[activeTab]}
+                  title={`스내치 (개인 기록: ${personalRecord.snatch}kg)`}
+                />
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <CalculationCards
+              weightList={allWeights[activeTab]}
+              title={getCardTitle(activeTab, personalRecord)}
+            />
+          )}
+
+          <div className="flex justify-between mt-8">
+            <Link href={ROUTES.TRAINING.PROGRAM_INPUT}>
+              <Button variant="outline" className="rounded-xl">
+                이전으로 돌아가기
+              </Button>
+            </Link>
+
+            <Link href={ROUTES.TRAINING.SELECT_LIFT}>
+              <Button>
+                <Home className="h-4 w-4 mr-2" />
+                홈으로
+              </Button>
+            </Link>
+          </div>
         </div>
-      )}
-
-      <h1 className="text-lg font-bold">{`${tabInfo.find((tab) => tab.value === activeTab)?.label} (PR: ${
-        personalRecord[activeTab]
-      }kg)`}</h1>
-
-      <CalculateCard weightList={allWeights[activeTab]} />
-    </div>
+      </main>
+    </>
   );
 };
 

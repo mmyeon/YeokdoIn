@@ -12,10 +12,12 @@ export type WeightPercentage = {
 
 export interface WeightList extends WeightPercentage {
   totalWeight: number;
-  plates: PlateOption[];
+  plates: Plates;
 }
 
-export type PlateOption = {
-  weight: number;
-  color: string;
+export type Plates = number[];
+
+export type TabInfo = {
+  value: "clean" | "snatch";
+  label: string;
 };
