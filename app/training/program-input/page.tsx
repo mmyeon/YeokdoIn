@@ -79,11 +79,7 @@ const ProgramInput = () => {
       <div className="w-full max-w-md">
         <div className="mb-2 flex items-center">
           <Link href={ROUTES.TRAINING.PERSONAL_RECORD}>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground !px-1"
-            >
+            <Button variant="ghost" size="sm" className="text-muted-foreground">
               <ArrowLeft className="h-4 w-4 mr-1" />
               뒤로
             </Button>

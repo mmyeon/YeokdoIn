@@ -66,7 +66,7 @@ export default function AddRecords() {
             <Button
               variant="ghost"
               size="sm"
-              className="text-muted-foreground !px-1"
+              className="text-muted-foreground hover:font-bold bg-none"
             >
               <ArrowLeft className="h-4 w-4 mr-1" />
               뒤로
