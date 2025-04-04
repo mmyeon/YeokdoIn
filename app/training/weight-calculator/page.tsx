@@ -9,9 +9,9 @@ import {
   selectedLiftAtom,
 } from "@/entities/training/atoms/liftsAtom";
 import {
+  Lift,
   PersonalRecord,
   Plates,
-  TabInfo,
   WeightPercentage,
 } from "@/types/training";
 import CalculationCards from "./CalculationCards";
@@ -20,11 +20,7 @@ import { ROUTES } from "@/routes";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-const TABS: TabInfo[] = [
-  { value: "clean", label: "클린 앤 저크" },
-  { value: "snatch", label: "스내치" },
-];
+import { LIFT_INFO, LIFT_INFO_MAP } from "@/shared/constants";
 
 const AVAILABLE_PLATES: Plates = [0.5, 1, 1.5, 2, 2.5, 5, 10, 15, 20, 25];
 
@@ -70,9 +66,9 @@ const calculateProgramWeight = (
   });
 };
 
-const getCardTitle = (lift: "clean" | "snatch", pr: PersonalRecord) => {
+const getCardTitle = (lift: Lift, pr: PersonalRecord) => {
   return `${
-    lift === "clean" ? "클린 앤 저크" : "스내치"
+    lift === "cleanAndJerk" ? "클린 앤 저크" : "스내치"
   } (개인 기록: ${pr[lift]}kg)`;
 };
 
@@ -83,14 +79,14 @@ const WeightCalculator = () => {
 
   const programPercentages = useAtomValue(programPercentagesAtom);
 
-  const [activeTab, setActiveTab] = useState<"clean" | "snatch">(
-    selectedLift !== "snatch" ? "clean" : "snatch",
+  const [activeTab, setActiveTab] = useState<Lift>(
+    selectedLift !== "snatch" ? "cleanAndJerk" : "snatch",
   );
 
   const allWeights = useMemo(() => {
     return {
-      clean: calculateProgramWeight(
-        Number(personalRecord.clean) ?? 0,
+      cleanAndJerk: calculateProgramWeight(
+        Number(personalRecord.cleanAndJerk) ?? 0,
         programPercentages,
         barWeight ?? 0,
       ),
@@ -124,38 +120,39 @@ const WeightCalculator = () => {
               훈련 시작할 준비되셨나요?
             </h1>
             <p className="text-muted-foreground">
-              개인 기록을 바탕으로 계산된 훈련 중량을 확인하세요exercises.
+              개인 기록을 바탕으로 계산된 훈련 중량을 확인하세요.
             </p>
           </div>
 
           {selectedLift === "both" ? (
             <Tabs
               value={activeTab}
-              onValueChange={(e) => console.log(e)}
+              onValueChange={(value) => setActiveTab(value as Lift)}
               className="w-full"
             >
               <TabsList className="grid grid-cols-2 h-12 mb-6 w-full">
-                {TABS.map((tab) => (
+                {LIFT_INFO.map((liftInfo) => (
                   <TabsTrigger
-                    key={tab.value}
-                    value={tab.value}
+                    key={liftInfo.value}
+                    value={liftInfo.value}
                     className="text-base"
                   >
-                    {tab.label}
+                    {liftInfo.label}
                   </TabsTrigger>
                 ))}
               </TabsList>
 
-              <TabsContent value="clean">
+              <TabsContent value="cleanAndJerk">
                 <CalculationCards
                   weightList={allWeights[activeTab]}
-                  title={`클린 앤 저크 (개인 기록: ${personalRecord.clean}kg)`}
+                  title={`${LIFT_INFO_MAP[activeTab]} (개인 기록: ${personalRecord[activeTab]}kg)`}
                 />
               </TabsContent>
+
               <TabsContent value="snatch">
                 <CalculationCards
                   weightList={allWeights[activeTab]}
-                  title={`스내치 (개인 기록: ${personalRecord.snatch}kg)`}
+                  title={`${LIFT_INFO_MAP[activeTab]} (개인 기록: ${personalRecord[activeTab]}kg)`}
                 />
               </TabsContent>
             </Tabs>

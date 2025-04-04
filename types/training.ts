@@ -1,9 +1,8 @@
-export type PersonalRecord = {
-  clean?: string;
-  snatch?: string;
-};
+export type PersonalRecord = Record<Lift, string | undefined>;
 
-export type Lift = "clean-and-jerk" | "snatch" | "both";
+export type Lift = "cleanAndJerk" | "snatch";
+
+export type LiftOptions = Lift | "both";
 
 export type WeightPercentage = {
   id: number;
@@ -17,7 +16,7 @@ export interface WeightList extends WeightPercentage {
 
 export type Plates = number[];
 
-export type TabInfo = {
-  value: "clean" | "snatch";
+export type LiftInfo = {
+  value: Lift;
   label: string;
 };

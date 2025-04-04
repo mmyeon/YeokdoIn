@@ -16,6 +16,8 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle, ArrowLeft, ArrowRight } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useRouter } from "next/navigation";
+import { Lift } from "@/types/training";
+import { LIFT_INFO_MAP } from "@/shared/constants";
 
 export default function AddRecords() {
   const router = useRouter();
@@ -25,11 +27,11 @@ export default function AddRecords() {
   // TODO: 화면 그려진 뒤 값 가져와서 flash 발생함.
   const selectedLift = useAtomValue(selectedLiftAtom);
 
-  const handleInputChange = (key: "clean" | "snatch", value: string) => {
+  const handleInputChange = (key: Lift, value: string) => {
     const numericValidation = numericStringSchema.safeParse(value);
 
     if (!numericValidation.success) {
-      if (key === "clean") {
+      if (key === "cleanAndJerk") {
         setCleanError(numericValidation.error.errors[0]?.message);
       } else if (key === "snatch") {
         setSnatchError(numericValidation.error.errors[0]?.message);
@@ -37,7 +39,7 @@ export default function AddRecords() {
       return;
     }
 
-    if (key === "clean") {
+    if (key === "cleanAndJerk") {
       setCleanError(null);
     } else if (key === "snatch") {
       setSnatchError(null);
@@ -50,12 +52,12 @@ export default function AddRecords() {
   };
 
   const isButtonDisabled =
-    selectedLift === "clean-and-jerk"
-      ? !personalRecord.clean
+    selectedLift === "cleanAndJerk"
+      ? !personalRecord.cleanAndJerk
       : selectedLift === "snatch"
         ? !personalRecord.snatch
         : selectedLift === "both"
-          ? !(personalRecord.clean && personalRecord.snatch)
+          ? !(personalRecord.cleanAndJerk && personalRecord.snatch)
           : true;
 
   return (
@@ -83,19 +85,19 @@ export default function AddRecords() {
 
         <Card className="toss-card">
           <CardContent className="p-6 space-y-6">
-            {(selectedLift === "clean-and-jerk" || selectedLift === "both") && (
+            {(selectedLift === "cleanAndJerk" || selectedLift === "both") && (
               <div className="space-y-2">
                 <Label htmlFor="clean-and-jerk-pr" className="toss-label">
-                  클린 앤 저크 개인 기록 (kg)
+                  {LIFT_INFO_MAP[selectedLift]} 개인 기록 (kg)
                 </Label>
 
                 <Input
                   id="clean-and-jerk-pr"
                   type="number"
-                  value={personalRecord.clean ?? ""}
+                  value={personalRecord.cleanAndJerk ?? ""}
                   placeholder="무게를 kg 단위로 입력하세요."
                   onChange={(e) => {
-                    handleInputChange("clean", e.target.value);
+                    handleInputChange("cleanAndJerk", e.target.value);
 
                     if (cleanError) setCleanError(null);
                   }}
@@ -114,7 +116,7 @@ export default function AddRecords() {
             {(selectedLift === "snatch" || selectedLift === "both") && (
               <div className="space-y-2">
                 <Label htmlFor="snatch-pr" className="toss-label">
-                  스내치 개인 기록 (kg)
+                  {LIFT_INFO_MAP[selectedLift]} 개인 기록 (kg)
                 </Label>
                 <Input
                   id="snatch-pr"

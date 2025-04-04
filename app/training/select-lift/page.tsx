@@ -8,9 +8,10 @@ import { selectedLiftAtom } from "@/entities/training/atoms/liftsAtom";
 import { ROUTES } from "@/routes";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { LiftOptions } from "@/types/training";
 
-const LIFT_OPTIONS = [
-  { label: "Clean And Jerk", value: "clean-and-jerk" },
+const LIFT_OPTIONS: { label: string; value: LiftOptions }[] = [
+  { label: "Clean And Jerk", value: "cleanAndJerk" },
   { label: "Snatch", value: "snatch" },
   { label: "Both (Snatch + Clean)", value: "both" },
 ];

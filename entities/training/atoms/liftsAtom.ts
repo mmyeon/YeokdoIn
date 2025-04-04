@@ -1,10 +1,14 @@
 import { atomWithStorage } from "jotai/utils";
-import { Lift, PersonalRecord, WeightPercentage } from "@/types/training"; // 분리된 타입 가져오기
+import {
+  LiftOptions,
+  PersonalRecord,
+  WeightPercentage,
+} from "@/types/training";
 
 export const personalRecordAtom = atomWithStorage<PersonalRecord>(
   "personalRecord",
   {
-    clean: "",
+    cleanAndJerk: "",
     snatch: "",
   },
 );
@@ -16,7 +20,7 @@ export const programPercentagesAtom = atomWithStorage<WeightPercentage[]>(
   "programPercentages",
   [],
 );
-export const selectedLiftAtom = atomWithStorage<Lift>(
+export const selectedLiftAtom = atomWithStorage<LiftOptions>(
   "selectedLift",
-  "clean-and-jerk",
+  "cleanAndJerk",
 );
