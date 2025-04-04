@@ -166,13 +166,7 @@ const WeightCalculator = () => {
             />
           )}
 
-          <div className="flex justify-between mt-8">
-            <Link href={ROUTES.TRAINING.PROGRAM_INPUT}>
-              <Button variant="outline" className="rounded-xl">
-                이전으로 돌아가기
-              </Button>
-            </Link>
-
+          <div className="flex justify-end mt-8">
             <Link href={ROUTES.TRAINING.SELECT_LIFT}>
               <Button>
                 <Home className="h-4 w-4 mr-2" />
