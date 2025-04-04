@@ -63,6 +63,7 @@ const ProgramInput = () => {
       ...prev,
       { id: Date.now(), percent: Number(value) },
     ]);
+    setPercentageError(null);
   };
 
   const handleDeletePercentage = (id: number) => {
@@ -165,18 +166,8 @@ const ProgramInput = () => {
                       onClick={() => handleDeletePercentage(id)}
                     >
                       <X className="h-3 w-3" />
-                      <span className="sr-only">제거</span>
                     </Button>
                   </Badge>
-                  // <div
-                  //   key={item.id}
-                  //   className="w-fit bg-gray-600 px-3.5 py-1  text-white rounded-xl text-sm flex gap-2 font-bold"
-                  // >
-                  //   {item.percent}%{" "}
-                  //   <button onClick={() => handleDeletePercentage(item.id)}>
-                  //     X
-                  //   </button>
-                  // </div>
                 ))
               )}
             </div>
