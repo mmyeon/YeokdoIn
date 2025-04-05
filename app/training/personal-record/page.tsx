@@ -88,7 +88,7 @@ export default function AddRecords() {
             {(selectedLift === "cleanAndJerk" || selectedLift === "both") && (
               <div className="space-y-2">
                 <Label htmlFor="clean-and-jerk-pr" className="toss-label">
-                  {LIFT_INFO_MAP[selectedLift]} 개인 기록 (kg)
+                  {LIFT_INFO_MAP["cleanAndJerk"]} 개인 기록 (kg)
                 </Label>
 
                 <Input
@@ -116,7 +116,7 @@ export default function AddRecords() {
             {(selectedLift === "snatch" || selectedLift === "both") && (
               <div className="space-y-2">
                 <Label htmlFor="snatch-pr" className="toss-label">
-                  {LIFT_INFO_MAP[selectedLift]} 개인 기록 (kg)
+                  {LIFT_INFO_MAP["snatch"]} 개인 기록 (kg)
                 </Label>
                 <Input
                   id="snatch-pr"
