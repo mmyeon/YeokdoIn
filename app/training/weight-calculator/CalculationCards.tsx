@@ -1,8 +1,9 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { WeightList } from "@/types/training";
-import { Dumbbell } from "lucide-react";
+import { Lift, WeightList } from "@/types/training";
+import { ArrowDown, ArrowUp, Trophy } from "lucide-react";
 import { useAtomValue } from "jotai";
-import { barWeightAtom } from "@/entities/training/atoms/liftsAtom";
+import { personalRecordAtom } from "@/entities/training/atoms/liftsAtom";
+import { LIFT_INFO_MAP } from "@/shared/constants";
 
 const getWeightGap = (prevWeight: number, currentWeight: number) => {
   if (prevWeight === currentWeight) {
@@ -14,16 +15,20 @@ const getWeightGap = (prevWeight: number, currentWeight: number) => {
 
 const CalculationCards = ({
   weightList,
-  title,
+  lift,
 }: {
   weightList: WeightList[];
-  title: string;
+  lift: Lift;
 }) => {
-  const barWeight = useAtomValue(barWeightAtom);
+  const personalRecord = useAtomValue(personalRecordAtom);
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-blue-500">{title}</h3>
+      <div className="flex gap-1 items-center justify-end">
+        <Trophy className="w-4 h-4 mr-1 text-yellow-500" />
+
+        <h3 className="text-sm font-semibold">{`개인기록 : ${personalRecord[lift]}kg`}</h3>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-4">
         {weightList.map((item, index) => {
@@ -38,47 +43,41 @@ const CalculationCards = ({
           return (
             <Card className="toss-card p-0 overflow-hidden" key={index}>
               <CardContent className="p-0">
-                <div className="bg-blue-50 text-gray-800 p-3 flex justify-between items-center">
-                  <h3 className="font-bold text-lg bg-blue-500 rounded-full text-white w-12 h-12 flex justify-center items-center tracking-wide">
-                    {item.percent}%
+                <div className="bg-blue-500 flex justify-between items-center p-3">
+                  <h3 className="font-bold text-lg text-white">
+                    {LIFT_INFO_MAP[lift]}
                   </h3>
 
-                  <div className="flex flex-col text-sm">
-                    {weightGap !== 0 ? (
-                      <>
-                        {index >= 1 && (
-                          <span>
-                            이전 무게보다{" "}
-                            <span
-                              className={`text-xl ${weightGap > 0 ? "text-red-500" : "text-blue-500"} tracing-wide font-semibold`}
-                            >
-                              {weightGap > 0 ? "+" : "-"}
-                              {Math.abs(weightGap)}
-                              kg
-                            </span>
-                          </span>
-                        )}
-                      </>
-                    ) : (
-                      <span></span>
-                    )}
-                  </div>
+                  <span className="bg-white text-blue-500 font-semibold rounded-lg px-2 text-sm">
+                    {item.percent}%
+                  </span>
                 </div>
 
-                <div className="p-6 text-center">
-                  <span className="font-bold text-3xl">
-                    {item.totalWeight}kg
-                  </span>
-                  <div className="flex justify-center items-center mt-1 gap-1">
-                    <Dumbbell size={18} strokeWidth={1.1} />
-                    <span>바벨에서</span>
+                <div className="p-6">
+                  <div className="flex items-start flex-col">
+                    <span className="font-bold text-3xl mb-1">
+                      {item.totalWeight}kg
+                    </span>
 
-                    {/* TODO: 바벨과의 무게 차이 정보 보여줄 지 고민*/}
                     <span
-                      className={`${item.totalWeight - barWeight! > 0 ? "text-red-500" : "text-blue-500"} font-semibold text-sm`}
+                      className={`flex items-center ${weightGap > 0 ? "text-red-500" : "text-blue-500"} gap-0.5 text-sm`}
                     >
-                      {item.totalWeight - barWeight! > 0 ? "+" : "-"}
-                      {getWeightGap(item.totalWeight, barWeight!)}kg
+                      {weightGap !== 0 && (
+                        <>
+                          {index >= 1 && (
+                            <>
+                              <span>이전 무게보다 {Math.abs(weightGap)}kg</span>
+
+                              {/* TODO: 컬러 한 곳에서 관리하기 */}
+                              {weightGap > 0 ? (
+                                <ArrowUp className="w-4 h-4 mr-1" />
+                              ) : (
+                                <ArrowDown className="w-4 h-4 mr-1" />
+                              )}
+                            </>
+                          )}
+                        </>
+                      )}
                     </span>
                   </div>
                 </div>
