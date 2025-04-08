@@ -6,6 +6,10 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { DevTools } from "jotai-devtools";
 
+import { usePathname } from "next/navigation";
+import { AuthProvider } from "@/features/auth/model/AuthProvider";
+import AuthButtons from "@/features/auth/ui/AuthButtons";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -26,13 +30,20 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+  const isVisible = !pathname.includes("login") && !pathname.includes("signup");
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <DevTools />
-        {children}
+        <AuthProvider>
+          {isVisible && <AuthButtons />}
+
+          <DevTools />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
