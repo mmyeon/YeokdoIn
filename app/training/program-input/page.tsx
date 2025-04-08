@@ -16,8 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/input/label";
 import { Input } from "@/components/ui/input/input";
-import { AlertCircle, ArrowLeft, ArrowRight, X } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -26,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import FormAlert from "@/components/FormAlert";
 
 const PERCENTAGES = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]; // 퍼센트 옵션
 
@@ -120,12 +120,7 @@ const ProgramInput = () => {
             />
 
             {/* TODO: border 컬러 적용안되는 이슈 개선 */}
-            {barWeightError && (
-              <Alert variant="destructive" className="mt-2 rounded-xl">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{barWeightError}</AlertDescription>
-              </Alert>
-            )}
+            {barWeightError && <FormAlert errorMessage={barWeightError} />}
 
             <Label htmlFor="clean-and-jerk-pr" className="toss-label">
               훈련 강도 (%)
@@ -177,12 +172,7 @@ const ProgramInput = () => {
               )}
             </div>
 
-            {percentageError && (
-              <Alert variant="destructive" className="mt-2 rounded-xl">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{percentageError}</AlertDescription>
-              </Alert>
-            )}
+            {percentageError && <FormAlert errorMessage={percentageError} />}
 
             <Button
               type="button"

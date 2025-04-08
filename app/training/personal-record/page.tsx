@@ -13,11 +13,11 @@ import { Input } from "@/components/ui/input/input";
 import { Label } from "@radix-ui/react-label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, ArrowLeft, ArrowRight } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Lift } from "@/types/training";
 import { LIFT_INFO_MAP } from "@/shared/constants";
+import FormAlert from "@/components/FormAlert";
 
 export default function AddRecords() {
   const router = useRouter();
@@ -105,12 +105,7 @@ export default function AddRecords() {
                 />
 
                 {/* TODO: border 컬러 적용안되는 이슈 개선 */}
-                {cleanError && (
-                  <Alert variant="destructive" className="mt-2 rounded-xl">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>{cleanError}</AlertDescription>
-                  </Alert>
-                )}
+                {cleanError && <FormAlert errorMessage={cleanError} />}
               </div>
             )}
 
@@ -131,12 +126,7 @@ export default function AddRecords() {
                   }}
                 />
 
-                {snatchError && (
-                  <Alert variant="destructive" className="mt-2 rounded-xl">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>{snatchError}</AlertDescription>
-                  </Alert>
-                )}
+                {snatchError && <FormAlert errorMessage={snatchError} />}
               </div>
             )}
 
