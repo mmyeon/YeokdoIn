@@ -79,12 +79,17 @@ const ProgramInput = () => {
     <main className="container mx-auto flex min-h-screen flex-col items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="mb-2 flex items-center">
-          <Link href={ROUTES.TRAINING.PERSONAL_RECORD}>
-            <Button variant="ghost" size="sm" className="text-muted-foreground">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground"
+            asChild
+          >
+            <Link href={ROUTES.TRAINING.PERSONAL_RECORD}>
               <ArrowLeft className="h-4 w-4 mr-1" />
               뒤로
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
 
         <div className="mb-6">
@@ -179,16 +184,17 @@ const ProgramInput = () => {
               </Alert>
             )}
 
-            <Link href={ROUTES.TRAINING.WEIGHT_CALCULATOR} className="w-full">
-              <Button
-                type="button"
-                className="w-full h-12 rounded-xl text-base font-semibold bg-primary"
-                disabled={percentages.length == 0}
-              >
+            <Button
+              type="button"
+              className="w-full h-12 rounded-xl text-base font-semibold bg-primary"
+              disabled={percentages.length == 0}
+              asChild
+            >
+              <Link href={ROUTES.TRAINING.WEIGHT_CALCULATOR} className="w-full">
                 다음
                 <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </CardContent>
         </Card>
       </div>

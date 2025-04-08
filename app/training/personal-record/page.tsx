@@ -64,16 +64,17 @@ export default function AddRecords() {
     <main className="container mx-auto flex min-h-screen flex-col items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="mb-2 flex items-center">
-          <Link href={ROUTES.TRAINING.SELECT_LIFT}>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground hover:font-bold bg-none"
-            >
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:font-bold bg-none"
+            asChild
+          >
+            <Link href={ROUTES.TRAINING.SELECT_LIFT}>
               <ArrowLeft className="h-4 w-4 mr-1" />
               뒤로
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
 
         <div className="mb-6">
@@ -140,7 +141,6 @@ export default function AddRecords() {
             )}
 
             <Button
-              type="button"
               // TODO: bg-primary 적용 안됨
               className="w-full h-12 rounded-xl text-base font-semibold bg-primary"
               disabled={isButtonDisabled}

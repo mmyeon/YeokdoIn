@@ -44,15 +44,18 @@ export default function LiftSelection() {
           <CardContent className="p-6">
             <div className="flex flex-col gap-4">
               {LIFT_OPTIONS.map(({ value, label }) => (
-                <Link
+                <Button
+                  className="w-full flex items-center space-x-3 p-4 rounded-xl bg-secondary/50 cursor-pointer hover:bg-secondary transition-colors text-primary font-bold"
                   key={value}
-                  href={ROUTES.TRAINING.PERSONAL_RECORD}
-                  onClick={() => setSelectedLift(value)}
+                  asChild
                 >
-                  <Button className="w-full flex items-center space-x-3 p-4 rounded-xl bg-secondary/50 cursor-pointer hover:bg-secondary transition-colors text-primary font-bold">
+                  <Link
+                    href={ROUTES.TRAINING.PERSONAL_RECORD}
+                    onClick={() => setSelectedLift(value)}
+                  >
                     {label}
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               ))}
             </div>
           </CardContent>

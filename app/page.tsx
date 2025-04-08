@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import "jotai-devtools/styles.css";
 import { ROUTES } from "@/routes";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
@@ -22,11 +23,13 @@ export default function Home() {
           개인 기록(PR)을 기반으로 훈련 중량을 계산하고, 프로그램을 설정하세요.
         </p>
 
-        <Link href={ROUTES.TRAINING.SELECT_LIFT}>
-          <button className="w-full border-2 text-black hover:bg-blue-300 font-bold py-2 px-4 rounded">
-            시작하기
-          </button>
-        </Link>
+        <Button
+          className="w-full h-12 rounded-xl text-base font-semibold bg-primary"
+          // className="w-full border-2 hover:bg-gray-700 font-bold py-2 px-4 rounded"
+          asChild
+        >
+          <Link href={ROUTES.TRAINING.SELECT_LIFT}>시작하기</Link>
+        </Button>
       </div>
     </div>
   );

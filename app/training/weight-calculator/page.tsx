@@ -92,16 +92,17 @@ const WeightCalculator = () => {
       <main className="container mx-auto flex min-h-screen flex-col items-center p-4">
         <div className="md:w-full max-w-3xl">
           <div className="mb-2 flex items-center">
-            <Link href={ROUTES.TRAINING.PROGRAM_INPUT}>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground p-0 h-auto"
-              >
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground p-0 h-auto"
+              asChild
+            >
+              <Link href={ROUTES.TRAINING.PROGRAM_INPUT}>
                 <ArrowLeft className="h-4 w-4 mr-1" />
                 뒤로
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
 
           <div className="mb-6">
@@ -152,12 +153,12 @@ const WeightCalculator = () => {
           )}
 
           <div className="flex justify-end mt-8">
-            <Link href={ROUTES.TRAINING.SELECT_LIFT}>
-              <Button>
+            <Button asChild>
+              <Link href={ROUTES.TRAINING.SELECT_LIFT}>
                 <Home className="h-4 w-4 mr-2" />
                 홈으로
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </main>
