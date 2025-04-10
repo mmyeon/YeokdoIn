@@ -1,3 +1,5 @@
+"use client";
+
 import useAuth from "@/features/auth/model/useAuth";
 import AuthForm from "@/features/auth/ui/AuthForm";
 
