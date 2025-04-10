@@ -13,10 +13,11 @@ import { Button } from "../../../components/ui/button";
 // import FormAlert from "@/components/FormAlert";
 import { AUTH_FORM_INFO } from "../constants";
 import Link from "next/link";
+import { AuthFn } from "../model/AuthContext";
 
 interface AuthFormProps {
   mode: "login" | "signup";
-  handleClick: (email: string, password: string) => void;
+  handleClick: AuthFn;
 }
 
 const AuthForm = ({ mode, handleClick }: AuthFormProps) => {
@@ -67,7 +68,9 @@ const AuthForm = ({ mode, handleClick }: AuthFormProps) => {
             <Button
               className="w-full"
               disabled={!email || !password}
-              onClick={() => handleClick(email, password)}
+              onClick={async () => {
+                await handleClick(email, password);
+              }}
             >
               {AUTH_FORM_INFO[mode].buttonText}
             </Button>

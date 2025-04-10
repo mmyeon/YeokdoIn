@@ -1,30 +1,39 @@
 import { supabaseClient } from "@/shared/api/supabaseClient";
+import { AuthError } from "@supabase/supabase-js";
 
-export const getSession = async () => {
-  const { data, error } = await supabaseClient.auth.getSession();
-  if (error) throw new Error(error.message);
-  return data.session;
+const handleSupabaseError = (error: AuthError | null) => {
+  if (error) {
+    console.error("Supabase error:", error.message);
+    throw new Error(error.message);
+  }
 };
 
-export const logIn = async (email: string, password: string) => {
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email,
-    password,
-  });
-  if (error) throw new Error(error.message);
-  return data.user;
+const authService = {
+  getSession: async () => {
+    const { data, error } = await supabaseClient.auth.getSession();
+    handleSupabaseError(error);
+    return data.session;
+  },
+  logIn: async (email: string, password: string) => {
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+      email,
+      password,
+    });
+    handleSupabaseError(error);
+    return data.user;
+  },
+  signUp: async (email: string, password: string) => {
+    const { data, error } = await supabaseClient.auth.signUp({
+      email,
+      password,
+    });
+    handleSupabaseError(error);
+    return data.user;
+  },
+  logOut: async () => {
+    const { error } = await supabaseClient.auth.signOut();
+    handleSupabaseError(error);
+  },
 };
 
-export const signUp = async (email: string, password: string) => {
-  const { data, error } = await supabaseClient.auth.signUp({
-    email,
-    password,
-  });
-  if (error) throw new Error(error.message);
-  return data.user;
-};
-
-export const logOut = async () => {
-  const { error } = await supabaseClient.auth.signOut();
-  if (error) throw new Error(error.message);
-};
+export default authService;
