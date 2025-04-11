@@ -16,6 +16,8 @@ import { AuthFn } from "../model/AuthContext";
 import FormAlert from "@/components/FormAlert";
 import HelpAlert from "@/components/HelpAlert";
 import { validateEmail, validatePassword } from "@/shared/form/validations";
+import useAuth from "../model/useAuth";
+import { toast } from "sonner";
 
 interface AuthFormProps {
   mode: "login" | "signup";
@@ -27,6 +29,7 @@ const AuthForm = ({ mode, handleClick }: AuthFormProps) => {
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const { authError } = useAuth();
 
   const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newEmail = e.target.value;
@@ -97,9 +100,17 @@ const AuthForm = ({ mode, handleClick }: AuthFormProps) => {
           <div className="flex flex-col items-center w-full gap-4">
             <Button
               className="w-full"
-              disabled={!email || !password}
+              disabled={
+                !email ||
+                !password ||
+                !!emailError ||
+                !!passwordError ||
+                !!authError
+              }
               onClick={async () => {
-                await handleClick(email, password);
+                await handleClick(email, password, (errorMessage: string) =>
+                  toast.error(errorMessage),
+                );
               }}
             >
               {AUTH_FORM_INFO[mode].buttonText}

@@ -9,6 +9,7 @@ import { DevTools } from "jotai-devtools";
 import { usePathname } from "next/navigation";
 import { AuthProvider } from "@/features/auth/model/AuthProvider";
 import AuthButtons from "@/features/auth/ui/AuthButtons";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,6 +44,7 @@ export default function RootLayout({
 
           <DevTools />
           {children}
+          <Toaster />
         </AuthProvider>
       </body>
     </html>
