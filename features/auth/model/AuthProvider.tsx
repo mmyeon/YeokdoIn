@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
   }, []);
 
-  const handleLogIn = async (email: string, password: string) => {
+  const handleLogin = async (email: string, password: string) => {
     setLoading(true);
     try {
       const loggedInUser = await authService.logIn(email, password);
@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const handleLogOut = async () => {
+  const handleLogout = async () => {
     try {
       await authService.logOut();
     } catch (error) {
@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const handleSignUp = async (email: string, password: string) => {
+  const handleSignup = async (email: string, password: string) => {
     setLoading(true);
     try {
       const signedUpUser = await authService.signUp(email, password);
@@ -70,9 +70,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       value={{
         user,
         loading,
-        logIn: handleLogIn,
-        signUp: handleSignUp,
-        logOut: handleLogOut,
+        handleLogin,
+        handleSignup,
+        handleLogout,
       }}
     >
       {children}

@@ -1,12 +1,7 @@
-"use client";
-
-import useAuth from "@/features/auth/model/useAuth";
-import AuthForm from "@/features/auth/ui/AuthForm";
+import LoginForm from "@/features/auth/ui/LoginForm";
 
 const LoginPage = () => {
-  const { logIn } = useAuth();
-
-  return <AuthForm mode="login" handleClick={logIn} />;
+  return <LoginForm />;
 };
 
 export default LoginPage;

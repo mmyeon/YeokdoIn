@@ -1,12 +1,7 @@
-"use client";
-
-import useAuth from "@/features/auth/model/useAuth";
-import AuthForm from "@/features/auth/ui/AuthForm";
+import SignupForm from "@/features/auth/ui/SignupForm";
 
 const SignupPage = () => {
-  const { signUp } = useAuth();
-
-  return <AuthForm mode="signup" handleClick={signUp} />;
+  return <SignupForm />;
 };
 
 export default SignupPage;

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useState } from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -12,51 +12,30 @@ import { Label } from "../../../components/ui/input/label";
 import { Button } from "../../../components/ui/button";
 import { AUTH_FORM_INFO } from "../constants";
 import Link from "next/link";
-import { AuthFn } from "../model/AuthContext";
 import FormAlert from "@/components/FormAlert";
 import HelpAlert from "@/components/HelpAlert";
-import { validateEmail, validatePassword } from "@/shared/form/validations";
 import { toast } from "sonner";
+import useAuth from "../model/useAuth";
+import { useAuthForm } from "../hooks/useAuthForm";
 
-interface AuthFormProps {
-  mode: "login" | "signup";
-  handleClick: AuthFn;
-}
+const SignupForm = () => {
+  const { handleSignup } = useAuth();
+  const {
+    email,
+    password,
+    emailError,
+    passwordError,
+    handleEmailChange,
+    handlePasswordChange,
+  } = useAuthForm();
 
-const AuthForm = ({ mode, handleClick }: AuthFormProps) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
   const [authError, setAuthError] = useState("");
-
-  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const newEmail = e.target.value;
-    setEmail(newEmail);
-
-    if (newEmail.length === 0) {
-      setEmailError("");
-    } else {
-      setEmailError(validateEmail(newEmail));
-    }
-  };
-
-  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const newPassword = e.target.value;
-    setPassword(newPassword);
-
-    if (newPassword.length < 8) {
-      setPasswordError("");
-    } else {
-      setPasswordError(validatePassword(newPassword));
-    }
-  };
 
   return (
     <div className="container flex flex-col items-center justify-center min-h-screen p-4 mx-auto">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-2xl font-bold text-center">
-          {AUTH_FORM_INFO[mode].title}
+          {AUTH_FORM_INFO["signup"].title}
         </CardHeader>
 
         <CardContent>
@@ -108,7 +87,7 @@ const AuthForm = ({ mode, handleClick }: AuthFormProps) => {
               }
               onClick={async () => {
                 try {
-                  await handleClick(email, password);
+                  await handleSignup(email, password);
                 } catch (error) {
                   console.error("Error during authentication:", error);
                   if (error instanceof Error) {
@@ -120,16 +99,16 @@ const AuthForm = ({ mode, handleClick }: AuthFormProps) => {
                 }
               }}
             >
-              {AUTH_FORM_INFO[mode].buttonText}
+              {AUTH_FORM_INFO["signup"].buttonText}
             </Button>
 
             <p>
-              {AUTH_FORM_INFO[mode].help}{" "}
+              {AUTH_FORM_INFO["signup"].help}{" "}
               <Link
-                href={AUTH_FORM_INFO[mode].linkUrl}
+                href={AUTH_FORM_INFO["signup"].linkUrl}
                 className="text-blue-500 font-bold hover:underline"
               >
-                {AUTH_FORM_INFO[mode].linkText}
+                {AUTH_FORM_INFO["signup"].linkText}
               </Link>
             </p>
           </div>
@@ -139,4 +118,4 @@ const AuthForm = ({ mode, handleClick }: AuthFormProps) => {
   );
 };
 
-export default AuthForm;
+export default SignupForm;
