@@ -8,7 +8,7 @@ import {
 import { useAtom, useAtomValue } from "jotai";
 import Link from "next/link";
 import { ROUTES } from "@/routes";
-import { numericStringSchema } from "@/shared/form/validationSchemas";
+import { numericStringSchema } from "@/shared/form/schemas";
 import { Input } from "@/components/ui/input/input";
 import { Label } from "@radix-ui/react-label";
 import { Card, CardContent } from "@/components/ui/card";

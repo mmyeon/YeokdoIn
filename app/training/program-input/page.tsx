@@ -8,10 +8,7 @@ import {
 } from "@/entities/training/atoms/liftsAtom";
 import { useAtom } from "jotai";
 import { ROUTES } from "@/routes";
-import {
-  barWeightSchema,
-  numericStringSchema,
-} from "@/shared/form/validationSchemas";
+import { barWeightSchema, numericStringSchema } from "@/shared/form/schemas";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/input/label";

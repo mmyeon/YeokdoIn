@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import {
   Card,
   CardContent,
@@ -10,10 +10,12 @@ import {
 import { Input } from "../../../components/ui/input/input";
 import { Label } from "../../../components/ui/input/label";
 import { Button } from "../../../components/ui/button";
-// import FormAlert from "@/components/FormAlert";
 import { AUTH_FORM_INFO } from "../constants";
 import Link from "next/link";
 import { AuthFn } from "../model/AuthContext";
+import FormAlert from "@/components/FormAlert";
+import HelpAlert from "@/components/HelpAlert";
+import { validateEmail, validatePassword } from "@/shared/form/validations";
 
 interface AuthFormProps {
   mode: "login" | "signup";
@@ -23,8 +25,30 @@ interface AuthFormProps {
 const AuthForm = ({ mode, handleClick }: AuthFormProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  // const [emailError, setEmailError] = useState("");
-  // const [passwordError, setPasswordError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const newEmail = e.target.value;
+    setEmail(newEmail);
+
+    if (newEmail.length === 0) {
+      setEmailError("");
+    } else {
+      setEmailError(validateEmail(newEmail));
+    }
+  };
+
+  const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+
+    if (newPassword.length < 8) {
+      setPasswordError("");
+    } else {
+      setPasswordError(validatePassword(newPassword));
+    }
+  };
 
   return (
     <div className="container flex flex-col items-center justify-center min-h-screen p-4 mx-auto">
@@ -43,10 +67,11 @@ const AuthForm = ({ mode, handleClick }: AuthFormProps) => {
               type="email"
               placeholder="이메일"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => handleEmailChange(e)}
             />
 
-            {/* {emailError && <FormAlert errorMessage={emailError} />} */}
+            {!email && <HelpAlert message="이메일을 입력해 주세요." />}
+            {emailError && <FormAlert errorMessage={emailError} />}
           </div>
 
           <Label htmlFor="password" className="mb-1">
@@ -57,10 +82,15 @@ const AuthForm = ({ mode, handleClick }: AuthFormProps) => {
             type="password"
             placeholder="비밀번호"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => handlePasswordChange(e)}
           />
 
-          {/* {passwordError && <FormAlert errorMessage={passwordError} />} */}
+          {password.length < 8 && (
+            <HelpAlert message="문자, 숫자, 특수문자 포함, 8자 이상 입력해 주세요." />
+          )}
+          {password.length >= 8 && passwordError && (
+            <FormAlert errorMessage={passwordError} />
+          )}
         </CardContent>
 
         <CardFooter>

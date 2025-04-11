@@ -25,7 +25,6 @@ export default function Home() {
 
         <Button
           className="w-full h-12 rounded-xl text-base font-semibold bg-primary"
-          // className="w-full border-2 hover:bg-gray-700 font-bold py-2 px-4 rounded"
           asChild
         >
           <Link href={ROUTES.TRAINING.SELECT_LIFT}>시작하기</Link>
