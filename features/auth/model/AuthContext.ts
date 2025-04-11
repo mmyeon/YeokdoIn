@@ -3,11 +3,7 @@
 import { User } from "@supabase/supabase-js";
 import { createContext } from "react";
 
-export type AuthFn = (
-  email: string,
-  password: string,
-  onError?: (message: string) => void,
-) => Promise<void>;
+export type AuthFn = (email: string, password: string) => Promise<void>;
 
 interface AuthContextType {
   // TODO: 프론트애서 필요한 유저 정보만 가져오도록 손상 방지 계층(ACL)추가하기
@@ -16,7 +12,6 @@ interface AuthContextType {
   logIn: AuthFn;
   signUp: AuthFn;
   logOut: () => Promise<void>;
-  authError: string | null;
 }
 
 const initialContext: AuthContextType = {
@@ -25,7 +20,6 @@ const initialContext: AuthContextType = {
   logIn: async () => {},
   signUp: async () => {},
   logOut: async () => {},
-  authError: null,
 };
 
 export const AuthContext = createContext<AuthContextType | undefined>(

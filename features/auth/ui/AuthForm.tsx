@@ -16,7 +16,6 @@ import { AuthFn } from "../model/AuthContext";
 import FormAlert from "@/components/FormAlert";
 import HelpAlert from "@/components/HelpAlert";
 import { validateEmail, validatePassword } from "@/shared/form/validations";
-import useAuth from "../model/useAuth";
 import { toast } from "sonner";
 
 interface AuthFormProps {
@@ -29,7 +28,7 @@ const AuthForm = ({ mode, handleClick }: AuthFormProps) => {
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const { authError } = useAuth();
+  const [authError, setAuthError] = useState("");
 
   const handleEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newEmail = e.target.value;
@@ -108,9 +107,17 @@ const AuthForm = ({ mode, handleClick }: AuthFormProps) => {
                 !!authError
               }
               onClick={async () => {
-                await handleClick(email, password, (errorMessage: string) =>
-                  toast.error(errorMessage),
-                );
+                try {
+                  await handleClick(email, password);
+                } catch (error) {
+                  console.error("Error during authentication:", error);
+                  if (error instanceof Error) {
+                    setAuthError(error.message);
+                    toast.error(error.message);
+                  } else {
+                    toast.error("알 수 없는 오류가 발생했습니다.");
+                  }
+                }
               }}
             >
               {AUTH_FORM_INFO[mode].buttonText}
