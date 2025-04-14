@@ -1,9 +1,10 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { SocialAuthProvider } from "@/types/auth";
 
-type SocialProvider = "google" | "kakao";
-
-const getProviderDetails = (provider: SocialProvider) => {
+const getProviderDetails = (provider: SocialAuthProvider) => {
   switch (provider) {
     case "google":
       return {
@@ -28,10 +29,10 @@ const getProviderDetails = (provider: SocialProvider) => {
 
 const SocialButtons = ({
   provider,
-  loginMode = false,
+  onClick,
 }: {
-  provider: SocialProvider;
-  loginMode?: boolean;
+  provider: SocialAuthProvider;
+  onClick: (provider: SocialAuthProvider) => void;
 }) => {
   const details = getProviderDetails(provider);
 
@@ -39,6 +40,7 @@ const SocialButtons = ({
     <Button
       variant="outline"
       className={`justify-start ${details.bgColor} ${details.textColor} ${details.borderColor} ${details.hoverColor}`}
+      onClick={() => onClick(provider)}
     >
       <div className="w-full flex items-center justify-center gap-2">
         <Image
@@ -48,11 +50,7 @@ const SocialButtons = ({
           height={20}
         />
 
-        <span>
-          {loginMode
-            ? `${details.name}로 로그인`
-            : `${details.name}로 가입하기`}
-        </span>
+        <span>{`${details.name}로 로그인하기`}</span>
       </div>
     </Button>
   );

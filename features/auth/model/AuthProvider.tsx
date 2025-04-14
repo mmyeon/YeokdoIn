@@ -1,71 +1,70 @@
 import { useEffect, useState } from "react";
-import { User } from "@supabase/supabase-js";
-import { useRouter } from "next/navigation";
-import { ROUTES } from "@/routes";
+import { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 import { AuthContext } from "./AuthContext";
 import authService from "../api/authService";
+import { SocialAuthProvider } from "@/types/auth";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
+
+  const handleUserChange = (user: User | null) => {
+    setUser(user);
+  };
+
+  const handleAuthStateChange = (
+    event: AuthChangeEvent,
+    session: Session | null,
+  ) => {
+    switch (event) {
+      case "SIGNED_IN":
+        console.log("User signed in:", session?.user);
+        handleUserChange(session?.user || null);
+        break;
+      case "SIGNED_OUT":
+        handleUserChange(null);
+        break;
+      default:
+        break;
+    }
+  };
 
   useEffect(() => {
-    authService
-      .getSession()
-      .then((session) => {
-        if (session) {
-          setUser(session.user);
-        } else {
-          setUser(null);
-        }
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error fetching session:", error);
-        setLoading(false);
-      });
+    const initializeUser = async () => {
+      try {
+        const session = await authService.getSession();
+        handleUserChange(session?.user ?? null);
+      } catch (error) {
+        console.error("Error getting session:", error);
+        handleUserChange(null);
+      }
+    };
+
+    initializeUser();
   }, []);
 
-  const handleLogin = async (email: string, password: string) => {
-    setLoading(true);
+  useEffect(() => {
+    const { data } = authService.onAuthStateChange((event, session) => {
+      handleAuthStateChange(event, session);
+    });
+    return () => {
+      data.subscription.unsubscribe();
+    };
+  }, []);
+
+  const signInWithOAuth = async (provider: SocialAuthProvider) => {
     try {
-      const loggedInUser = await authService.logIn(email, password);
-      setUser(loggedInUser);
-      router.push(ROUTES.TRAINING.SELECT_LIFT);
+      await authService.signIn(provider);
     } catch (error) {
-      console.error("Error logging in:", error);
-      throw error;
-    } finally {
-      setLoading(false);
+      console.error("Error signing in with OAuth:", error);
     }
   };
 
-  const handleLogout = async () => {
+  const signOut = async () => {
     try {
-      await authService.logOut();
-    } catch (error) {
-      console.error("Error logging out:", error);
-    } finally {
+      await authService.SignOut();
       setUser(null);
-      router.push(ROUTES.AUTH.LOGIN);
-    }
-  };
-
-  const handleSignup = async (email: string, password: string) => {
-    setLoading(true);
-    try {
-      const signedUpUser = await authService.signUp(email, password);
-      setUser(signedUpUser);
-      if (signedUpUser?.email)
-        router.push(
-          `${ROUTES.AUTH.CONFIRM}?email=${encodeURIComponent(signedUpUser.email)}`,
-        );
     } catch (error) {
-      console.error("Error signing up:", error);
-      throw error;
-    } finally {
-      setLoading(false);
+      console.error("Error signing out:", error);
     }
   };
 
@@ -73,10 +72,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     <AuthContext.Provider
       value={{
         user,
-        loading,
-        handleLogin,
-        handleSignup,
-        handleLogout,
+        signInWithOAuth,
+        signOut,
       }}
     >
       {children}
