@@ -46,20 +46,27 @@ const authService = {
       email,
       password,
     });
-    handleSupabaseError(error);
+    if (error) handleSupabaseError(error);
     return data.user;
   },
   signUp: async (email: string, password: string) => {
+    const redirectUrl = `${process.env.NEXT_PUBLIC_APP_URL}/welcome?email=${encodeURIComponent(email)}`;
+
     const { data, error } = await supabaseClient.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: redirectUrl,
+      },
     });
-    handleSupabaseError(error);
+
+    if (error) handleSupabaseError(error);
+
     return data.user;
   },
   logOut: async () => {
     const { error } = await supabaseClient.auth.signOut();
-    handleSupabaseError(error);
+    if (error) handleSupabaseError(error);
   },
 };
 

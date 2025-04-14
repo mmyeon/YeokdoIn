@@ -57,9 +57,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const signedUpUser = await authService.signUp(email, password);
       setUser(signedUpUser);
-      router.push(ROUTES.HOME);
+      if (signedUpUser?.email)
+        router.push(
+          `${ROUTES.AUTH.CONFIRM}?email=${encodeURIComponent(signedUpUser.email)}`,
+        );
     } catch (error) {
       console.error("Error signing up:", error);
+      throw error;
     } finally {
       setLoading(false);
     }
