@@ -6,14 +6,13 @@ import {
   selectedLiftAtom,
 } from "@/entities/training/atoms/liftsAtom";
 import { useAtom, useAtomValue } from "jotai";
-import Link from "next/link";
 import { ROUTES } from "@/routes";
 import { numericStringSchema } from "@/shared/form/schemas";
 import { Input } from "@/components/ui/input/input";
 import { Label } from "@radix-ui/react-label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Lift } from "@/types/training";
 import { LIFT_INFO_MAP } from "@/shared/constants";
@@ -63,20 +62,6 @@ export default function AddRecords() {
   return (
     <main className="container mx-auto flex min-h-screen flex-col items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="mb-2 flex items-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-muted-foreground hover:font-bold bg-none"
-            asChild
-          >
-            <Link href={ROUTES.TRAINING.SELECT_LIFT}>
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              뒤로
-            </Link>
-          </Button>
-        </div>
-
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-1">개인 기록을 알려주세요.</h1>
           <p className="text-muted-foreground">

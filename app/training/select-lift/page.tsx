@@ -20,7 +20,7 @@ export default function LiftSelection() {
   const setSelectedLift = useSetAtom(selectedLiftAtom);
 
   return (
-    <main className="container min-h-screen p-4  flex items-center justify-center m-auto">
+    <main className="p-4 flex items-center justify-center mt-6">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <div className="mx-auto mb-6 w-50 h-50 rounded-full flex items-center justify-center">

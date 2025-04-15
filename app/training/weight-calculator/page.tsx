@@ -10,10 +10,6 @@ import {
 } from "@/entities/training/atoms/liftsAtom";
 import { Lift, Plates, WeightPercentage } from "@/types/training";
 import CalculationCards from "./CalculationCards";
-import { ArrowLeft } from "lucide-react";
-import { ROUTES } from "@/routes";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LIFT_INFO } from "@/shared/constants";
 
@@ -88,72 +84,54 @@ const WeightCalculator = () => {
   }, [barWeight, personalRecord, programPercentages]);
 
   return (
-    <>
-      <main className="container mx-auto flex min-h-screen flex-col items-center p-4">
-        <div className="md:w-full max-w-3xl">
-          <div className="mb-2 flex items-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground p-0 h-auto"
-              asChild
-            >
-              <Link href={ROUTES.TRAINING.PROGRAM_INPUT}>
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                뒤로
-              </Link>
-            </Button>
-          </div>
-
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold mb-1">
-              훈련 시작할 준비되셨나요?
-            </h1>
-            <p className="text-muted-foreground">
-              개인 기록을 바탕으로 계산된 훈련 중량을 확인하세요.
-            </p>
-          </div>
-
-          {selectedLift === "both" ? (
-            <Tabs
-              value={currentLift}
-              onValueChange={(value) => setCurrentLift(value as Lift)}
-            >
-              <TabsList className="grid grid-cols-2 h-12 mb-6 w-full">
-                {LIFT_INFO.map((liftInfo) => (
-                  <TabsTrigger
-                    key={liftInfo.value}
-                    value={liftInfo.value}
-                    className="text-base"
-                  >
-                    {liftInfo.label}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-
-              <TabsContent value="cleanAndJerk">
-                <CalculationCards
-                  weightList={allWeights[currentLift]}
-                  lift={currentLift}
-                />
-              </TabsContent>
-
-              <TabsContent value="snatch">
-                <CalculationCards
-                  weightList={allWeights[currentLift]}
-                  lift={currentLift}
-                />
-              </TabsContent>
-            </Tabs>
-          ) : (
-            <CalculationCards
-              weightList={allWeights[currentLift]}
-              lift={currentLift}
-            />
-          )}
+    <main className="p-4 mt-6">
+      <div className="md:w-full max-w-3xl">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold mb-1">훈련 시작할 준비되셨나요?</h1>
+          <p className="text-muted-foreground">
+            개인 기록을 바탕으로 계산된 훈련 중량을 확인하세요.
+          </p>
         </div>
-      </main>
-    </>
+
+        {selectedLift === "both" ? (
+          <Tabs
+            value={currentLift}
+            onValueChange={(value) => setCurrentLift(value as Lift)}
+          >
+            <TabsList className="grid grid-cols-2 h-12 mb-6 w-full">
+              {LIFT_INFO.map((liftInfo) => (
+                <TabsTrigger
+                  key={liftInfo.value}
+                  value={liftInfo.value}
+                  className="text-base"
+                >
+                  {liftInfo.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            <TabsContent value="cleanAndJerk">
+              <CalculationCards
+                weightList={allWeights[currentLift]}
+                lift={currentLift}
+              />
+            </TabsContent>
+
+            <TabsContent value="snatch">
+              <CalculationCards
+                weightList={allWeights[currentLift]}
+                lift={currentLift}
+              />
+            </TabsContent>
+          </Tabs>
+        ) : (
+          <CalculationCards
+            weightList={allWeights[currentLift]}
+            lift={currentLift}
+          />
+        )}
+      </div>
+    </main>
   );
 };
 

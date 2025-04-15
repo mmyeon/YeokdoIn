@@ -73,22 +73,8 @@ const ProgramInput = () => {
   };
 
   return (
-    <main className="container mx-auto flex min-h-screen flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="mb-2 flex items-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-muted-foreground"
-            asChild
-          >
-            <Link href={ROUTES.TRAINING.PERSONAL_RECORD}>
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              뒤로
-            </Link>
-          </Button>
-        </div>
-
+    <main className="flex flex-col p-4 mt-6 gap-6">
+      <div>
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-1">
             훈련 프로그램을 설정해볼까요?
