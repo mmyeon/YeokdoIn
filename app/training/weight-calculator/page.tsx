@@ -10,7 +10,7 @@ import {
 } from "@/entities/training/atoms/liftsAtom";
 import { Lift, Plates, WeightPercentage } from "@/types/training";
 import CalculationCards from "./CalculationCards";
-import { ArrowLeft, Home } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { ROUTES } from "@/routes";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -151,15 +151,6 @@ const WeightCalculator = () => {
               lift={currentLift}
             />
           )}
-
-          <div className="flex justify-end mt-8">
-            <Button asChild>
-              <Link href={ROUTES.TRAINING.SELECT_LIFT}>
-                <Home className="h-4 w-4 mr-2" />
-                홈으로
-              </Link>
-            </Button>
-          </div>
         </div>
       </main>
     </>
