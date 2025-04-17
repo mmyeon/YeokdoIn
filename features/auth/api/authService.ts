@@ -1,26 +1,23 @@
-import { supabaseClient } from "@/shared/api/supabaseClient";
 import { SocialAuthProvider } from "@/types/auth";
 import { AuthChangeEvent, Session } from "@supabase/supabase-js";
+import { SupabaseBroswerClient } from "../supabase/BrowserClient";
 
 const authService = {
   signIn: async (provider: SocialAuthProvider) => {
-    const { error } = await supabaseClient.auth.signInWithOAuth({
+    const { error } = await SupabaseBroswerClient().auth.signInWithOAuth({
       provider,
-      options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/training/personal-record`,
-      },
     });
 
     if (error) throw new Error(error.message);
   },
 
   SignOut: async () => {
-    const { error } = await supabaseClient.auth.signOut();
+    const { error } = await SupabaseBroswerClient().auth.signOut();
     if (error) throw new Error(error.message);
   },
 
   getSession: async () => {
-    const { data, error } = await supabaseClient.auth.getSession();
+    const { data, error } = await SupabaseBroswerClient().auth.getSession();
 
     if (error) throw new Error(error.message);
 
@@ -29,7 +26,7 @@ const authService = {
   onAuthStateChange: (
     callback: (event: AuthChangeEvent, session: Session | null) => void,
   ) => {
-    return supabaseClient.auth.onAuthStateChange(callback);
+    return SupabaseBroswerClient().auth.onAuthStateChange(callback);
   },
 };
 
