@@ -3,9 +3,12 @@ import { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
 import { AuthContext } from "./AuthContext";
 import authService from "../api/authService";
 import { SocialAuthProvider } from "@/types/auth";
+import { ROUTES } from "@/routes";
+import { useRouter } from "next/navigation";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
 
   const handleUserChange = (user: User | null) => {
     setUser(user);
@@ -63,6 +66,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       await authService.SignOut();
       setUser(null);
+      router.push(ROUTES.HOME);
     } catch (error) {
       console.error("Error signing out:", error);
     }
