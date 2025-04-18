@@ -1,14 +1,14 @@
 import { SocialAuthProvider } from "@/types/auth";
 import { AuthChangeEvent, Session } from "@supabase/supabase-js";
-import { SupabaseBroswerClient } from "../supabase/BrowserClient";
 import { QUERY_KEYS } from "@/routes";
+import { SupabaseBrowserClient } from "../supabase/BrowserClient";
 
 const authService = {
   signIn: async (provider: SocialAuthProvider) => {
     const urlParams = new URLSearchParams(window.location.search);
     const redirectTo = urlParams.get(QUERY_KEYS.REDIRECT_TO);
 
-    const { error } = await SupabaseBroswerClient().auth.signInWithOAuth({
+    const { error } = await SupabaseBrowserClient().auth.signInWithOAuth({
       provider,
       options: {
         redirectTo: `${window.location.origin}/auth/callback?redirectTo=${redirectTo}`,
@@ -19,12 +19,12 @@ const authService = {
   },
 
   SignOut: async () => {
-    const { error } = await SupabaseBroswerClient().auth.signOut();
+    const { error } = await SupabaseBrowserClient().auth.signOut();
     if (error) throw new Error(error.message);
   },
 
   getSession: async () => {
-    const { data, error } = await SupabaseBroswerClient().auth.getSession();
+    const { data, error } = await SupabaseBrowserClient().auth.getSession();
 
     if (error) throw new Error(error.message);
 
@@ -33,7 +33,7 @@ const authService = {
   onAuthStateChange: (
     callback: (event: AuthChangeEvent, session: Session | null) => void,
   ) => {
-    return SupabaseBroswerClient().auth.onAuthStateChange(callback);
+    return SupabaseBrowserClient().auth.onAuthStateChange(callback);
   },
 };
 
