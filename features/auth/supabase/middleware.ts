@@ -36,7 +36,12 @@ export async function updateSession(request: NextRequest) {
 
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser();
+
+  if (error) {
+    console.error("Error getting user in middleware:", error);
+  }
 
   // 로그인 관련 경로는 건너뛰기
   if (
