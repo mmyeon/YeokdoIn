@@ -17,9 +17,9 @@ const ClientProvider = ({ children }: { children: ReactNode }) => {
     <AuthProvider>
       {isVisible && <AuthButtons />}
 
-      <DevTools />
       {children}
       <Toaster />
+      {process.env.NODE_ENV === "development" && <DevTools />}
     </AuthProvider>
   );
 };
