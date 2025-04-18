@@ -5,6 +5,7 @@ import authService from "../api/authService";
 import { SocialAuthProvider } from "@/types/auth";
 import { ROUTES } from "@/routes";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -37,6 +38,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         handleUserChange(session?.user ?? null);
       } catch (error) {
         console.error("Error getting session:", error);
+        toast.error("세션을 가져오는 중 오류가 발생했습니다.");
         handleUserChange(null);
       }
     };
@@ -58,16 +60,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await authService.signIn(provider);
     } catch (error) {
       console.error("Error signing in with OAuth:", error);
+      toast.error("소셜 로그인 중 오류가 발생했습니다.");
     }
   };
 
   const signOut = async () => {
     try {
       await authService.SignOut();
-      setUser(null);
       router.push(ROUTES.HOME);
     } catch (error) {
       console.error("Error signing out:", error);
+      toast.error("로그아웃 중 오류가 발생했습니다.");
     }
   };
 
