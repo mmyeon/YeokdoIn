@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/input/label";
 import { Input } from "@/components/ui/input/input";
-import { ArrowLeft, ArrowRight, X } from "lucide-react";
+import { ArrowRight, X } from "lucide-react";
 import {
   Select,
   SelectContent,
