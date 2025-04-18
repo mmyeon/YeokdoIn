@@ -7,6 +7,11 @@ export const ROUTES = {
   },
   AUTH: {
     LOGIN: "/login",
+    CALLBACK: "/auth/callback",
   },
   HOME: "/",
+};
+
+export const QUERY_KEYS = {
+  REDIRECT_TO: "redirectTo",
 };

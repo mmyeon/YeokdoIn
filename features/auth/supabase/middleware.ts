@@ -1,3 +1,4 @@
+import { QUERY_KEYS, ROUTES } from "@/routes";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
@@ -37,29 +38,21 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // 인증되지 않은 사용자는 로그인 페이지로 리다이렉트
+  // 로그인 관련 경로는 건너뛰기
   if (
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    request.nextUrl.pathname !== "/"
+    request.nextUrl.pathname.startsWith(ROUTES.AUTH.LOGIN) ||
+    request.nextUrl.pathname.startsWith(ROUTES.AUTH.CALLBACK)
   ) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
+    return NextResponse.next();
   }
 
-  // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
-  // creating a new response object with NextResponse.next() make sure to:
-  // 1. Pass the request in it, like so:
-  //    const myNewResponse = NextResponse.next({ request })
-  // 2. Copy over the cookies, like so:
-  //    myNewResponse.cookies.setAll(supabaseResponse.cookies.getAll())
-  // 3. Change the myNewResponse object to fit your needs, but avoid changing
-  //    the cookies!
-  // 4. Finally:
-  //    return myNewResponse
-  // If this is not done, you may be causing the browser and server to go out
-  // of sync and terminate the user's session prematurely!
+  // 인증되지 않은 사용자는 로그인 페이지로 리다이렉트
+  if (!user && request.nextUrl.pathname !== ROUTES.HOME) {
+    const url = request.nextUrl.clone();
+    url.pathname = ROUTES.AUTH.LOGIN;
+    url.searchParams.set(QUERY_KEYS.REDIRECT_TO, request.nextUrl.pathname);
+    return NextResponse.redirect(url);
+  }
 
   return supabaseResponse;
 }

@@ -3,6 +3,8 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import useAuth from "@/features/auth/model/useAuth";
 import SocialButtons from "@/features/auth/ui/AuthButtons/SocialButtons";
+import ErrorDisplay from "./ErrorDisplay";
+import { Suspense } from "react";
 
 const LoginPage = () => {
   const { signInWithOAuth } = useAuth();
@@ -18,6 +20,10 @@ const LoginPage = () => {
         </CardHeader>
 
         <CardContent>
+          <Suspense>
+            <ErrorDisplay />
+          </Suspense>
+
           <div className="flex flex-col gap-4">
             <SocialButtons provider="google" onClick={signInWithOAuth} />
 

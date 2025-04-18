@@ -20,7 +20,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   ) => {
     switch (event) {
       case "SIGNED_IN":
-        console.log("User signed in:", session?.user);
         handleUserChange(session?.user || null);
         break;
       case "SIGNED_OUT":
