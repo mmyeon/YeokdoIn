@@ -19,7 +19,7 @@ const BUTTONS = [
   {
     icon: <PersonStanding />,
     text: "자세 분석",
-    route: ROUTES.TRAINING.SELECT_LIFT,
+    route: ROUTES.TRAINING.POSTURE_ANALYSIS,
   },
   {
     icon: <AlignJustify />,
