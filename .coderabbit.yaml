@@ -1,12 +1,20 @@
-version: 1
-language: ko
-commentStyle: github-markdown
-ignore_paths: # 리뷰 제외 파일/폴더 (필요에 따라 조정)
-  - "**/node_modules/**"
-  - "**/build/**"
-max_comment_length: 600 # 코멘트 최대 길이 (적절한 값으로 조정)
-reviewTriggers:
-  - action: opened
-  - action: synchronize
-    options:
-      review_only_changed_files: true
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: "ko"
+early_access: false
+
+# Include/exclude paths from review
+path_filters: "!node_modules/**,!build/**"
+
+reviews:
+  profile: "chill"
+  request_changes_workflow: false
+  high_level_summary: true
+  review_status: true
+  collapse_walkthrough: false
+
+auto_review:
+  enabled: true
+  drafts: false
+
+chat:
+  auto_reply: true
