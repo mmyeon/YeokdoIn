@@ -6,18 +6,17 @@ import {
   selectedLiftAtom,
 } from "@/entities/training/atoms/liftsAtom";
 import { useAtom, useAtomValue } from "jotai";
-import Link from "next/link";
 import { ROUTES } from "@/routes";
-import { numericStringSchema } from "@/shared/form/validationSchemas";
+import { numericStringSchema } from "@/shared/form/schemas";
 import { Input } from "@/components/ui/input/input";
 import { Label } from "@radix-ui/react-label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, ArrowLeft, ArrowRight } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Lift } from "@/types/training";
 import { LIFT_INFO_MAP } from "@/shared/constants";
+import FormAlert from "@/components/FormAlert";
 
 export default function AddRecords() {
   const router = useRouter();
@@ -63,19 +62,6 @@ export default function AddRecords() {
   return (
     <main className="container mx-auto flex min-h-screen flex-col items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="mb-2 flex items-center">
-          <Link href={ROUTES.TRAINING.SELECT_LIFT}>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground hover:font-bold bg-none"
-            >
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              뒤로
-            </Button>
-          </Link>
-        </div>
-
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-1">개인 기록을 알려주세요.</h1>
           <p className="text-muted-foreground">
@@ -104,12 +90,7 @@ export default function AddRecords() {
                 />
 
                 {/* TODO: border 컬러 적용안되는 이슈 개선 */}
-                {cleanError && (
-                  <Alert variant="destructive" className="mt-2 rounded-xl">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>{cleanError}</AlertDescription>
-                  </Alert>
-                )}
+                {cleanError && <FormAlert errorMessage={cleanError} />}
               </div>
             )}
 
@@ -130,17 +111,11 @@ export default function AddRecords() {
                   }}
                 />
 
-                {snatchError && (
-                  <Alert variant="destructive" className="mt-2 rounded-xl">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>{snatchError}</AlertDescription>
-                  </Alert>
-                )}
+                {snatchError && <FormAlert errorMessage={snatchError} />}
               </div>
             )}
 
             <Button
-              type="button"
               // TODO: bg-primary 적용 안됨
               className="w-full h-12 rounded-xl text-base font-semibold bg-primary"
               disabled={isButtonDisabled}

@@ -8,16 +8,12 @@ import {
 } from "@/entities/training/atoms/liftsAtom";
 import { useAtom } from "jotai";
 import { ROUTES } from "@/routes";
-import {
-  barWeightSchema,
-  numericStringSchema,
-} from "@/shared/form/validationSchemas";
+import { barWeightSchema, numericStringSchema } from "@/shared/form/schemas";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/input/label";
 import { Input } from "@/components/ui/input/input";
-import { AlertCircle, ArrowLeft, ArrowRight, X } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ArrowRight, X } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -26,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import FormAlert from "@/components/FormAlert";
 
 const PERCENTAGES = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]; // 퍼센트 옵션
 
@@ -76,17 +73,8 @@ const ProgramInput = () => {
   };
 
   return (
-    <main className="container mx-auto flex min-h-screen flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="mb-2 flex items-center">
-          <Link href={ROUTES.TRAINING.PERSONAL_RECORD}>
-            <Button variant="ghost" size="sm" className="text-muted-foreground">
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              뒤로
-            </Button>
-          </Link>
-        </div>
-
+    <main className="flex flex-col p-4 mt-6 gap-6">
+      <div>
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-1">
             훈련 프로그램을 설정해볼까요?
@@ -115,12 +103,7 @@ const ProgramInput = () => {
             />
 
             {/* TODO: border 컬러 적용안되는 이슈 개선 */}
-            {barWeightError && (
-              <Alert variant="destructive" className="mt-2 rounded-xl">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{barWeightError}</AlertDescription>
-              </Alert>
-            )}
+            {barWeightError && <FormAlert errorMessage={barWeightError} />}
 
             <Label htmlFor="clean-and-jerk-pr" className="toss-label">
               훈련 강도 (%)
@@ -172,23 +155,19 @@ const ProgramInput = () => {
               )}
             </div>
 
-            {percentageError && (
-              <Alert variant="destructive" className="mt-2 rounded-xl">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{percentageError}</AlertDescription>
-              </Alert>
-            )}
+            {percentageError && <FormAlert errorMessage={percentageError} />}
 
-            <Link href={ROUTES.TRAINING.WEIGHT_CALCULATOR} className="w-full">
-              <Button
-                type="button"
-                className="w-full h-12 rounded-xl text-base font-semibold bg-primary"
-                disabled={percentages.length == 0}
-              >
+            <Button
+              type="button"
+              className="w-full h-12 rounded-xl text-base font-semibold bg-primary"
+              disabled={percentages.length == 0}
+              asChild
+            >
+              <Link href={ROUTES.TRAINING.WEIGHT_CALCULATOR} className="w-full">
                 다음
                 <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </CardContent>
         </Card>
       </div>
