@@ -36,15 +36,10 @@ export async function updateSession(request: NextRequest) {
 
   const {
     data: { user },
-    error,
   } = await supabase.auth.getUser();
 
-  if (error) {
-    console.error("Error getting user in middleware:", error);
-  }
-
-  // 로그인 관련 경로는 건너뛰기
   if (
+    request.nextUrl.pathname === ROUTES.HOME ||
     request.nextUrl.pathname.startsWith(ROUTES.AUTH.LOGIN) ||
     request.nextUrl.pathname.startsWith(ROUTES.AUTH.CALLBACK)
   ) {
@@ -52,7 +47,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // 인증되지 않은 사용자는 로그인 페이지로 리다이렉트
-  if (!user && request.nextUrl.pathname !== ROUTES.HOME) {
+  if (!user) {
     const url = request.nextUrl.clone();
     url.pathname = ROUTES.AUTH.LOGIN;
     url.searchParams.set(QUERY_KEYS.REDIRECT_TO, request.nextUrl.pathname);
