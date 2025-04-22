@@ -10,7 +10,7 @@ const LoginPage = () => {
   const { signInWithOAuth } = useAuth();
 
   return (
-    <div className="container min-h-screen flex items-center justify-center mx-auto p-4">
+    <div className="container flex items-center justify-center mx-auto p-4 h-dvh">
       <Card className="toss-card w-full max-w-md">
         <CardHeader className="text-center mb-2">
           <h1 className="text-2xl font-bold">로그인</h1>

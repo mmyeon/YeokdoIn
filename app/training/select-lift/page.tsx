@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import "jotai-devtools/styles.css";
 import { useSetAtom } from "jotai";
 import { selectedLiftAtom } from "@/entities/training/atoms/liftsAtom";
@@ -20,19 +19,9 @@ export default function LiftSelection() {
   const setSelectedLift = useSetAtom(selectedLiftAtom);
 
   return (
-    <main className="p-4 flex items-center justify-center mt-6">
+    <main className="p-4 flex items-center justify-center min-h-dvh">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-6 w-50 h-50 rounded-full flex items-center justify-center">
-            <Image
-              src="/logo.svg"
-              alt="YeokdoIn logo"
-              width={300}
-              height={300}
-              priority
-            />
-          </div>
-
           <h1 className="text-2xl font-bold mb-1">
             오늘 어떤 종목을 훈련하실 건가요?
           </h1>
