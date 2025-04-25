@@ -1,7 +1,7 @@
 "use client";
 
 import { ROUTES } from "@/routes";
-import { AlignJustify, Dumbbell, Home, PersonStanding } from "lucide-react";
+import { Dumbbell, Home, PersonStanding, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -22,14 +22,18 @@ const BUTTONS = [
     route: ROUTES.TRAINING.POSTURE_ANALYSIS,
   },
   {
-    icon: <AlignJustify />,
-    text: "전체",
-    route: ROUTES.HOME,
+    icon: <Settings />,
+    text: "설정",
+    route: ROUTES.SETTINGS.ROOT,
   },
 ];
 
 const Menu = () => {
   const pathname = usePathname();
+
+  if (pathname?.startsWith(`${ROUTES.SETTINGS.ROOT}/`)) {
+    return null;
+  }
 
   return (
     <div className="absolute bottom-0 left-0 right-0 max-w-md w-full bg-white rounded-t-3xl border-2 border-gray-100 border-b-0 mx-auto">

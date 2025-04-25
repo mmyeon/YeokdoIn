@@ -11,6 +11,12 @@ export const ROUTES = {
     CALLBACK: "/auth/callback",
   },
   HOME: "/",
+  SETTINGS: {
+    ROOT: "/settings",
+    GOAL: "/settings/goal",
+    PERSONAL_RECORD: "/settings/personal-record",
+    BARBELL_WEIGHT: "/settings/barbell-weight",
+  },
 };
 
 export const QUERY_KEYS = {
