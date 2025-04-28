@@ -16,7 +16,8 @@
     "format-check": "prettier --check .",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "size-limit": "size-limit",
-    "lighthouse": "lhci autorun"
+    "lighthouse": "lhci autorun",
+    "generate-types": "npx supabase gen types typescript --project-id fltnzhmuvfkrgbjgvchd --schema public > types_db.ts"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.6",
