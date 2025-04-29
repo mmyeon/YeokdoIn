@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useAtomValue } from "jotai";
 import {
-  barWeightAtom,
+  barbellWeightAtom,
   personalRecordAtom,
   programPercentagesAtom,
   selectedLiftAtom,
@@ -59,7 +59,7 @@ const calculateProgramWeight = (
 
 const WeightCalculator = () => {
   const selectedLift = useAtomValue(selectedLiftAtom);
-  const barWeight = useAtomValue(barWeightAtom);
+  const barWeight = useAtomValue(barbellWeightAtom);
   const personalRecord = useAtomValue(personalRecordAtom);
 
   const programPercentages = useAtomValue(programPercentagesAtom);

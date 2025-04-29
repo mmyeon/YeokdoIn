@@ -4,7 +4,8 @@ import { saveBarbellWeight } from "@/actions/user-settings-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { atom, useAtom } from "jotai";
+import { barbellWeightAtom } from "@/entities/training/atoms/liftsAtom";
+import { useAtom } from "jotai";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -19,10 +20,8 @@ interface BarbellSettingProps {
   barbellWeight: number | null;
 }
 
-const barbellAtom = atom<number | null>(null);
-
 const BarbellSetting = ({ barbellWeight }: BarbellSettingProps) => {
-  const [selectedWeight, setSelectedWeight] = useAtom(barbellAtom);
+  const [selectedWeight, setSelectedWeight] = useAtom(barbellWeightAtom);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {

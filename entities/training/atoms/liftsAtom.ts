@@ -4,6 +4,7 @@ import {
   PersonalRecord,
   WeightPercentage,
 } from "@/types/training";
+import { atom } from "jotai";
 
 export const personalRecordAtom = atomWithStorage<PersonalRecord>(
   "personalRecord",
@@ -11,12 +12,6 @@ export const personalRecordAtom = atomWithStorage<PersonalRecord>(
     cleanAndJerk: "",
     snatch: "",
   },
-);
-
-// TODO: 프로그램 무게 계산 로직 변경하고 삭제
-export const barWeightAtom = atomWithStorage<number | undefined>(
-  "barWeight",
-  undefined,
 );
 
 export const programPercentagesAtom = atomWithStorage<WeightPercentage[]>(
@@ -28,3 +23,5 @@ export const selectedLiftAtom = atomWithStorage<LiftOptions>(
   "selectedLift",
   "cleanAndJerk",
 );
+
+export const barbellWeightAtom = atom<number | null>(null);

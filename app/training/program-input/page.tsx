@@ -2,17 +2,12 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import {
-  barWeightAtom,
-  programPercentagesAtom,
-} from "@/entities/training/atoms/liftsAtom";
+import { programPercentagesAtom } from "@/entities/training/atoms/liftsAtom";
 import { useAtom } from "jotai";
 import { ROUTES } from "@/routes";
-import { barWeightSchema, numericStringSchema } from "@/shared/form/schemas";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/input/label";
-import { Input } from "@/components/ui/input/input";
 import { ArrowRight, X } from "lucide-react";
 import {
   Select,
@@ -29,31 +24,7 @@ const PERCENTAGES = [50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]; // 퍼센트 
 const ProgramInput = () => {
   const [percentages, setPercentages] = useAtom(programPercentagesAtom);
 
-  const [barWeightError, setBarWeightError] = useState<string | null>(null);
   const [percentageError, setPercentageError] = useState<string | null>(null);
-
-  const [barWeight, setBarWeight] = useAtom(barWeightAtom);
-
-  const handleBarWeightChange = (value: string) => {
-    const numericValidation = numericStringSchema.safeParse(value);
-
-    if (!numericValidation.success) {
-      setBarWeightError(numericValidation.error.errors[0].message);
-      return;
-    }
-
-    const parsedValue = value === "" ? undefined : Number(value);
-
-    setBarWeight(parsedValue);
-
-    const { success, error } = barWeightSchema.safeParse(parsedValue);
-
-    if (success) {
-      setBarWeightError(null);
-    } else {
-      setBarWeightError(error.errors[0].message);
-    }
-  };
 
   const addPercentage = (value: number) => {
     setPercentages((prev) => [
@@ -79,32 +50,11 @@ const ProgramInput = () => {
           <h1 className="text-2xl font-bold mb-1">
             훈련 프로그램을 설정해볼까요?
           </h1>
-          <p className="text-muted-foreground">
-            바벨 무게와 훈련 강도를 입력해 주세요.
-          </p>
+          <p className="text-muted-foreground">훈련 강도를 입력해 주세요.</p>
         </div>
 
         <Card className="toss-card">
           <CardContent className="p-6 space-y-6">
-            <Label htmlFor="clean-and-jerk-pr" className="toss-label">
-              바벨 무게 (kg)
-            </Label>
-
-            <Input
-              id="clean-and-jerk-pr"
-              type="number"
-              value={barWeight ?? ""}
-              placeholder="무게를 kg 단위로 입력하세요."
-              onChange={(e) => {
-                handleBarWeightChange(e.target.value);
-
-                if (barWeightError) setBarWeightError(null);
-              }}
-            />
-
-            {/* TODO: border 컬러 적용안되는 이슈 개선 */}
-            {barWeightError && <FormAlert errorMessage={barWeightError} />}
-
             <Label htmlFor="clean-and-jerk-pr" className="toss-label">
               훈련 강도 (%)
             </Label>
