@@ -14,7 +14,7 @@ export const ROUTES = {
   SETTINGS: {
     ROOT: "/settings",
     GOAL: "/settings/goal",
-    PERSONAL_RECORD: "/settings/personal-record",
+    PERSONAL_RECORD: "/settings/personal-records",
     BARBELL_WEIGHT: "/settings/barbell-weight",
   },
 };
