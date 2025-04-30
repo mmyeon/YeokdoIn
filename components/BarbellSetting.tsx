@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { barbellWeightAtom } from "@/entities/training/atoms/liftsAtom";
 import { useAtom } from "jotai";
-import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import BackButton from "./BackButton";
 
 const weights = [
   { id: 7, label: "7kg" },
@@ -43,15 +43,7 @@ const BarbellSetting = ({ barbellWeight }: BarbellSettingProps) => {
   return (
     <Card className="toss-card p-4">
       <div className="flex flex-col items-start">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8"
-          aria-label="뒤로 가기"
-          onClick={() => window.history.back()}
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
+        <BackButton />
 
         <h1 className="text-2xl font-bold">바벨 무게 설정</h1>
       </div>
