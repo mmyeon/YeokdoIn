@@ -5,7 +5,7 @@ async function BarbellSettingPage() {
   const data = await getUserDefaultBarbelWeight();
 
   return (
-    <main className="flex items-center justify-center p-4 h-dvh max-w-sm relative">
+    <main className="flex items-center justify-center p-4 h-dvh">
       <BarbellSetting barbellWeight={data?.default_barbell_weight ?? null} />
     </main>
   );

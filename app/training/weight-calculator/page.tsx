@@ -85,7 +85,7 @@ const WeightCalculator = () => {
 
   return (
     <main className="p-4 mt-6">
-      <div className="md:w-full max-w-3xl">
+      <div className="md:w-full max-w-3xl mx-auto">
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-1">훈련 시작할 준비되셨나요?</h1>
           <p className="text-muted-foreground">

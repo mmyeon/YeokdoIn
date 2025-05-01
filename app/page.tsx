@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center gap-4 max-w-md h-dvh">
+    <div className="flex flex-col items-center justify-center gap-4 max-w-md h-dvh mx-auto">
       <h1 className="text-2xl font-bold">YeokdoIn</h1>
 
       <Image

@@ -26,7 +26,7 @@ const Settings = () => {
   const { user } = useAuth();
 
   return (
-    <main className="flex flex-col p-4 mt-6 gap-4">
+    <main className="flex flex-col p-4 mt-6 gap-4 max-w-md mx-auto">
       <div className="flex gap-4 items-center">
         <Avatar className="w-16 h-16">
           {/* TODO: 아바타 변경 기능 추가 */}
