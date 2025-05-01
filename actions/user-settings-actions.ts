@@ -19,6 +19,13 @@ export type PersonalRecordInfo = {
   exerciseName: ExercisesRow["name"];
 };
 
+export type Exercises = {
+  id: ExercisesRow["id"];
+  name: ExercisesRow["name"];
+  createdAt: ExercisesRow["created_at"];
+  updatedAt: ExercisesRow["updated_at"];
+};
+
 function handleDatabaseError(error: PostgrestError | null) {
   console.error(error);
   throw new Error(error?.message);
@@ -114,4 +121,39 @@ export async function deleteRecord(
     .eq("id", id);
 
   if (error) handleDatabaseError(error);
+}
+
+export async function addRecord(
+  newRecord: Pick<PersonalRecordInfo, "exerciseId" | "weight">,
+) {
+  const supabase = await supabaseServerClient();
+  const userId = (await supabase.auth.getUser()).data.user?.id;
+
+  if (!userId) {
+    throw new Error("사용자가 인증되지 않았습니다.");
+  }
+
+  const { error } = await supabase.from("personal-records").upsert(
+    {
+      user_id: userId,
+      exercise_id: newRecord.exerciseId,
+      weight: newRecord.weight,
+      pr_date: new Date().toISOString(),
+    },
+    {
+      onConflict: "user_id, exercise_id",
+    },
+  );
+
+  if (error) handleDatabaseError(error);
+}
+
+export async function getExercises(): Promise<ExercisesRow[]> {
+  const supabase = await supabaseServerClient();
+
+  const { data, error } = await supabase.from("exercises").select("*");
+
+  if (error) handleDatabaseError(error);
+
+  return data ?? [];
 }

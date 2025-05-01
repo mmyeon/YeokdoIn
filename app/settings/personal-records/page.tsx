@@ -1,11 +1,20 @@
-import { getUserPersonalRecords } from "@/actions/user-settings-actions";
+import {
+  getExercises,
+  getUserPersonalRecords,
+} from "@/actions/user-settings-actions";
 import BackButton from "@/components/BackButton";
 import PersonalRecordsList from "@/components/PersonalRecords/PersonalRecordsList";
-import { Button } from "@/components/ui/button";
+import RecordAddDialog from "@/components/PersonalRecords/RecordAddDialog";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 async function PersonalRecords() {
   const records = await getUserPersonalRecords();
+  const exercises = (await getExercises()).map((exercise) => ({
+    id: exercise.id,
+    name: exercise.name,
+    createdAt: exercise.created_at,
+    updatedAt: exercise.updated_at,
+  }));
 
   return (
     <div className="container flex items-center justify-center mx-auto py-8 px-4 h-dvh">
@@ -15,7 +24,8 @@ async function PersonalRecords() {
 
           <div className="flex justify-between items-center mt-4 mb-2">
             <h1 className="text-2xl font-bold">개인 기록</h1>
-            <Button className="w-fit">추가</Button>
+
+            <RecordAddDialog exercises={exercises} />
           </div>
         </CardHeader>
 
