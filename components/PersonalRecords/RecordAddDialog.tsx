@@ -47,14 +47,21 @@ const RecordAddDialog = ({ exercises }: { exercises: Exercises[] }) => {
   }
   const [open, setOpen] = useState(false);
 
+  function handleToggleDialog(openCondition: boolean) {
+    if (!openCondition) setRecord({ exerciseId: 0, weight: 0 });
+
+    setOpen(openCondition);
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleToggleDialog}>
       <DialogTrigger asChild>
         <Button className="w-fit">추가</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>기록 추가하기</DialogTitle>
+
           <DialogDescription>
             운동 종목과 기록을 입력해 주세요.
           </DialogDescription>
@@ -76,7 +83,6 @@ const RecordAddDialog = ({ exercises }: { exercises: Exercises[] }) => {
             type="number"
             placeholder="기록을 입력해 주세요."
             onChange={(e) => {
-              console.log(e.target.valueAsNumber);
               setRecord({ ...record, weight: e.target.valueAsNumber });
             }}
           />
