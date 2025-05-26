@@ -38,14 +38,6 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (
-    request.nextUrl.pathname === ROUTES.HOME ||
-    request.nextUrl.pathname.startsWith(ROUTES.AUTH.LOGIN) ||
-    request.nextUrl.pathname.startsWith(ROUTES.AUTH.CALLBACK)
-  ) {
-    return NextResponse.next();
-  }
-
   // 인증되지 않은 사용자는 로그인 페이지로 리다이렉트
   if (!user) {
     const url = request.nextUrl.clone();
