@@ -32,21 +32,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    const initializeUser = async () => {
-      try {
-        const session = await authService.getSession();
-        handleUserChange(session?.user ?? null);
-      } catch (error) {
-        console.error("Error getting session:", error);
-        toast.error("세션을 가져오는 중 오류가 발생했습니다.");
-        handleUserChange(null);
-      }
-    };
-
-    initializeUser();
-  }, []);
-
-  useEffect(() => {
     const { data } = authService.onAuthStateChange((event, session) => {
       handleAuthStateChange(event, session);
     });
