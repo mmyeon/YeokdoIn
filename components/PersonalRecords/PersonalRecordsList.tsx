@@ -4,17 +4,21 @@ import { Button } from "../ui/button";
 import { Edit2, Save, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { Input } from "../ui/input/input";
+import { PersonalRecordInfo } from "@/actions/user-settings-actions";
 import {
-  deleteRecord,
-  PersonalRecordInfo,
-  updateRecordWeight,
-} from "@/actions/user-settings-actions";
-import { toast } from "sonner";
+  usePersonalRecords,
+  useUpdatePersonalRecord,
+  useDeletePersonalRecord,
+} from "@/hooks/usePersonalRecords";
 
-const PersonalRecordList = ({ records }: { records: PersonalRecordInfo[] }) => {
+const PersonalRecordList = () => {
   const [selectedRecordId, setSelectedRecordId] = useState<number | null>(null);
   const [newRecordWeight, setNewRecordWeight] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+
+  const { data: records = [], isLoading: isLoadingRecords } =
+    usePersonalRecords();
+  const updateRecordMutation = useUpdatePersonalRecord();
+  const deleteRecordMutation = useDeletePersonalRecord();
 
   function cancelEditing() {
     setSelectedRecordId(null);
@@ -26,22 +30,27 @@ const PersonalRecordList = ({ records }: { records: PersonalRecordInfo[] }) => {
   }
 
   async function handleUpdatePR(value: number) {
-    try {
-      setIsLoading(true);
-      if (value <= 0) {
-        toast.error("무게는 0보다 커야 합니다.");
-        return;
-      }
+    if (!selectedRecordId) return;
 
-      await updateRecordWeight(selectedRecordId!, value);
-      toast.success("개인 기록이 수정되었습니다.");
-    } catch {
-      toast.error("개인 기록 수정 중 오류가 발생했습니다.");
-    } finally {
-      setIsLoading(false);
-    }
+    await updateRecordMutation.mutateAsync({
+      recordId: selectedRecordId,
+      newWeight: value,
+    });
+
     setSelectedRecordId(null);
     setNewRecordWeight(null);
+  }
+
+  async function handleDeleteRecord(recordId: number) {
+    await deleteRecordMutation.mutateAsync(recordId);
+  }
+
+  if (isLoadingRecords) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="text-muted-foreground">로딩 중...</div>
+      </div>
+    );
   }
 
   return (
@@ -75,9 +84,13 @@ const PersonalRecordList = ({ records }: { records: PersonalRecordInfo[] }) => {
               <Button
                 className="w-full"
                 onClick={async () => await handleUpdatePR(newRecordWeight!)}
+                disabled={
+                  newRecordWeight === record.weight ||
+                  updateRecordMutation.isPending
+                }
               >
                 <Save className="h-4 w-4 mr-2" />{" "}
-                {isLoading ? "저장중..." : "저장하기"}
+                {updateRecordMutation.isPending ? "저장중..." : "저장하기"}
               </Button>
             </div>
           ) : (
@@ -98,7 +111,8 @@ const PersonalRecordList = ({ records }: { records: PersonalRecordInfo[] }) => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={async () => await deleteRecord(record.id)}
+                  onClick={async () => await handleDeleteRecord(record.id)}
+                  disabled={deleteRecordMutation.isPending}
                   className="h-8 w-8 p-0"
                 >
                   <Trash2 className="h-4 w-4" />

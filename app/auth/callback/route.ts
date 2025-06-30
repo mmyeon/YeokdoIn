@@ -1,11 +1,11 @@
 import { supabaseServerClient } from "@/features/auth/supabase/ServerClient";
-import { QUERY_KEYS } from "@/routes";
+import {  REDIRECT_TO_KEY } from "@/routes";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
-  const redirectTo = requestUrl.searchParams.get(QUERY_KEYS.REDIRECT_TO);
+  const redirectTo = requestUrl.searchParams.get(REDIRECT_TO_KEY);
 
   if (code) {
     const supabase = await supabaseServerClient();

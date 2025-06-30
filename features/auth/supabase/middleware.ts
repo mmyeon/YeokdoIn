@@ -1,4 +1,4 @@
-import { QUERY_KEYS, ROUTES } from "@/routes";
+import { REDIRECT_TO_KEY, ROUTES } from "@/routes";
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
@@ -42,7 +42,7 @@ export async function updateSession(request: NextRequest) {
   if (!user) {
     const url = request.nextUrl.clone();
     url.pathname = ROUTES.AUTH.LOGIN;
-    url.searchParams.set(QUERY_KEYS.REDIRECT_TO, request.nextUrl.pathname);
+    url.searchParams.set(REDIRECT_TO_KEY, request.nextUrl.pathname);
     return NextResponse.redirect(url);
   }
 

@@ -13,39 +13,28 @@ import {
 import { Label } from "../ui/input/label";
 import { Save } from "lucide-react";
 import WorkoutSelect from "./WorkoutSelect";
-import {
-  addRecord,
-  Exercises,
-  PersonalRecordInfo,
-} from "@/actions/user-settings-actions";
+import { PersonalRecordInfo } from "@/actions/user-settings-actions";
 import { Input } from "../ui/input/input";
 import { useState } from "react";
-import { toast } from "sonner";
+import { useAddPersonalRecord } from "@/hooks/usePersonalRecords";
 
-const RecordAddDialog = ({ exercises }: { exercises: Exercises[] }) => {
+const RecordAddDialog = () => {
   const [record, setRecord] = useState<
     Pick<PersonalRecordInfo, "exerciseId" | "weight">
   >({
     exerciseId: 0,
     weight: 0,
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const addRecordMutation = useAddPersonalRecord();
 
   async function handleAddRecord(
     record: Pick<PersonalRecordInfo, "exerciseId" | "weight">,
   ) {
-    try {
-      setIsLoading(true);
-      await addRecord(record);
-      toast.success("기록이 추가되었습니다.");
-      setOpen(false);
-    } catch {
-      toast.error("기록 추가에 실패했습니다.");
-    } finally {
-      setIsLoading(false);
-    }
+    await addRecordMutation.mutateAsync(record);
+    setOpen(false);
   }
-  const [open, setOpen] = useState(false);
 
   function handleToggleDialog(openCondition: boolean) {
     if (!openCondition) setRecord({ exerciseId: 0, weight: 0 });
@@ -71,7 +60,6 @@ const RecordAddDialog = ({ exercises }: { exercises: Exercises[] }) => {
           <Label htmlFor="exercise">운동 종목</Label>
 
           <WorkoutSelect
-            exercises={exercises}
             onSelect={(id) => setRecord({ ...record, exerciseId: id })}
           />
 
@@ -91,11 +79,15 @@ const RecordAddDialog = ({ exercises }: { exercises: Exercises[] }) => {
         <DialogFooter>
           <Button
             type="submit"
-            disabled={!record.weight || !record.exerciseId}
+            disabled={
+              !record.weight ||
+              !record.exerciseId ||
+              addRecordMutation.isPending
+            }
             onClick={async () => await handleAddRecord(record)}
           >
             <Save className="h-4 w-4 mr-2" />
-            {isLoading ? "저장중..." : "저장하기"}
+            {addRecordMutation.isPending ? "저장중..." : "저장하기"}
           </Button>
         </DialogFooter>
       </DialogContent>

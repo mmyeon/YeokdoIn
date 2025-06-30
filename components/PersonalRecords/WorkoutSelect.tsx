@@ -1,4 +1,3 @@
-import { Exercises } from "@/actions/user-settings-actions";
 import {
   Select,
   SelectTrigger,
@@ -7,14 +6,11 @@ import {
   SelectGroup,
   SelectItem,
 } from "../ui/select";
+import { useExercises } from "@/hooks/usePersonalRecords";
 
-function WorkoutSelect({
-  exercises,
-  onSelect,
-}: {
-  exercises: Exercises[];
-  onSelect: (id: number) => void;
-}) {
+function WorkoutSelect({ onSelect }: { onSelect: (id: number) => void }) {
+  const { data: exercises = [] } = useExercises();
+
   return (
     <Select
       onValueChange={(value) => {

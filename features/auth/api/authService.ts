@@ -1,12 +1,12 @@
 import { SocialAuthProvider } from "@/types/auth";
 import { AuthChangeEvent, Session } from "@supabase/supabase-js";
-import { QUERY_KEYS } from "@/routes";
+import {  REDIRECT_TO_KEY } from "@/routes";
 import { SupabaseBrowserClient } from "../supabase/BrowserClient";
 
 const authService = {
   signIn: async (provider: SocialAuthProvider) => {
     const urlParams = new URLSearchParams(window.location.search);
-    const redirectTo = urlParams.get(QUERY_KEYS.REDIRECT_TO);
+    const redirectTo = urlParams.get(REDIRECT_TO_KEY);
 
     const { error } = await SupabaseBrowserClient().auth.signInWithOAuth({
       provider,
