@@ -65,7 +65,9 @@ const BarbellSetting = ({ barbellWeight }: BarbellSettingProps) => {
         <Button
           className="w-full mt-4"
           onClick={handleSave}
-          disabled={isLoading || !selectedWeight}
+          disabled={
+            isLoading || !selectedWeight || selectedWeight === barbellWeight
+          }
         >
           {isLoading ? "저장 중..." : "저장하기"}
         </Button>
