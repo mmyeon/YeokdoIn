@@ -38,6 +38,7 @@ const RecordAddDialog = () => {
   ) {
     await addRecordMutation.mutateAsync(record);
     setOpen(false);
+    setRecord({ exerciseId: 0, weight: 0 });
   }
 
   function handleToggleDialog(openCondition: boolean) {
