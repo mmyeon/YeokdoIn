@@ -17,6 +17,7 @@ import { PersonalRecordInfo } from "@/actions/user-settings-actions";
 import { Input } from "../ui/input/input";
 import { useState } from "react";
 import { useAddPersonalRecord } from "@/hooks/usePersonalRecords";
+import { toast } from "sonner";
 
 const RecordAddDialog = () => {
   const [record, setRecord] = useState<
@@ -27,7 +28,10 @@ const RecordAddDialog = () => {
   });
   const [open, setOpen] = useState(false);
 
-  const addRecordMutation = useAddPersonalRecord();
+  const addRecordMutation = useAddPersonalRecord(
+    () => toast.success("개인 기록이 추가되었습니다."),
+    () => toast.error("개인 기록 추가 중 오류가 발생했습니다."),
+  );
 
   async function handleAddRecord(
     record: Pick<PersonalRecordInfo, "exerciseId" | "weight">,

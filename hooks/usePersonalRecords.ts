@@ -10,7 +10,6 @@ import {
   getUserPersonalRecords,
 } from "@/actions/user-settings-actions";
 import { QUERY_KEYS } from "@/routes";
-import { toast } from "sonner";
 
 // 개인 기록 조회
 export const usePersonalRecords = () => {
@@ -29,7 +28,10 @@ export const useExercises = () => {
 };
 
 // 개인 기록 수정
-export const useUpdatePersonalRecord = () => {
+export const useUpdatePersonalRecord = (
+  onSuccess: () => void,
+  onError: (error: Error) => void
+) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -47,42 +49,48 @@ export const useUpdatePersonalRecord = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PERSONAL_RECORDS] });
-      toast.success("개인 기록이 수정되었습니다.");
+      onSuccess();
     },
     onError: (error) => {
-      toast.error(error.message || "개인 기록 수정 중 오류가 발생했습니다.");
+      onError(error);
     },
   });
 };
 
 // 개인 기록 삭제
-export const useDeletePersonalRecord = () => {
+export const useDeletePersonalRecord = (
+  onSuccess: () => void,
+  onError: (error: Error) => void
+) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: deleteRecord,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PERSONAL_RECORDS] });
-      toast.success("개인 기록이 삭제되었습니다.");
+      onSuccess();
     },
-    onError: () => {
-      toast.error("개인 기록 삭제 중 오류가 발생했습니다.");
+    onError: (error) => {
+      onError(error);
     },
   });
 };
 
 // 개인 기록 추가
-export const useAddPersonalRecord = () => {
+export const useAddPersonalRecord = (
+  onSuccess: () => void,
+  onError: (error: Error) => void
+) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: addRecord,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PERSONAL_RECORDS] });
-      toast.success("개인 기록이 추가되었습니다.");
+      onSuccess();
     },
-    onError: () => {
-      toast.error("개인 기록 추가 중 오류가 발생했습니다.");
+    onError: (error) => {
+      onError(error);
     },
   });
 }; 
