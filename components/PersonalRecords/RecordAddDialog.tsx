@@ -16,7 +16,10 @@ import WorkoutSelect from "./WorkoutSelect";
 import { PersonalRecordInfo } from "@/actions/user-settings-actions";
 import { Input } from "../ui/input/input";
 import { useState } from "react";
-import { useAddPersonalRecord } from "@/hooks/usePersonalRecords";
+import {
+  useAddPersonalRecord,
+  usePersonalRecords,
+} from "@/hooks/usePersonalRecords";
 import { toast } from "sonner";
 
 const RecordAddDialog = () => {
@@ -28,8 +31,21 @@ const RecordAddDialog = () => {
   });
   const [open, setOpen] = useState(false);
 
+  const { data: existingRecords = [] } = usePersonalRecords();
+
   const addRecordMutation = useAddPersonalRecord(
-    () => toast.success("개인 기록이 추가되었습니다."),
+    () => {
+      const existingRecord = existingRecords.find(
+        (r) => r.exerciseId === record.exerciseId,
+      );
+
+      console.log(existingRecord);
+      toast.success(
+        existingRecord
+          ? "기존 기록이 변경되었습니다."
+          : "개인 기록이 추가되었습니다.",
+      );
+    },
     () => toast.error("개인 기록 추가 중 오류가 발생했습니다."),
   );
 
