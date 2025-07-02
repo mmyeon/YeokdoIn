@@ -9,7 +9,7 @@ import {
   getExercises,
   getUserPersonalRecords,
 } from "@/actions/user-settings-actions";
-import { QUERY_KEYS } from "@/routes";
+import { QUERY_KEYS } from "@/lib/queryKeys";
 
 // 개인 기록 조회
 export const usePersonalRecords = () => {

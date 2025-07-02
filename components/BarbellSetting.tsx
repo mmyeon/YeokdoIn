@@ -1,14 +1,17 @@
 "use client";
 
-import { saveBarbellWeight } from "@/actions/user-settings-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { barbellWeightAtom } from "@/entities/training/atoms/liftsAtom";
-import { useAtom } from "jotai";
-import { useEffect, useState } from "react";
+import {
+  useBarbellWeight,
+  useSaveBarbellWeight,
+} from "@/hooks/useBarbellWeight";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import BackButton from "./BackButton";
+import { useAtom } from "jotai";
+import { barbellWeightAtom } from "@/entities/training/atoms/liftsAtom";
 
 const weights = [
   { id: 7, label: "7kg" },
@@ -16,28 +19,46 @@ const weights = [
   { id: 20, label: "20kg" },
 ];
 
-interface BarbellSettingProps {
-  barbellWeight: number | null;
-}
-
-const BarbellSetting = ({ barbellWeight }: BarbellSettingProps) => {
+const BarbellSetting = () => {
   const [selectedWeight, setSelectedWeight] = useAtom(barbellWeightAtom);
-  const [isLoading, setIsLoading] = useState(false);
 
+  const { data: barbellData, isLoading: isLoadingData } = useBarbellWeight();
+  const { mutate: saveWeight, isPending: isSaving } = useSaveBarbellWeight();
+
+  //
   useEffect(() => {
-    if (barbellWeight) setSelectedWeight(barbellWeight);
-  }, [barbellWeight, setSelectedWeight]);
+    if (barbellData) setSelectedWeight(barbellData.default_barbell_weight);
+  }, [barbellData, setSelectedWeight]);
 
   async function handleSave() {
-    try {
-      setIsLoading(true);
-      if (selectedWeight) await saveBarbellWeight(selectedWeight);
-      toast.success("바벨 무게가 저장되었습니다.");
-    } catch (error) {
-      console.error("Error saving weight:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    if (!selectedWeight) return;
+
+    saveWeight(selectedWeight, {
+      onSuccess: () => {
+        toast.success("바벨 무게가 저장되었습니다.");
+      },
+      onError: (error) => {
+        console.error("Error saving weight:", error);
+        toast.error("저장 중 오류가 발생했습니다.");
+      },
+    });
+  }
+
+  // TODO: 페이지 전체 뒤로가기 버튼과 타이틀 간의 간격 통일
+  if (isLoadingData) {
+    return (
+      <Card className="toss-card p-4">
+        <div className="flex flex-col items-start mt-4 mb-2">
+          <BackButton />
+          <h1 className="text-2xl font-bold">바벨 무게 설정</h1>
+        </div>
+        <CardContent>
+          <div className="flex items-center justify-center py-8">
+            <div className="text-muted-foreground">로딩 중...</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -45,7 +66,7 @@ const BarbellSetting = ({ barbellWeight }: BarbellSettingProps) => {
       <div className="flex flex-col items-start">
         <BackButton />
 
-        <h1 className="text-2xl font-bold">바벨 무게 설정</h1>
+        <h1 className="text-2xl font-bold mt-4 mb-2">바벨 무게 설정</h1>
       </div>
 
       <CardContent>
@@ -66,10 +87,12 @@ const BarbellSetting = ({ barbellWeight }: BarbellSettingProps) => {
           className="w-full mt-4"
           onClick={handleSave}
           disabled={
-            isLoading || !selectedWeight || selectedWeight === barbellWeight
+            isSaving ||
+            !selectedWeight ||
+            selectedWeight === barbellData?.default_barbell_weight
           }
         >
-          {isLoading ? "저장 중..." : "저장하기"}
+          {isSaving ? "저장 중..." : "저장하기"}
         </Button>
       </CardContent>
     </Card>

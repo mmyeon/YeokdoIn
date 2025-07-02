@@ -1,12 +1,9 @@
-import { getUserDefaultBarbelWeight } from "@/actions/user-settings-actions";
 import BarbellSetting from "@/components/BarbellSetting";
 
-async function BarbellSettingPage() {
-  const data = await getUserDefaultBarbelWeight();
-
+function BarbellSettingPage() {
   return (
     <main className="flex items-center justify-center p-4 h-dvh">
-      <BarbellSetting barbellWeight={data?.default_barbell_weight ?? null} />
+      <BarbellSetting />
     </main>
   );
 }
