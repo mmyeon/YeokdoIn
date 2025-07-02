@@ -7,25 +7,21 @@ import {
   useBarbellWeight,
   useSaveBarbellWeight,
 } from "@/hooks/useBarbellWeight";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import BackButton from "./BackButton";
-import { useAtom } from "jotai";
-import { barbellWeightAtom } from "@/entities/training/atoms/liftsAtom";
 
 const weights = [
-  { id: 7, label: "7kg" },
-  { id: 15, label: "15kg" },
-  { id: 20, label: "20kg" },
+  { label: "7kg", value: 7 },
+  { label: "15kg", value: 15 },
+  { label: "20kg", value: 20 },
 ];
-
 const BarbellSetting = () => {
-  const [selectedWeight, setSelectedWeight] = useAtom(barbellWeightAtom);
+  const [selectedWeight, setSelectedWeight] = useState<number | null>(0);
 
   const { data: barbellData, isLoading: isLoadingData } = useBarbellWeight();
   const { mutate: saveWeight, isPending: isSaving } = useSaveBarbellWeight();
 
-  //
   useEffect(() => {
     if (barbellData) setSelectedWeight(barbellData.default_barbell_weight);
   }, [barbellData, setSelectedWeight]);
@@ -71,12 +67,12 @@ const BarbellSetting = () => {
 
       <CardContent>
         <div className="flex flex-wrap gap-3 mb-6">
-          {weights.map((weight) => (
+          {weights.map((weight, index) => (
             <Badge
-              key={weight.id}
-              variant={selectedWeight === weight.id ? "default" : "outline"}
-              className={`text-md py-2 px-4 cursor-pointer ${selectedWeight === weight.id ? "bg-primary" : ""}`}
-              onClick={() => setSelectedWeight(weight.id)}
+              key={index}
+              variant={selectedWeight === weight.value ? "default" : "outline"}
+              className={`text-md py-2 px-4 cursor-pointer`}
+              onClick={() => setSelectedWeight(weight.value)}
             >
               {weight.label}
             </Badge>
