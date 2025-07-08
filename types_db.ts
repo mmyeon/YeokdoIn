@@ -37,20 +37,20 @@ export type Database = {
       }
       goals: {
         Row: {
+          content: string | null
           created_at: string
-          "goal_text:": string | null
           id: number
           user_id: string | null
         }
         Insert: {
+          content?: string | null
           created_at?: string
-          "goal_text:"?: string | null
           id?: number
           user_id?: string | null
         }
         Update: {
+          content?: string | null
           created_at?: string
-          "goal_text:"?: string | null
           id?: number
           user_id?: string | null
         }
