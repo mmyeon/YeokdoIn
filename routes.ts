@@ -13,7 +13,7 @@ export const ROUTES = {
   HOME: "/",
   SETTINGS: {
     ROOT: "/settings",
-    GOAL: "/settings/goal",
+    GOALS: "/settings/goals",
     PERSONAL_RECORD: "/settings/personal-records",
     BARBELL_WEIGHT: "/settings/barbell-weight",
   },

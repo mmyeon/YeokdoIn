@@ -14,7 +14,7 @@ const SETTINGS_LIST = [
   },
   {
     title: "훈련 목표",
-    route: ROUTES.SETTINGS.GOAL,
+    route: ROUTES.SETTINGS.GOALS,
   },
   {
     title: "바벨 무게",
