@@ -1,17 +1,12 @@
 "use server";
 
 import { supabaseServerClient } from "@/features/auth/supabase/ServerClient";
-import { PostgrestError } from "@supabase/supabase-js";
 import {
   UserSettingRow,
   ExercisesRow,
   PersonalRecordInfo,
 } from "@/types/personalRecords";
-
-function handleDatabaseError(error: PostgrestError | null) {
-  console.error(error);
-  throw new Error(error?.message);
-}
+import { handleDatabaseError } from "@/utils/database";
 
 export async function getUserDefaultBarbelWeight(): Promise<UserSettingRow | null> {
   const supabase = await supabaseServerClient();
