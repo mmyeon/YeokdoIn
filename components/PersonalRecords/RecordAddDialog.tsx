@@ -13,7 +13,7 @@ import {
 import { Label } from "../ui/input/label";
 import { Save } from "lucide-react";
 import WorkoutSelect from "./WorkoutSelect";
-import { PersonalRecordInfo } from "@/actions/user-settings-actions";
+import { PersonalRecordInfo } from "@/types/personalRecords";
 import { Input } from "../ui/input/input";
 import { useState } from "react";
 import {

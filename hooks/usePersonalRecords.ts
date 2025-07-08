@@ -5,11 +5,11 @@ import {
   updateRecordWeight,
   deleteRecord,
   addRecord,
-  PersonalRecordInfo,
   getExercises,
   getUserPersonalRecords,
-} from "@/actions/user-settings-actions";
+} from "@/actions/personalRecords";
 import { QUERY_KEYS } from "@/lib/queryKeys";
+import { PersonalRecordInfo } from "@/types/personalRecords";
 
 // 개인 기록 조회
 export const usePersonalRecords = () => {

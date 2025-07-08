@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { saveBarbellWeight, getUserDefaultBarbelWeight } from "@/actions/user-settings-actions";
+import { saveBarbellWeight, getUserDefaultBarbelWeight } from "@/actions/personalRecords";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 
 // 바벨 무게 조회

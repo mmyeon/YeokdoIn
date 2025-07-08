@@ -4,13 +4,13 @@ import { Button } from "../ui/button";
 import { Edit2, Save, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { Input } from "../ui/input/input";
-import { PersonalRecordInfo } from "@/actions/user-settings-actions";
 import {
   usePersonalRecords,
   useUpdatePersonalRecord,
   useDeletePersonalRecord,
 } from "@/hooks/usePersonalRecords";
 import { toast } from "sonner";
+import { PersonalRecordInfo } from "@/types/personalRecords";
 
 const PersonalRecordList = () => {
   const [selectedRecordId, setSelectedRecordId] = useState<number | null>(null);

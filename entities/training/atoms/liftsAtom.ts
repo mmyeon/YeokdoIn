@@ -5,7 +5,7 @@ import {
   WeightPercentage,
 } from "@/types/training";
 import { atom } from "jotai";
-import { PersonalRecordInfo } from "@/actions/user-settings-actions";
+import { PersonalRecordInfo } from "@/types/personalRecords";
 
 // TODO: DB 연동하고 나서 삭제
 export const personalRecordAtom = atomWithStorage<PersonalRecord>(
