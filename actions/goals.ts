@@ -5,7 +5,7 @@ import { handleDatabaseError } from "@/utils/database";
 
 export async function getUserGoals() {
   const supabase = await supabaseServerClient();
-  const { data, error } = await supabase.from("goals").select("*");
+  const { data , error } = await supabase.from("goals").select("*").order("created_at", { ascending: false });
   if (error) handleDatabaseError(error);
   return data;
 }

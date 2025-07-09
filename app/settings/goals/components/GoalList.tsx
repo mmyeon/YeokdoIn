@@ -16,6 +16,18 @@ interface GoalListProps {
   onAddNew: () => void;
 }
 
+const formatDate = (dateString: string) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+
+  const options: Intl.DateTimeFormatOptions = {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  };
+  return new Intl.DateTimeFormat("ko-KR", options).format(date);
+};
+
 export default function GoalList({ goals, onAddNew }: GoalListProps) {
   return (
     <div className="space-y-4">
@@ -40,7 +52,7 @@ export default function GoalList({ goals, onAddNew }: GoalListProps) {
             <CardContent className="pt-4">
               <div className="flex justify-between items-center mb-3">
                 <p className="text-sm text-muted-foreground">
-                  등록일: {created_at}
+                  등록일: {formatDate(created_at)}
                 </p>
 
                 <div className="flex gap-2">

@@ -41,8 +41,8 @@ export const useAddGoal = ( {
       const previousGoals = queryClient.getQueryData([QUERY_KEYS.GOALS]) as Goal[];
       
       queryClient.setQueryData([QUERY_KEYS.GOALS], (oldGoals : Goal[]) => [
-        ...oldGoals,
         { id: Date.now().toString(), content: newGoalContent, created_at: new Date().toISOString() },
+        ...oldGoals,
       ]);
 
       return { previousGoals };
