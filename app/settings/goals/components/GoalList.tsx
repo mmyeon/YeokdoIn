@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useDeleteGoal } from "@/hooks/useGoals";
 import { Edit, Trash2, Info } from "lucide-react";
 
 interface Goal {
@@ -29,6 +30,8 @@ const formatDate = (dateString: string) => {
 };
 
 export default function GoalList({ goals, onAddNew }: GoalListProps) {
+  const { mutate: deleteGoal } = useDeleteGoal();
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -60,6 +63,7 @@ export default function GoalList({ goals, onAddNew }: GoalListProps) {
                     variant="ghost"
                     size="icon"
                     className="text-red-600 hover:text-red-700"
+                    onClick={() => deleteGoal(id)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -67,7 +71,7 @@ export default function GoalList({ goals, onAddNew }: GoalListProps) {
               </div>
 
               <div className="flex justify-between items-center ">
-                <p className="font-medium text-xl">{content || "내용 없음"}</p>
+                <p className="font-medium text-xl">{content}</p>
 
                 <Button variant="ghost" size="icon">
                   <Edit className="h-4 w-4" />
