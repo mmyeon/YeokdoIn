@@ -5,15 +5,33 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Info } from "lucide-react";
-import { useAddGoal } from "@/hooks/useGoals";
+import { useAddGoal, useUpdateGoal } from "@/hooks/useGoals";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { QUERY_KEYS } from "@/lib/queryKeys";
+import { Goal } from "@/types/goal";
 
 interface GoalEditFormProps {
-  onCancel: () => void;
+  toggleEdit: () => void;
+  editId?: number | null;
+  handleEditGoalId: (id: number | null) => void;
 }
 
-export default function GoalEditForm({ onCancel }: GoalEditFormProps) {
-  const [goalContent, setGoalContent] = useState("");
+export default function GoalEditForm({
+  toggleEdit,
+  editId,
+  handleEditGoalId,
+}: GoalEditFormProps) {
+  const queryClient = useQueryClient();
+  const goals = queryClient.getQueryData<Goal[]>([QUERY_KEYS.GOALS]);
+  const goal = goals ? goals.find((goal) => goal.id === editId) : null;
+  const [goalContent, setGoalContent] = useState(goal?.content || "");
+
+  const { mutate: updateGoal } = useUpdateGoal({
+    onSuccess: () => {
+      toast.success("목표가 수정되었습니다.");
+    },
+  });
 
   const { mutate: addGoal } = useAddGoal({
     onSuccess: () => {
@@ -24,7 +42,23 @@ export default function GoalEditForm({ onCancel }: GoalEditFormProps) {
   const handleSave = () => {
     addGoal(goalContent);
     setGoalContent("");
-    onCancel();
+    toggleEdit();
+  };
+
+  const handleEdit = () => {
+    if (!editId) return;
+
+    updateGoal({
+      goalId: editId,
+      newGoal: goalContent,
+    });
+    toggleEdit();
+    handleEditGoalId(null);
+  };
+
+  const handleCancel = () => {
+    toggleEdit();
+    handleEditGoalId(null);
   };
 
   return (
@@ -49,10 +83,14 @@ export default function GoalEditForm({ onCancel }: GoalEditFormProps) {
       </div>
 
       <div className="flex gap-2 pt-4">
-        <Button className="flex-1" disabled={!goalContent} onClick={handleSave}>
-          저장하기
+        <Button
+          className="flex-1"
+          disabled={!goalContent || goalContent === goal?.content}
+          onClick={editId ? handleEdit : handleSave}
+        >
+          {editId ? "수정하기" : "저장하기"}
         </Button>
-        <Button variant="outline" onClick={onCancel}>
+        <Button variant="outline" onClick={handleCancel}>
           취소
         </Button>
       </div>

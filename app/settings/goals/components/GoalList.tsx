@@ -3,18 +3,14 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useDeleteGoal } from "@/hooks/useGoals";
+import { Goal } from "@/types/goal";
 import { Edit, Trash2, Info } from "lucide-react";
-
-interface Goal {
-  id: number;
-  content: string | null;
-  created_at: string;
-  user_id: string | null;
-}
+import { toast } from "sonner";
 
 interface GoalListProps {
   goals: Goal[];
-  onAddNew: () => void;
+  toggleEditMode: () => void;
+  handleEditGoalId: (id: number | null) => void;
 }
 
 const formatDate = (dateString: string) => {
@@ -29,8 +25,21 @@ const formatDate = (dateString: string) => {
   return new Intl.DateTimeFormat("ko-KR", options).format(date);
 };
 
-export default function GoalList({ goals, onAddNew }: GoalListProps) {
-  const { mutate: deleteGoal } = useDeleteGoal();
+export default function GoalList({
+  goals,
+  toggleEditMode,
+  handleEditGoalId,
+}: GoalListProps) {
+  const { mutate: deleteGoal } = useDeleteGoal({
+    onSuccess: () => {
+      toast.success("목표가 삭제되었습니다.");
+    },
+  });
+
+  const handleEditGoal = (id: number) => {
+    handleEditGoalId(id);
+    toggleEditMode();
+  };
 
   return (
     <div className="space-y-4">
@@ -39,7 +48,7 @@ export default function GoalList({ goals, onAddNew }: GoalListProps) {
           목표 목록 ({`${goals.length}/3`})
         </h3>
 
-        <Button onClick={onAddNew} disabled={goals.length >= 3}>
+        <Button onClick={toggleEditMode} disabled={goals.length >= 3}>
           추가
         </Button>
       </div>
@@ -72,8 +81,11 @@ export default function GoalList({ goals, onAddNew }: GoalListProps) {
 
               <div className="flex justify-between items-center ">
                 <p className="font-medium text-xl">{content}</p>
-
-                <Button variant="ghost" size="icon">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleEditGoal(id)}
+                >
                   <Edit className="h-4 w-4" />
                 </Button>
               </div>

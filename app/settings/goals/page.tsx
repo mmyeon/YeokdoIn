@@ -9,14 +9,15 @@ import WelcomeMessage from "./components/WelcomeMessage";
 
 export default function PersonalGoals() {
   const [isEditing, setIsEditing] = useState(false);
+  const [currentEditingId, setCurrentEditingId] = useState<number | null>(null);
   const { data: goals = [], isLoading } = useGoals();
 
-  const handleAddNew = () => {
-    setIsEditing(true);
+  const toggleEditMode = () => {
+    setIsEditing((prev) => !prev);
   };
 
-  const handleCancel = () => {
-    setIsEditing(false);
+  const handleEditGoalId = (id: number | null) => {
+    setCurrentEditingId(id);
   };
 
   return (
@@ -32,14 +33,24 @@ export default function PersonalGoals() {
               </div>
             )}
 
-            {isEditing && <GoalEditForm onCancel={handleCancel} />}
+            {isEditing && (
+              <GoalEditForm
+                toggleEdit={toggleEditMode}
+                editId={currentEditingId}
+                handleEditGoalId={handleEditGoalId}
+              />
+            )}
 
             {!isEditing &&
               !isLoading &&
               (goals.length > 0 ? (
-                <GoalList goals={goals} onAddNew={handleAddNew} />
+                <GoalList
+                  goals={goals}
+                  toggleEditMode={toggleEditMode}
+                  handleEditGoalId={handleEditGoalId}
+                />
               ) : (
-                <WelcomeMessage onAddNew={handleAddNew} />
+                <WelcomeMessage onAddNew={toggleEditMode} />
               ))}
           </CardContent>
         </Card>
