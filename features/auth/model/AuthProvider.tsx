@@ -25,10 +25,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         break;
       case "SIGNED_OUT":
         handleUserChange(null);
-        console.log(
-          "[Client] AuthStateChange: SIGNED_OUT at",
-          new Date().toISOString(),
-        );
         break;
       default:
         break;
@@ -44,10 +40,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, []);
 
-  useEffect(() => {
-    console.log("[Client] User changed to", user, new Date().toISOString());
-  }, [user]);
-
   const signInWithOAuth = async (provider: SocialAuthProvider) => {
     try {
       await authService.signIn(provider);
@@ -59,12 +51,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     try {
-      console.log("[Client] SignOut initiated at", new Date().toISOString());
       await authService.SignOut();
-      console.log(
-        "[Client] authService.SignOut completed at",
-        new Date().toISOString(),
-      );
       router.push(ROUTES.HOME);
     } catch (error) {
       console.error("Error signing out:", error);
