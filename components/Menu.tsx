@@ -1,6 +1,4 @@
 "use client";
-
-import useAuth from "@/features/auth/model/useAuth";
 import { ROUTES } from "@/routes";
 import { Dumbbell, Home, PersonStanding, Settings } from "lucide-react";
 import Link from "next/link";
@@ -31,7 +29,6 @@ const BUTTONS = [
 
 const Menu = () => {
   const pathname = usePathname();
-  const { user } = useAuth();
 
   if (pathname?.startsWith(`${ROUTES.SETTINGS.ROOT}/`)) {
     return null;
@@ -45,7 +42,7 @@ const Menu = () => {
             key={index}
             className={`flex flex-col items-center justify-center gap-1 cursor-pointer ${pathname === button.route ? "text-black" : "text-gray-500"}`}
             href={button.route}
-            prefetch={user?.id ? undefined : false}
+            prefetch={false}
           >
             {button.icon}
 
