@@ -38,6 +38,14 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // 개인화된 페이지의 캐시 무효화를 위한 헤더 설정
+  supabaseResponse.headers.set(
+    'Cache-Control',
+    'no-cache, no-store, must-revalidate, private'
+  );
+  supabaseResponse.headers.set('Pragma', 'no-cache');
+  supabaseResponse.headers.set('Expires', '0');
+
   // 인증되지 않은 사용자는 로그인 페이지로 리다이렉트
   if (!user) {
     const url = request.nextUrl.clone();
