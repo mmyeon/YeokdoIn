@@ -2,6 +2,7 @@
 
 import { ROUTES } from "@/routes";
 import { Dumbbell, Home, PersonStanding, Settings } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const BUTTONS = [
@@ -38,7 +39,7 @@ const Menu = () => {
     <div className="absolute bottom-0 left-0 right-0 max-w-md w-full bg-white rounded-t-3xl border-2 border-gray-100 border-b-0 mx-auto">
       <div className="flex items-center justify-between p-2 ml-10 mr-10">
         {BUTTONS.map((button, index) => (
-          <a
+          <Link
             key={index}
             className={`flex flex-col items-center justify-center gap-1 cursor-pointer ${pathname === button.route ? "text-black" : "text-gray-500"}`}
             href={button.route}
@@ -46,7 +47,7 @@ const Menu = () => {
             {button.icon}
 
             <span className="text-xs font-bold">{button.text}</span>
-          </a>
+          </Link>
         ))}
       </div>
     </div>
