@@ -3,7 +3,7 @@ export const ROUTES = {
     SELECT_LIFT: "/training/select-lift",
     PERSONAL_RECORD: "/training/personal-record",
     PROGRAM_INPUT: "/training/program-input",
-    POSTURE_ANALYSIS: "/training/posture-analysis",
+    MOVEMENT_ANALYSIS: "/training/movement-analysis",
     WEIGHT_CALCULATOR: "/training/weight-calculator",
   },
   AUTH: {

@@ -17,8 +17,8 @@ const BUTTONS = [
   },
   {
     icon: <PersonStanding />,
-    text: "자세 분석",
-    route: ROUTES.TRAINING.POSTURE_ANALYSIS,
+    text: "움직임 분석",
+    route: ROUTES.TRAINING.MOVEMENT_ANALYSIS,
   },
   {
     icon: <Settings />,
@@ -40,9 +40,9 @@ const Menu = () => {
         {BUTTONS.map((button, index) => (
           <Link
             key={index}
+            prefetch={false}
             className={`flex flex-col items-center justify-center gap-1 cursor-pointer ${pathname === button.route ? "text-black" : "text-gray-500"}`}
             href={button.route}
-            prefetch={false}
           >
             {button.icon}
 
