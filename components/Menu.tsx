@@ -35,7 +35,7 @@ const Menu = () => {
   }
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 max-w-md w-full bg-white rounded-t-3xl border-2 border-gray-100 border-b-0 mx-auto">
+    <div className="fixed bottom-0 left-0 right-0 max-w-md w-full bg-white rounded-t-3xl border-2 border-gray-100 border-b-0 mx-auto">
       <div className="flex items-center justify-between p-2 ml-10 mr-10">
         {BUTTONS.map((button, index) => (
           <Link

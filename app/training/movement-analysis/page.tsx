@@ -1,9 +1,24 @@
-const MovementAnalysis = () => {
+"use client";
+
+import React from "react";
+import VideoAnalysis from "./VideoAnalysis";
+
+const MovementAnalysisPage = () => {
   return (
-    <main className="p-4 flex items-center justify-center min-h-dvh">
-      <h1>움직임 분석</h1>
-    </main>
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8">동작 분석</h1>
+
+        <div className="bg-card rounded-lg p-6 shadow-sm">
+          <p className="text-muted-foreground mb-6">
+            비디오 파일을 업로드하면 움직임을 분석해드려요.
+          </p>
+
+          <VideoAnalysis />
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default MovementAnalysis;
+export default MovementAnalysisPage;
