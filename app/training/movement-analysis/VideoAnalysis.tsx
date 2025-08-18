@@ -8,26 +8,18 @@ import VideoPlayer from "./VideoPlayer";
 import VideoUpload from "./VideoUpload";
 
 const VideoAnalysis = () => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleRemoveFile = () => {
-    if (videoUrl) URL.revokeObjectURL(videoUrl);
-
-    setSelectedFile(null);
-    setVideoUrl(null);
+    setUploadedFile(null);
 
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleFileSelect = useCallback((file: File) => {
-    if (videoUrl) URL.revokeObjectURL(videoUrl);
-
-    setSelectedFile(file);
-    const url = URL.createObjectURL(file);
-    setVideoUrl(url);
+    setUploadedFile(file);
   }, []);
 
   const getFileSize = (bytes: number) => {
@@ -40,7 +32,7 @@ const VideoAnalysis = () => {
 
   return (
     <div className={cn("space-y-4")}>
-      {!selectedFile ? (
+      {!uploadedFile ? (
         <VideoUpload
           handleFileSelect={handleFileSelect}
           fileInputRef={fileInputRef}
@@ -51,7 +43,7 @@ const VideoAnalysis = () => {
             <div className="flex items-center space-x-2">
               <span className="font-medium">선택된 파일:</span>
               <span className="text-sm text-muted-foreground">
-                {selectedFile.name} ({getFileSize(selectedFile.size)})
+                {uploadedFile.name} ({getFileSize(uploadedFile.size)})
               </span>
             </div>
 
@@ -65,7 +57,7 @@ const VideoAnalysis = () => {
             </Button>
           </div>
 
-          <VideoPlayer videoUrl={videoUrl} />
+          <VideoPlayer videoUrl={URL.createObjectURL(uploadedFile)} />
         </div>
       )}
     </div>
