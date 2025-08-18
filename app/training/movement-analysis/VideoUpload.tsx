@@ -1,8 +1,9 @@
 import { Info, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input/input";
-import { RefObject, useState } from "react";
+import { RefObject } from "react";
 import { cn } from "@/lib/utils";
+import useDragAndDrop from "@/hooks/useDragAndDrop";
 import { toast } from "sonner";
 
 const VideoUpload = ({
@@ -12,36 +13,23 @@ const VideoUpload = ({
   handleFileSelect: (file: File) => void;
   fileInputRef: RefObject<HTMLInputElement | null>;
 }) => {
-  const [isDragOver, setIsDragOver] = useState(false);
+  const { isDragOver, handleDragLeave, handleDragOver, handleDrop } =
+    useDragAndDrop({
+      onDropCallback: (files) => {
+        if (files.length > 1) {
+          toast.info("하나의 영상만 업로드할 수 있습니다.");
+          return;
+        }
+
+        handleFileSelect(files?.[0]);
+      },
+    });
 
   const handleFileInputChange = (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
     if (file) handleFileSelect(file);
-  };
-
-  const handleDragOver = (event: React.DragEvent) => {
-    event.preventDefault();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = (event: React.DragEvent) => {
-    event.preventDefault();
-    setIsDragOver(false);
-  };
-
-  const handleDrop = (event: React.DragEvent) => {
-    event.preventDefault();
-    setIsDragOver(false);
-
-    const files = event.dataTransfer.files;
-    if (files.length > 1) {
-      toast.info("하나의 영상만 업로드할 수 있습니다.");
-      return;
-    }
-
-    handleFileSelect(files?.[0]);
   };
 
   return (
