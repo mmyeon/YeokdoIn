@@ -3,8 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import VideoPlayer from "./VideoPlayer";
 import FileInfoDisplay from "./FileInfoDisplay";
+import VideoPlayer from "./VideoPlayer";
 
 const VideoDisplay = ({
   uploadedFile,
