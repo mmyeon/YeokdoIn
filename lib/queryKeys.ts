@@ -1,4 +1,3 @@
-
 export const QUERY_KEYS = {
   PERSONAL_RECORDS: "personalRecords",
   EXERCISES: "exercises",

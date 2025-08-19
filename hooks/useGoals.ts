@@ -18,13 +18,13 @@ export const useGoals = () => {
     queryKey: [QUERY_KEYS.GOALS],
     queryFn: async () => {
       const goals = await getUserGoals();
-      return goals ?? []; 
+      return goals ?? [];
     },
   });
 };
 
 // 목표 추가
-export const useAddGoal = ( {
+export const useAddGoal = ({
   onSuccess,
   onError,
 }: {
@@ -38,10 +38,16 @@ export const useAddGoal = ( {
     onMutate: (newGoalContent) => {
       queryClient.cancelQueries({ queryKey: [QUERY_KEYS.GOALS] });
 
-      const previousGoals = queryClient.getQueryData([QUERY_KEYS.GOALS]) as Goal[];
-      
-      queryClient.setQueryData([QUERY_KEYS.GOALS], (oldGoals : Goal[]) => [
-        { id: Date.now().toString(), content: newGoalContent, created_at: new Date().toISOString() },
+      const previousGoals = queryClient.getQueryData([
+        QUERY_KEYS.GOALS,
+      ]) as Goal[];
+
+      queryClient.setQueryData([QUERY_KEYS.GOALS], (oldGoals: Goal[]) => [
+        {
+          id: Date.now().toString(),
+          content: newGoalContent,
+          created_at: new Date().toISOString(),
+        },
         ...oldGoals,
       ]);
 
@@ -54,23 +60,24 @@ export const useAddGoal = ( {
     onError: (error, variables, context) => {
       onError?.(error);
 
-      if(context?.previousGoals) {
-      queryClient.setQueryData([QUERY_KEYS.GOALS], (previousGoals: Goal[]) => previousGoals);
+      if (context?.previousGoals) {
+        queryClient.setQueryData(
+          [QUERY_KEYS.GOALS],
+          (previousGoals: Goal[]) => previousGoals,
+        );
       }
     },
   });
 };
 
 // 목표 삭제
-export const useDeleteGoal = (
-  {
-    onSuccess,
-    onError,
-  }: {
-    onSuccess?: () => void;
-    onError?: (error: Error) => void;
-  } 
-) => {
+export const useDeleteGoal = ({
+  onSuccess,
+  onError,
+}: {
+  onSuccess?: () => void;
+  onError?: (error: Error) => void;
+}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -86,14 +93,13 @@ export const useDeleteGoal = (
 };
 
 // 목표 수정
-export const useUpdateGoal = (
- { onSuccess,
+export const useUpdateGoal = ({
+  onSuccess,
   onError,
 }: {
   onSuccess?: () => void;
   onError?: (error: Error) => void;
-} 
-) => {
+}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -109,12 +115,18 @@ export const useUpdateGoal = (
       }
       return updateUserGoal(goalId, newGoal);
     },
-    onMutate: ({goalId, newGoal}) => {
+    onMutate: ({ goalId, newGoal }) => {
       queryClient.cancelQueries({ queryKey: [QUERY_KEYS.GOALS] });
 
-      const previousGoals = queryClient.getQueryData([QUERY_KEYS.GOALS]) as Goal[];
+      const previousGoals = queryClient.getQueryData([
+        QUERY_KEYS.GOALS,
+      ]) as Goal[];
 
-      queryClient.setQueryData([QUERY_KEYS.GOALS], (oldGoals: Goal[]) => oldGoals.map((goal) => goal.id === goalId ? { ...goal, content: newGoal } : goal));
+      queryClient.setQueryData([QUERY_KEYS.GOALS], (oldGoals: Goal[]) =>
+        oldGoals.map((goal) =>
+          goal.id === goalId ? { ...goal, content: newGoal } : goal,
+        ),
+      );
 
       return { previousGoals };
     },
@@ -123,10 +135,9 @@ export const useUpdateGoal = (
       onSuccess?.();
     },
     onError: (error, variables, context) => {
-      
-      if(context?.previousGoals) 
+      if (context?.previousGoals)
         queryClient.setQueryData([QUERY_KEYS.GOALS], context.previousGoals);
       onError?.(error);
     },
   });
-}; 
+};

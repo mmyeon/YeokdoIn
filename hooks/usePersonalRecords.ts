@@ -30,7 +30,7 @@ export const useExercises = () => {
 // 개인 기록 수정
 export const useUpdatePersonalRecord = (
   onSuccess: () => void,
-  onError: (error: Error) => void
+  onError: (error: Error) => void,
 ) => {
   const queryClient = useQueryClient();
 
@@ -48,7 +48,9 @@ export const useUpdatePersonalRecord = (
       return updateRecordWeight(recordId, newWeight);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PERSONAL_RECORDS] });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.PERSONAL_RECORDS],
+      });
       onSuccess();
     },
     onError: (error) => {
@@ -60,14 +62,16 @@ export const useUpdatePersonalRecord = (
 // 개인 기록 삭제
 export const useDeletePersonalRecord = (
   onSuccess: () => void,
-  onError: (error: Error) => void
+  onError: (error: Error) => void,
 ) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: deleteRecord,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PERSONAL_RECORDS] });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.PERSONAL_RECORDS],
+      });
       onSuccess();
     },
     onError: (error) => {
@@ -79,18 +83,20 @@ export const useDeletePersonalRecord = (
 // 개인 기록 추가
 export const useAddPersonalRecord = (
   onSuccess: () => void,
-  onError: (error: Error) => void
+  onError: (error: Error) => void,
 ) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: addRecord,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PERSONAL_RECORDS] });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.PERSONAL_RECORDS],
+      });
       onSuccess();
     },
     onError: (error) => {
       onError(error);
     },
   });
-}; 
+};

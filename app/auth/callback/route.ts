@@ -1,5 +1,5 @@
 import { supabaseServerClient } from "@/features/auth/supabase/ServerClient";
-import {  REDIRECT_TO_KEY } from "@/routes";
+import { REDIRECT_TO_KEY } from "@/routes";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {

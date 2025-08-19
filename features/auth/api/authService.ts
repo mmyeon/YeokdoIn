@@ -1,6 +1,6 @@
 import { SocialAuthProvider } from "@/types/auth";
 import { AuthChangeEvent, Session } from "@supabase/supabase-js";
-import {  REDIRECT_TO_KEY } from "@/routes";
+import { REDIRECT_TO_KEY } from "@/routes";
 import { SupabaseBrowserClient } from "../supabase/BrowserClient";
 
 const authService = {

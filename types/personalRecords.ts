@@ -20,4 +20,4 @@ export type Exercises = {
   name: ExercisesRow["name"];
   createdAt: ExercisesRow["created_at"];
   updatedAt: ExercisesRow["updated_at"];
-}; 
+};

@@ -5,7 +5,10 @@ import { handleDatabaseError } from "@/utils/database";
 
 export async function getUserGoals() {
   const supabase = await supabaseServerClient();
-  const { data , error } = await supabase.from("goals").select("*").order("created_at", { ascending: false });
+  const { data, error } = await supabase
+    .from("goals")
+    .select("*")
+    .order("created_at", { ascending: false });
   if (error) handleDatabaseError(error);
   return data;
 }
@@ -18,21 +21,29 @@ export async function saveUserGoal(goal: string) {
     throw new Error("사용자가 인증되지 않았습니다.");
   }
 
-  const { data, error } = await supabase.from("goals").insert({ content: goal, user_id: userId });
+  const { data, error } = await supabase
+    .from("goals")
+    .insert({ content: goal, user_id: userId });
   if (error) handleDatabaseError(error);
   return data;
 }
 
 export async function deleteUserGoal(goalId: number) {
   const supabase = await supabaseServerClient();
-  const { data, error } = await supabase.from("goals").delete().eq("id", goalId);
+  const { data, error } = await supabase
+    .from("goals")
+    .delete()
+    .eq("id", goalId);
   if (error) handleDatabaseError(error);
   return data;
 }
 
 export async function updateUserGoal(goalId: number, goal: string) {
   const supabase = await supabaseServerClient();
-  const { data, error } = await supabase.from("goals").update({ content: goal }).eq("id", goalId);
+  const { data, error } = await supabase
+    .from("goals")
+    .update({ content: goal })
+    .eq("id", goalId);
   if (error) handleDatabaseError(error);
   return data;
 }

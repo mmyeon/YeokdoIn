@@ -9,18 +9,16 @@ const useMediaPipe = ({
   videoRef,
   canvasRef,
 }: {
-  videoRef: RefObject<HTMLVideoElement| null> ;
-  canvasRef: RefObject<HTMLCanvasElement | null> ;
+  videoRef: RefObject<HTMLVideoElement | null>;
+  canvasRef: RefObject<HTMLCanvasElement | null>;
 }) => {
   // media pipe pose landmarker 객체 인스턴스 저장
   const poseLandmarkerRef = useRef<PoseLandmarker>(null);
   // 애니메이션 루프 제어
   const animationFrameId = useRef<number | null>(null);
 
-  
   const [smoothedLandmarks, setSmoothedLandmarks] = useState<Landmark[]>([]);
 
-    
   useEffect(() => {
     const createPoseLandmarker = async () => {
       try {
@@ -49,8 +47,6 @@ const useMediaPipe = ({
 
     createPoseLandmarker();
 
-    
-
     // 컴포넌트 언마운트 시 정리
     return () => {
       if (poseLandmarkerRef.current) {
@@ -62,11 +58,10 @@ const useMediaPipe = ({
     };
   }, []);
 
-
-        const landmarkHistory = useRef<Landmark[][]>([]);
+  const landmarkHistory = useRef<Landmark[][]>([]);
   const smoothingWindow = 5; // 스무딩에 사용할 프레임 수
 
-   const smoothLandmarks = (currentLandmarks: Landmark[]) => {
+  const smoothLandmarks = (currentLandmarks: Landmark[]) => {
     // 현재 랜드마크를 히스토리에 추가
     landmarkHistory.current.push(currentLandmarks);
 
@@ -89,7 +84,6 @@ const useMediaPipe = ({
         sumZ = 0,
         sumVisibility = 0;
       let validCount = 0;
-
 
       // 히스토리에서 유효한 값들의 평균 계산
       landmarkHistory.current.forEach((frame) => {
@@ -152,7 +146,6 @@ const useMediaPipe = ({
   };
 
   const detectPoseInVideo = useCallback(() => {
-
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const poseLandmarker = poseLandmarkerRef.current;
