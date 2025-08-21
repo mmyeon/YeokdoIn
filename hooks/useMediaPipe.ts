@@ -223,15 +223,15 @@ const useMediaPipe = ({
                 canvasCtx.stroke();
 
                 // 관절점 번호 표시 (신뢰도가 높을 때만)
-                if (point.visibility > 0.5) {
-                  canvasCtx.fillStyle = "rgba(255, 255, 255, 0.9)";
-                  canvasCtx.font = "bold 10px Arial";
-                  canvasCtx.fillText(
-                    index.toString(),
-                    point.x * canvas.width + 8,
-                    point.y * canvas.height - 8,
-                  );
-                }
+                // if (point.visibility > 0.5) {
+                //   canvasCtx.fillStyle = "rgba(255, 255, 255, 0.9)";
+                //   canvasCtx.font = "bold 10px Arial";
+                //   canvasCtx.fillText(
+                //     index.toString(),
+                //     point.x * canvas.width + 8,
+                //     point.y * canvas.height - 8,
+                //   );
+                // }
               }
             });
 
