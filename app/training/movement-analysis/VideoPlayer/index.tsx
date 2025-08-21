@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, MouseEvent } from "react";
 import PoseAnalyzer from "../PoseAnalyzer";
 import VideoController from "./VideoController";
 
@@ -43,6 +43,21 @@ const VideoPlayer = ({ videoUrl }: { videoUrl: string }) => {
 
   const handleVideoEnded = () => {
     setIsPlaying(false);
+  };
+
+  const handleProgressClick = (e: MouseEvent<HTMLDivElement>) => {
+    const { width, left } = e.currentTarget.getBoundingClientRect();
+    const { clientX } = e;
+
+    const relativeX = clientX - left;
+    const newTime = (relativeX / width) * duration;
+
+    const clampedTime = Math.max(0, Math.min(newTime, duration));
+
+    if (videoRef.current) {
+      videoRef.current.currentTime = clampedTime;
+      handleVideoTimeUpdate();
+    }
   };
 
   useEffect(() => {
@@ -106,6 +121,7 @@ const VideoPlayer = ({ videoUrl }: { videoUrl: string }) => {
         handleMuteToggle={handleMuteToggle}
         togglePlayPause={togglePlayPause}
         isPlaying={isPlaying}
+        handleProgressClick={handleProgressClick}
       />
     </div>
   );

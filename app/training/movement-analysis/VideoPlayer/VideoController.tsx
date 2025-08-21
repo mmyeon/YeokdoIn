@@ -15,6 +15,7 @@ const VideoController = ({
   handleMuteToggle,
   togglePlayPause,
   isPlaying,
+  handleProgressClick,
 }: {
   currentTime: number;
   duration: number;
@@ -22,6 +23,7 @@ const VideoController = ({
   handleMuteToggle: () => void;
   togglePlayPause: () => void;
   isPlaying: boolean;
+  handleProgressClick: (e: React.MouseEvent<HTMLDivElement>) => void;
 }) => {
   return (
     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
@@ -59,11 +61,14 @@ const VideoController = ({
       </div>
 
       {/* 프로그레스 바 */}
-      <div className="w-full bg-white/20 rounded-full h-1 mt-2">
+      <div
+        className="w-full bg-white/20 rounded-full h-1 mt-2 cursor-pointer"
+        onClick={handleProgressClick}
+      >
         <div
           className="bg-white h-1 rounded-full transition-all duration-300"
           style={{
-            width: duration > 0 ? `${(currentTime / duration) * 100}%` : "0%",
+            width: `${(currentTime / duration) * 100}%`,
           }}
         />
       </div>
