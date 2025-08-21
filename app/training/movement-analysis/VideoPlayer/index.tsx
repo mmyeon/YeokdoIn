@@ -78,8 +78,9 @@ const VideoPlayer = ({ videoUrl }: { videoUrl: string }) => {
   }, []);
 
   return (
-    <div className=" bg-black relative rounded-lg overflow-hidden w-full pb-[56.25%] h-0">
+    <div className=" bg-black relative rounded-lg overflow-hidden w-full pb-[177.78%] md:pb-[56.25%] h-0 md:w-1/2 mx-auto">
       <video
+        playsInline
         ref={videoRef}
         src={videoUrl}
         className="cursor-pointer absolute top-0 left-0 w-full h-full"
