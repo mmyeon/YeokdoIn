@@ -2,8 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import { cn } from "@/lib/utils";
-import FileInfoDisplay from "./FileInfoDisplay";
 import VideoPlayer from "./VideoPlayer";
 
 const VideoDisplay = ({
@@ -14,24 +12,16 @@ const VideoDisplay = ({
   handleRemoveFile: () => void;
 }) => {
   return (
-    <div className={cn("space-y-4")}>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <FileInfoDisplay file={uploadedFile} />
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleRemoveFile}
-            className="text-destructive hover:text-destructive"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-
-        <VideoPlayer videoUrl={URL.createObjectURL(uploadedFile)} />
-      </div>
-    </div>
+    <VideoPlayer videoUrl={URL.createObjectURL(uploadedFile)}>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={handleRemoveFile}
+        className="text-destructive hover:text-destructive p-2 absolute top-2 right-2 bg-white/90 hover:bg-white shadow-md"
+      >
+        <X className="h-4 w-4" />
+      </Button>
+    </VideoPlayer>
   );
 };
 

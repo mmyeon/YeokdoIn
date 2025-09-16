@@ -1,8 +1,14 @@
-import { useEffect, useRef, useState, MouseEvent } from "react";
+import { useEffect, useRef, useState, MouseEvent, ReactNode } from "react";
 import PoseAnalyzer from "../PoseAnalyzer";
 import VideoController from "./VideoController";
 
-const VideoPlayer = ({ videoUrl }: { videoUrl: string }) => {
+const VideoPlayer = ({
+  videoUrl,
+  children,
+}: {
+  videoUrl: string;
+  children: ReactNode;
+}) => {
   const [isPlaying, setIsPlaying] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -123,6 +129,8 @@ const VideoPlayer = ({ videoUrl }: { videoUrl: string }) => {
         isPlaying={isPlaying}
         handleProgressClick={handleProgressClick}
       />
+
+      {children}
     </div>
   );
 };
