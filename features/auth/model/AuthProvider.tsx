@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const handleAuthStateChange = (
     event: AuthChangeEvent,
-    session: Session | null,
+    session: Session | null
   ) => {
     switch (event) {
       case "SIGNED_IN":

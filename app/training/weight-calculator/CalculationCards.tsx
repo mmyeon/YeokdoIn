@@ -36,7 +36,7 @@ const CalculationCards = ({
             index >= 1
               ? getWeightGap(
                   item.totalWeight,
-                  weightList[index - 1].totalWeight,
+                  weightList[index - 1].totalWeight
                 )
               : 0;
 

@@ -24,7 +24,7 @@ const useMediaPipe = ({
       try {
         // MediaPipe Vision Tasks 초기화
         const vision = await FilesetResolver.forVisionTasks(
-          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm",
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"
         );
 
         // Pose Landmarker 모델 생성 및 설정
@@ -37,7 +37,7 @@ const useMediaPipe = ({
             },
             runningMode: "VIDEO", // 비디오 모드로 설정
             numPoses: 1, // 한 명의 포즈만 감지
-          },
+          }
         );
       } catch (error) {
         console.error("Failed to load PoseLandmarker:", error);
@@ -116,7 +116,7 @@ const useMediaPipe = ({
   // 관절 위치 안정화 함수 (이동 거리 기반)
   const stabilizeLandmarks = (
     currentLandmarks: Landmark[],
-    previousLandmarks: Landmark[],
+    previousLandmarks: Landmark[]
   ) => {
     if (!previousLandmarks || previousLandmarks.length === 0) {
       return currentLandmarks;
@@ -180,7 +180,7 @@ const useMediaPipe = ({
             const smoothedLandmark = smoothLandmarks(landmark);
             const stabilizedLandmark = stabilizeLandmarks(
               smoothedLandmark,
-              smoothedLandmarks,
+              smoothedLandmarks
             );
             setSmoothedLandmarks(stabilizedLandmark);
 
@@ -214,7 +214,7 @@ const useMediaPipe = ({
                   point.y * canvas.height,
                   4, // 관절점 크기를 더 작게
                   0,
-                  2 * Math.PI,
+                  2 * Math.PI
                 );
                 canvasCtx.fillStyle = "rgba(255, 0, 0, 0.7)"; // 반투명 빨간색
                 canvasCtx.fill();
@@ -280,11 +280,11 @@ const useMediaPipe = ({
                 canvasCtx.beginPath();
                 canvasCtx.moveTo(
                   startPoint.x * canvas.width,
-                  startPoint.y * canvas.height,
+                  startPoint.y * canvas.height
                 );
                 canvasCtx.lineTo(
                   endPoint.x * canvas.width,
-                  endPoint.y * canvas.height,
+                  endPoint.y * canvas.height
                 );
                 canvasCtx.strokeStyle = "rgba(255, 255, 0, 0.6)"; // 반투명 노란색
                 canvasCtx.lineWidth = 2;

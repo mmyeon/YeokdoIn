@@ -20,11 +20,11 @@ const PersonalRecordList = () => {
     usePersonalRecords();
   const updateRecordMutation = useUpdatePersonalRecord(
     () => toast.success("개인 기록이 수정되었습니다."),
-    () => toast.error("개인 기록 수정 중 오류가 발생했습니다."),
+    () => toast.error("개인 기록 수정 중 오류가 발생했습니다.")
   );
   const deleteRecordMutation = useDeletePersonalRecord(
     () => toast.success("개인 기록이 삭제되었습니다."),
-    () => toast.error("개인 기록 삭제 중 오류가 발생했습니다."),
+    () => toast.error("개인 기록 삭제 중 오류가 발생했습니다.")
   );
 
   function cancelEditing() {

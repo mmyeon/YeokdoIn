@@ -17,17 +17,17 @@ export async function updateSession(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
+            request.cookies.set(name, value)
           );
           supabaseResponse = NextResponse.next({
             request,
           });
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options),
+            supabaseResponse.cookies.set(name, value, options)
           );
         },
       },
-    },
+    }
   );
 
   // IMPORTANT: Avoid writing any logic between createServerClient and
@@ -41,7 +41,7 @@ export async function updateSession(request: NextRequest) {
   // 개인화된 페이지의 캐시 무효화를 위한 헤더 설정
   supabaseResponse.headers.set(
     "Cache-Control",
-    "no-cache, no-store, must-revalidate, private",
+    "no-cache, no-store, must-revalidate, private"
   );
   supabaseResponse.headers.set("Pragma", "no-cache");
   supabaseResponse.headers.set("Expires", "0");

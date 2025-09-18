@@ -26,7 +26,7 @@ const VideoUpload = ({
     });
 
   const handleFileInputChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
     if (file) handleFileSelect(file);
@@ -38,7 +38,7 @@ const VideoUpload = ({
         "border-2 border-dashed rounded-lg p-8 text-center transition-colors",
         isDragOver
           ? "border-primary bg-primary/5"
-          : "border-muted-foreground/25 hover:border-primary/50",
+          : "border-muted-foreground/25 hover:border-primary/50"
       )}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}

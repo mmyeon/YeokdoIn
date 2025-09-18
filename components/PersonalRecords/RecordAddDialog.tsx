@@ -36,21 +36,21 @@ const RecordAddDialog = () => {
   const addRecordMutation = useAddPersonalRecord(
     () => {
       const existingRecord = existingRecords.find(
-        (r) => r.exerciseId === record.exerciseId,
+        (r) => r.exerciseId === record.exerciseId
       );
 
       console.log(existingRecord);
       toast.success(
         existingRecord
           ? "기존 기록이 변경되었습니다."
-          : "개인 기록이 추가되었습니다.",
+          : "개인 기록이 추가되었습니다."
       );
     },
-    () => toast.error("개인 기록 추가 중 오류가 발생했습니다."),
+    () => toast.error("개인 기록 추가 중 오류가 발생했습니다.")
   );
 
   async function handleAddRecord(
-    record: Pick<PersonalRecordInfo, "exerciseId" | "weight">,
+    record: Pick<PersonalRecordInfo, "exerciseId" | "weight">
   ) {
     await addRecordMutation.mutateAsync(record);
     setOpen(false);

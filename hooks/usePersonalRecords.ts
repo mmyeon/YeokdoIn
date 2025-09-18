@@ -30,7 +30,7 @@ export const useExercises = () => {
 // 개인 기록 수정
 export const useUpdatePersonalRecord = (
   onSuccess: () => void,
-  onError: (error: Error) => void,
+  onError: (error: Error) => void
 ) => {
   const queryClient = useQueryClient();
 
@@ -62,7 +62,7 @@ export const useUpdatePersonalRecord = (
 // 개인 기록 삭제
 export const useDeletePersonalRecord = (
   onSuccess: () => void,
-  onError: (error: Error) => void,
+  onError: (error: Error) => void
 ) => {
   const queryClient = useQueryClient();
 
@@ -83,7 +83,7 @@ export const useDeletePersonalRecord = (
 // 개인 기록 추가
 export const useAddPersonalRecord = (
   onSuccess: () => void,
-  onError: (error: Error) => void,
+  onError: (error: Error) => void
 ) => {
   const queryClient = useQueryClient();
 

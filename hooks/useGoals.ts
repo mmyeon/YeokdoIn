@@ -63,7 +63,7 @@ export const useAddGoal = ({
       if (context?.previousGoals) {
         queryClient.setQueryData(
           [QUERY_KEYS.GOALS],
-          (previousGoals: Goal[]) => previousGoals,
+          (previousGoals: Goal[]) => previousGoals
         );
       }
     },
@@ -124,8 +124,8 @@ export const useUpdateGoal = ({
 
       queryClient.setQueryData([QUERY_KEYS.GOALS], (oldGoals: Goal[]) =>
         oldGoals.map((goal) =>
-          goal.id === goalId ? { ...goal, content: newGoal } : goal,
-        ),
+          goal.id === goalId ? { ...goal, content: newGoal } : goal
+        )
       );
 
       return { previousGoals };

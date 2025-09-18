@@ -15,7 +15,7 @@ export async function GET(request: Request) {
       const sanitizedRedirectTo = redirectTo.startsWith("/") ? redirectTo : "/";
       const absoluteRedirectUrl = new URL(
         sanitizedRedirectTo,
-        requestUrl.origin,
+        requestUrl.origin
       );
 
       return NextResponse.redirect(absoluteRedirectUrl.toString());

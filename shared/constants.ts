@@ -7,5 +7,5 @@ export const LIFT_INFO: LiftInfo[] = [
 
 export const LIFT_INFO_MAP = LIFT_INFO.reduce(
   (acc, { value, label }) => ({ ...acc, [value]: label }),
-  {} as Record<Lift, string>,
+  {} as Record<Lift, string>
 );

@@ -44,7 +44,7 @@ function calculatePlates(totalWeight: number, barbellWeight: number): Plates {
 const calculateProgramWeight = (
   pr: number,
   percentages: WeightPercentage[],
-  barWeight: number,
+  barWeight: number
 ) => {
   return percentages.map((program) => {
     const totalWeight = Math.ceil((pr * program.percent) / 100);
@@ -65,7 +65,7 @@ const WeightCalculator = () => {
   const programPercentages = useAtomValue(programPercentagesAtom);
 
   const [currentLift, setCurrentLift] = useState<Lift>(
-    selectedLift !== "snatch" ? "cleanAndJerk" : "snatch",
+    selectedLift !== "snatch" ? "cleanAndJerk" : "snatch"
   );
 
   const allWeights = useMemo(() => {
@@ -73,12 +73,12 @@ const WeightCalculator = () => {
       cleanAndJerk: calculateProgramWeight(
         Number(personalRecord.cleanAndJerk) ?? 0,
         programPercentages,
-        barWeight ?? 0,
+        barWeight ?? 0
       ),
       snatch: calculateProgramWeight(
         Number(personalRecord.snatch) ?? 0,
         programPercentages,
-        barWeight ?? 0,
+        barWeight ?? 0
       ),
     };
   }, [barWeight, personalRecord, programPercentages]);

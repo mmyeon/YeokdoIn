@@ -31,7 +31,7 @@ const authService = {
     return data.session;
   },
   onAuthStateChange: (
-    callback: (event: AuthChangeEvent, session: Session | null) => void,
+    callback: (event: AuthChangeEvent, session: Session | null) => void
   ) => {
     return SupabaseBrowserClient().auth.onAuthStateChange(callback);
   },

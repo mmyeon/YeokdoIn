@@ -33,7 +33,7 @@ export async function saveBarbellWeight(barbellWeight: number) {
     },
     {
       onConflict: "user_id",
-    },
+    }
   );
 
   if (error) handleDatabaseError(error);
@@ -56,7 +56,7 @@ export async function getUserPersonalRecords(): Promise<PersonalRecordInfo[]> {
           exercises (
             name
           )
-        `,
+        `
     )
     .eq("user_id", userId);
 
@@ -75,7 +75,7 @@ export async function getUserPersonalRecords(): Promise<PersonalRecordInfo[]> {
 
 export async function updateRecordWeight(
   recordId: PersonalRecordInfo["id"],
-  newWeight: PersonalRecordInfo["weight"],
+  newWeight: PersonalRecordInfo["weight"]
 ): Promise<void> {
   const supabase = await supabaseServerClient();
 
@@ -88,7 +88,7 @@ export async function updateRecordWeight(
 }
 
 export async function deleteRecord(
-  id: PersonalRecordInfo["id"],
+  id: PersonalRecordInfo["id"]
 ): Promise<void> {
   const supabase = await supabaseServerClient();
 
@@ -101,7 +101,7 @@ export async function deleteRecord(
 }
 
 export async function addRecord(
-  newRecord: Pick<PersonalRecordInfo, "exerciseId" | "weight">,
+  newRecord: Pick<PersonalRecordInfo, "exerciseId" | "weight">
 ) {
   const supabase = await supabaseServerClient();
   const userId = (await supabase.auth.getUser()).data.user?.id;
@@ -119,7 +119,7 @@ export async function addRecord(
     },
     {
       onConflict: "user_id, exercise_id",
-    },
+    }
   );
 
   if (error) handleDatabaseError(error);

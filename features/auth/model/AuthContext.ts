@@ -18,5 +18,5 @@ const initialContext: AuthContextType = {
 };
 
 export const AuthContext = createContext<AuthContextType | undefined>(
-  initialContext,
+  initialContext
 );

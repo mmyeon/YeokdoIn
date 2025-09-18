@@ -13,17 +13,17 @@ export const personalRecordAtom = atomWithStorage<PersonalRecord>(
   {
     cleanAndJerk: "",
     snatch: "",
-  },
+  }
 );
 
 export const programPercentagesAtom = atomWithStorage<WeightPercentage[]>(
   "programPercentages",
-  [],
+  []
 );
 
 export const selectedLiftAtom = atomWithStorage<LiftOptions>(
   "selectedLift",
-  "cleanAndJerk",
+  "cleanAndJerk"
 );
 // TODO: 프로그램 무게 계산 페이지 개선 후 삭제
 export const barbellWeightAtom = atom<number | null>(null);
