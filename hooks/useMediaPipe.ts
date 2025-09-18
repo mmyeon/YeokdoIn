@@ -303,6 +303,13 @@ const useMediaPipe = ({
 
     // 감지 루프 시작
     animationFrameId.current = requestAnimationFrame(performDetection);
+
+    return () => {
+      // 진행 중인 애니메이션 프레임 취소
+      if (animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current);
+      }
+    };
   }, []);
 
   return {
