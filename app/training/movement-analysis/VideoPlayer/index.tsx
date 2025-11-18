@@ -70,23 +70,9 @@ const VideoPlayer = ({
     const video = videoRef.current;
     if (video) {
       const handleMetadataLoad = () => {
-        const videoAspectRatio = video.videoWidth / video.videoHeight;
-        const containerWidth = video.clientWidth;
-        const containerHeight = video.clientHeight;
-
-        let canvasWidth, canvasHeight;
-
-        if (containerWidth / containerHeight > videoAspectRatio) {
-          canvasHeight = containerHeight;
-          canvasWidth = containerHeight * videoAspectRatio;
-        } else {
-          canvasWidth = containerWidth;
-          canvasHeight = containerWidth / videoAspectRatio;
-        }
-
         if (canvasRef.current) {
-          canvasRef.current.width = canvasWidth;
-          canvasRef.current.height = canvasHeight;
+          canvasRef.current.width = video.videoWidth;
+          canvasRef.current.height = video.videoHeight;
         }
       };
 
@@ -104,7 +90,7 @@ const VideoPlayer = ({
         playsInline
         ref={videoRef}
         src={videoUrl}
-        className="cursor-pointer absolute top-0 left-0 w-full h-full"
+        className="cursor-pointer absolute object-contain top-0 left-0 w-full h-full"
         onTimeUpdate={handleVideoTimeUpdate}
         onLoadedMetadata={handleVideoLoadedMetadata}
         muted={isMuted}

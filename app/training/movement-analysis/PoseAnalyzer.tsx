@@ -21,7 +21,7 @@ const PoseAnalyzer = ({
 
   return (
     <canvas
-      className="absolute w-full h-full object-contain pointer-events-none"
+      className="absolute w-full h-full object-contain top-0 left-0 pointer-events-none"
       ref={canvasRef}
     />
   );
