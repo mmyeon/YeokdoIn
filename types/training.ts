@@ -2,8 +2,6 @@ export type PersonalRecord = Record<Lift, string | undefined>;
 
 export type Lift = "cleanAndJerk" | "snatch";
 
-export type LiftOptions = Lift | "both";
-
 export type WeightPercentage = {
   id: number;
   percent: number;

@@ -1,11 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import {
-  personalRecordAtom,
-  selectedLiftAtom,
-} from "@/entities/training/atoms/liftsAtom";
-import { useAtom, useAtomValue } from "jotai";
+import { personalRecordAtom } from "@/entities/training/atoms/liftsAtom";
+import { useAtom } from "jotai";
 import { ROUTES } from "@/routes";
 import { numericStringSchema } from "@/shared/form/schemas";
 import { Input } from "@/components/ui/input/input";
@@ -23,8 +20,6 @@ export default function AddRecords() {
   const [personalRecord, setPersonalRecord] = useAtom(personalRecordAtom);
   const [snatchError, setSnatchError] = useState<string | null>(null);
   const [cleanError, setCleanError] = useState<string | null>(null);
-  // TODO: 화면 그려진 뒤 값 가져와서 flash 발생함.
-  const selectedLift = useAtomValue(selectedLiftAtom);
 
   const handleInputChange = (key: Lift, value: string) => {
     const numericValidation = numericStringSchema.safeParse(value);
@@ -51,13 +46,7 @@ export default function AddRecords() {
   };
 
   const isButtonDisabled =
-    selectedLift === "cleanAndJerk"
-      ? !personalRecord.cleanAndJerk
-      : selectedLift === "snatch"
-        ? !personalRecord.snatch
-        : selectedLift === "both"
-          ? !(personalRecord.cleanAndJerk && personalRecord.snatch)
-          : true;
+    !personalRecord.cleanAndJerk || !personalRecord.snatch;
 
   return (
     <main className="container mx-auto flex min-h-screen flex-col items-center justify-center p-4">
@@ -71,49 +60,45 @@ export default function AddRecords() {
 
         <Card className="toss-card">
           <CardContent className="p-6 space-y-6">
-            {(selectedLift === "cleanAndJerk" || selectedLift === "both") && (
-              <div className="space-y-2">
-                <Label htmlFor="clean-and-jerk-pr" className="toss-label">
-                  {LIFT_INFO_MAP["cleanAndJerk"]} 개인 기록 (kg)
-                </Label>
+            <div className="space-y-2">
+              <Label htmlFor="clean-and-jerk-pr" className="toss-label">
+                {LIFT_INFO_MAP["cleanAndJerk"]} 개인 기록 (kg)
+              </Label>
 
-                <Input
-                  id="clean-and-jerk-pr"
-                  type="number"
-                  value={personalRecord.cleanAndJerk ?? ""}
-                  placeholder="무게를 kg 단위로 입력하세요."
-                  onChange={(e) => {
-                    handleInputChange("cleanAndJerk", e.target.value);
+              <Input
+                id="clean-and-jerk-pr"
+                type="number"
+                value={personalRecord.cleanAndJerk ?? ""}
+                placeholder="무게를 kg 단위로 입력하세요."
+                onChange={(e) => {
+                  handleInputChange("cleanAndJerk", e.target.value);
 
-                    if (cleanError) setCleanError(null);
-                  }}
-                />
+                  if (cleanError) setCleanError(null);
+                }}
+              />
 
-                {/* TODO: border 컬러 적용안되는 이슈 개선 */}
-                {cleanError && <FormAlert errorMessage={cleanError} />}
-              </div>
-            )}
+              {/* TODO: border 컬러 적용안되는 이슈 개선 */}
+              {cleanError && <FormAlert errorMessage={cleanError} />}
+            </div>
 
-            {(selectedLift === "snatch" || selectedLift === "both") && (
-              <div className="space-y-2">
-                <Label htmlFor="snatch-pr" className="toss-label">
-                  {LIFT_INFO_MAP["snatch"]} 개인 기록 (kg)
-                </Label>
-                <Input
-                  id="snatch-pr"
-                  type="number"
-                  placeholder="무게를 kg 단위로 입력하세요"
-                  value={personalRecord.snatch ?? ""}
-                  onChange={(e) => {
-                    handleInputChange("snatch", e.target.value);
+            <div className="space-y-2">
+              <Label htmlFor="snatch-pr" className="toss-label">
+                {LIFT_INFO_MAP["snatch"]} 개인 기록 (kg)
+              </Label>
+              <Input
+                id="snatch-pr"
+                type="number"
+                placeholder="무게를 kg 단위로 입력하세요"
+                value={personalRecord.snatch ?? ""}
+                onChange={(e) => {
+                  handleInputChange("snatch", e.target.value);
 
-                    if (snatchError) setSnatchError(null);
-                  }}
-                />
+                  if (snatchError) setSnatchError(null);
+                }}
+              />
 
-                {snatchError && <FormAlert errorMessage={snatchError} />}
-              </div>
-            )}
+              {snatchError && <FormAlert errorMessage={snatchError} />}
+            </div>
 
             <Button
               // TODO: bg-primary 적용 안됨

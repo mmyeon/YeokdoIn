@@ -6,7 +6,6 @@ import {
   barbellWeightAtom,
   personalRecordAtom,
   programPercentagesAtom,
-  selectedLiftAtom,
 } from "@/entities/training/atoms/liftsAtom";
 import { Lift, Plates, WeightPercentage } from "@/types/training";
 import CalculationCards from "./CalculationCards";
@@ -58,15 +57,11 @@ const calculateProgramWeight = (
 };
 
 const WeightCalculator = () => {
-  const selectedLift = useAtomValue(selectedLiftAtom);
   const barWeight = useAtomValue(barbellWeightAtom);
   const personalRecord = useAtomValue(personalRecordAtom);
-
   const programPercentages = useAtomValue(programPercentagesAtom);
 
-  const [currentLift, setCurrentLift] = useState<Lift>(
-    selectedLift !== "snatch" ? "cleanAndJerk" : "snatch"
-  );
+  const [currentLift, setCurrentLift] = useState<Lift>("cleanAndJerk");
 
   const allWeights = useMemo(() => {
     return {
@@ -93,43 +88,36 @@ const WeightCalculator = () => {
           </p>
         </div>
 
-        {selectedLift === "both" ? (
-          <Tabs
-            value={currentLift}
-            onValueChange={(value) => setCurrentLift(value as Lift)}
-          >
-            <TabsList className="grid grid-cols-2 h-12 mb-6 w-full">
-              {LIFT_INFO.map((liftInfo) => (
-                <TabsTrigger
-                  key={liftInfo.value}
-                  value={liftInfo.value}
-                  className="text-base"
-                >
-                  {liftInfo.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
+        <Tabs
+          value={currentLift}
+          onValueChange={(value) => setCurrentLift(value as Lift)}
+        >
+          <TabsList className="grid grid-cols-2 h-12 mb-6 w-full">
+            {LIFT_INFO.map((liftInfo) => (
+              <TabsTrigger
+                key={liftInfo.value}
+                value={liftInfo.value}
+                className="text-base"
+              >
+                {liftInfo.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-            <TabsContent value="cleanAndJerk">
-              <CalculationCards
-                weightList={allWeights[currentLift]}
-                lift={currentLift}
-              />
-            </TabsContent>
+          <TabsContent value="cleanAndJerk">
+            <CalculationCards
+              weightList={allWeights[currentLift]}
+              lift={currentLift}
+            />
+          </TabsContent>
 
-            <TabsContent value="snatch">
-              <CalculationCards
-                weightList={allWeights[currentLift]}
-                lift={currentLift}
-              />
-            </TabsContent>
-          </Tabs>
-        ) : (
-          <CalculationCards
-            weightList={allWeights[currentLift]}
-            lift={currentLift}
-          />
-        )}
+          <TabsContent value="snatch">
+            <CalculationCards
+              weightList={allWeights[currentLift]}
+              lift={currentLift}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
     </main>
   );
