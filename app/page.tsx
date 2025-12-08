@@ -26,7 +26,7 @@ export default function Home() {
         className="w-full h-12 rounded-xl text-base font-semibold bg-primary"
         asChild
       >
-        <Link href={ROUTES.TRAINING.SELECT_LIFT}>시작하기</Link>
+        <Link href={ROUTES.TRAINING.PERSONAL_RECORD}>시작하기</Link>
       </Button>
     </div>
   );
