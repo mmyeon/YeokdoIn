@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import { useAtomValue } from "jotai";
 import {
-  barbellWeightAtom,
   personalRecordAtom,
   programPercentagesAtom,
 } from "@/entities/training/atoms/liftsAtom";
@@ -11,6 +10,7 @@ import { Lift, Plates, WeightPercentage } from "@/types/training";
 import CalculationCards from "./CalculationCards";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LIFT_INFO } from "@/shared/constants";
+import { useBarbellWeight } from "@/hooks/useBarbellWeight";
 
 const AVAILABLE_PLATES: Plates = [0.5, 1, 1.5, 2, 2.5, 5, 10, 15, 20, 25];
 
@@ -57,7 +57,8 @@ const calculateProgramWeight = (
 };
 
 const WeightCalculator = () => {
-  const barWeight = useAtomValue(barbellWeightAtom);
+  const { data: barbellData } = useBarbellWeight();
+
   const personalRecord = useAtomValue(personalRecordAtom);
   const programPercentages = useAtomValue(programPercentagesAtom);
 
@@ -68,15 +69,15 @@ const WeightCalculator = () => {
       cleanAndJerk: calculateProgramWeight(
         Number(personalRecord.cleanAndJerk) ?? 0,
         programPercentages,
-        barWeight ?? 0
+        barbellData ?? 0
       ),
       snatch: calculateProgramWeight(
         Number(personalRecord.snatch) ?? 0,
         programPercentages,
-        barWeight ?? 0
+        barbellData ?? 0
       ),
     };
-  }, [barWeight, personalRecord, programPercentages]);
+  }, [barbellData, personalRecord, programPercentages]);
 
   return (
     <main className="p-4 mt-6">

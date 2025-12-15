@@ -23,7 +23,7 @@ const BarbellSetting = () => {
   const { mutate: saveWeight, isPending: isSaving } = useSaveBarbellWeight();
 
   useEffect(() => {
-    if (barbellData) setSelectedWeight(barbellData.default_barbell_weight);
+    if (barbellData) setSelectedWeight(barbellData);
   }, [barbellData, setSelectedWeight]);
 
   async function handleSave() {
@@ -83,9 +83,7 @@ const BarbellSetting = () => {
           className="w-full mt-4"
           onClick={handleSave}
           disabled={
-            isSaving ||
-            !selectedWeight ||
-            selectedWeight === barbellData?.default_barbell_weight
+            isSaving || !selectedWeight || selectedWeight === barbellData
           }
         >
           {isSaving ? "저장 중..." : "저장하기"}
