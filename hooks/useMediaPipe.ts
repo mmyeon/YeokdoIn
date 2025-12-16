@@ -8,14 +8,18 @@ import { RefObject, useCallback, useEffect, useRef, useState } from "react";
 const useMediaPipe = ({
   videoRef,
   canvasRef,
+  trajectoryCanvasRef,
 }: {
   videoRef: RefObject<HTMLVideoElement | null>;
   canvasRef: RefObject<HTMLCanvasElement | null>;
+  trajectoryCanvasRef: RefObject<HTMLCanvasElement | null>;
 }) => {
   // media pipe pose landmarker 객체 인스턴스 저장
   const poseLandmarkerRef = useRef<PoseLandmarker>(null);
   // 애니메이션 루프 제어
   const animationFrameId = useRef<number | null>(null);
+  // 이전 바벨 위치 저장 (선 연결용)
+  const previousBarbellPos = useRef<{ x: number; y: number } | null>(null);
 
   const [smoothedLandmarks, setSmoothedLandmarks] = useState<Landmark[]>([]);
 
@@ -183,6 +187,60 @@ const useMediaPipe = ({
               smoothedLandmarks
             );
             setSmoothedLandmarks(stabilizedLandmark);
+
+            // 바벨 위치 감지 (양쪽 손목 중간점 사용)
+            const LEFT_WRIST = 15;
+            const RIGHT_WRIST = 16;
+
+            const leftWrist = stabilizedLandmark[LEFT_WRIST];
+            const rightWrist = stabilizedLandmark[RIGHT_WRIST];
+
+            // 양쪽 손목 가시성 검증 (임계값 0.5)
+            const leftValid =
+              leftWrist?.visibility && leftWrist.visibility > 0.5;
+            const rightValid =
+              rightWrist?.visibility && rightWrist.visibility > 0.5;
+
+            let barbellPosition: { x: number; y: number } | null = null;
+
+            if (leftValid && rightValid) {
+              // 양쪽 손목 중간점 = 바벨 중심
+              barbellPosition = {
+                x: ((leftWrist.x + rightWrist.x) / 2) * canvas.width,
+                y: ((leftWrist.y + rightWrist.y) / 2) * canvas.height,
+              };
+            } else if (leftValid || rightValid) {
+              // 한쪽만 보이면 해당 손목 사용 (차선책)
+              const wrist = leftValid ? leftWrist : rightWrist;
+              barbellPosition = {
+                x: wrist.x * canvas.width,
+                y: wrist.y * canvas.height,
+              };
+            }
+
+            // 궤적 그리기 (별도 캔버스)
+            if (barbellPosition && trajectoryCanvasRef.current) {
+              const trajectoryCtx =
+                trajectoryCanvasRef.current.getContext("2d");
+
+              if (trajectoryCtx && previousBarbellPos.current) {
+                // 이전 위치 → 현재 위치 선 그리기
+                trajectoryCtx.strokeStyle = "rgba(0, 255, 0, 0.8)";
+                trajectoryCtx.lineWidth = 8;
+                trajectoryCtx.lineCap = "round";
+                trajectoryCtx.beginPath();
+                trajectoryCtx.moveTo(
+                  previousBarbellPos.current.x,
+                  previousBarbellPos.current.y
+                );
+                trajectoryCtx.lineTo(barbellPosition.x, barbellPosition.y);
+                trajectoryCtx.stroke();
+              }
+
+              // 현재 위치를 다음 프레임을 위해 저장
+              previousBarbellPos.current = barbellPosition;
+            }
+            // 손목 안 보이면: previousBarbellPos 유지 (다음에 보일 때 직선으로 연결됨)
 
             // 기본 MediaPipe 관절점과 연결선 그리기 제거
             // drawingUtils.drawLandmarks(landmark, {
