@@ -12,20 +12,30 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LIFT_INFO } from "@/shared/constants";
 import { useBarbellWeight } from "@/hooks/useBarbellWeight";
 
-const AVAILABLE_PLATES: Plates = [0.5, 1, 1.5, 2, 2.5, 5, 10, 15, 20, 25];
+const AVAILABLE_PLATES: Plates = [25, 20, 15, 10, 5, 2.5, 2, 1.5, 1, 0.5];
 
-function calculatePlates(totalWeight: number, barbellWeight: number): Plates {
-  let remainingWeight = totalWeight - barbellWeight;
-  if (remainingWeight <= 0) return []; // 바벨 무게보다 가벼우면 계산할 필요 없음
+/**
+ * 바벨 무게를 제외한 남은 무게를 플레이트로 계산
+ * 양쪽에 2개씩 적용 (한쪽 플레이트만 반환)
+ *
+ * @param totalWeight - 전체 무게
+ * @param barbellWeight - 바벨 무게
+ * @returns 한쪽에 필요한 플레이트 배열 (무거운 것부터)
+ */
+function calculatePlates(remainingWeight: number): Plates {
+  // 전체 무게 - 바벨 무게
 
+  if (remainingWeight <= 0) return [];
+
+  // 남은 무게 / 2 = 한쪽 무게
+  let oneSideWeight = remainingWeight / 2;
   const plates: Plates = [];
 
-  // 남은 무게를 가장 큰 플레이트부터 반복적으로 채우기
+  // 플레이트 무거운 것부터 적용
   for (const plate of AVAILABLE_PLATES) {
-    const doublePlate = plate * 2; // 양쪽에 같은 무게의 플레이트를 사용하므로 두 배로 계산
-    while (remainingWeight >= doublePlate) {
+    while (oneSideWeight >= plate) {
       plates.push(plate);
-      remainingWeight -= plate * 2;
+      oneSideWeight -= plate;
     }
   }
 
@@ -47,11 +57,12 @@ const calculateProgramWeight = (
 ) => {
   return percentages.map((program) => {
     const totalWeight = Math.ceil((pr * program.percent) / 100);
+    const remainingWeight = totalWeight - barWeight;
 
     return {
       ...program,
       totalWeight,
-      plates: calculatePlates(totalWeight, barWeight),
+      plates: calculatePlates(remainingWeight),
     };
   });
 };

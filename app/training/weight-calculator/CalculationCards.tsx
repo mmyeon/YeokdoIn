@@ -4,6 +4,7 @@ import { ArrowDown, ArrowUp, Trophy } from "lucide-react";
 import { useAtomValue } from "jotai";
 import { personalRecordAtom } from "@/entities/training/atoms/liftsAtom";
 import { LIFT_INFO_MAP } from "@/shared/constants";
+import PlateVisualizer from "@/components/PlateVisualizer";
 
 const getWeightGap = (prevWeight: number, currentWeight: number) => {
   if (prevWeight === currentWeight) {
@@ -62,23 +63,26 @@ const CalculationCards = ({
                     <span
                       className={`flex items-center ${weightGap > 0 ? "text-red-500" : "text-blue-500"} gap-0.5 text-sm`}
                     >
-                      {weightGap !== 0 && (
-                        <>
-                          {index >= 1 && (
+                      <span
+                        className={`flex items-center ${weightGap > 0 ? "text-red-500" : "text-blue-500"} gap-0.5 text-sm`}
+                      >
+                        <div className="min-h-[24px] flex items-center">
+                          {" "}
+                          {weightGap !== 0 && (
                             <>
                               <span>이전 무게보다 {Math.abs(weightGap)}kg</span>
-
-                              {/* TODO: 컬러 한 곳에서 관리하기 */}
                               {weightGap > 0 ? (
-                                <ArrowUp className="w-4 h-4 mr-1" />
+                                <ArrowUp className="w-4 h-4 ml-1" />
                               ) : (
-                                <ArrowDown className="w-4 h-4 mr-1" />
+                                <ArrowDown className="w-4 h-4 ml-1" />
                               )}
                             </>
                           )}
-                        </>
-                      )}
+                        </div>
+                      </span>
                     </span>
+
+                    <PlateVisualizer oneSidePlates={item.plates} />
                   </div>
                 </div>
               </CardContent>
