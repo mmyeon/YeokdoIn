@@ -188,7 +188,7 @@ const useMediaPipe = ({
             );
             setSmoothedLandmarks(stabilizedLandmark);
 
-            // 바벨 위치 감지 (양쪽 손목 중간점 사용)
+            // 바벨 위치 감지 (카메라에 가까운 손목 사용)
             const LEFT_WRIST = 15;
             const RIGHT_WRIST = 16;
 
@@ -204,17 +204,12 @@ const useMediaPipe = ({
             let barbellPosition: { x: number; y: number } | null = null;
 
             if (leftValid && rightValid) {
-              // 양쪽 손목 중간점 = 바벨 중심
+              // z값이 큰 쪽 = 카메라에 가까운 손목 선택
+              const closerWrist =
+                leftWrist.z > rightWrist.z ? leftWrist : rightWrist;
               barbellPosition = {
-                x: ((leftWrist.x + rightWrist.x) / 2) * canvas.width,
-                y: ((leftWrist.y + rightWrist.y) / 2) * canvas.height,
-              };
-            } else if (leftValid || rightValid) {
-              // 한쪽만 보이면 해당 손목 사용 (차선책)
-              const wrist = leftValid ? leftWrist : rightWrist;
-              barbellPosition = {
-                x: wrist.x * canvas.width,
-                y: wrist.y * canvas.height,
+                x: closerWrist.x * canvas.width,
+                y: closerWrist.y * canvas.height,
               };
             }
 
