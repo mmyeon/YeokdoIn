@@ -2,6 +2,7 @@ import {
   FilesetResolver,
   Landmark,
   PoseLandmarker,
+  ObjectDetector,
 } from "@mediapipe/tasks-vision";
 import { RefObject, useCallback, useEffect, useRef, useState } from "react";
 
@@ -16,10 +17,17 @@ const useMediaPipe = ({
 }) => {
   // media pipe pose landmarker 객체 인스턴스 저장
   const poseLandmarkerRef = useRef<PoseLandmarker>(null);
+  const objectDetectorRef = useRef<ObjectDetector>(null);
   // 애니메이션 루프 제어
   const animationFrameId = useRef<number | null>(null);
   // 이전 바벨 위치 저장 (선 연결용)
   const previousBarbellPos = useRef<{ x: number; y: number } | null>(null);
+  // 기준 플레이트 정보 저장
+  const referencePlate = useRef<{
+    x: number;
+    y: number;
+    height: number;
+  } | null>(null);
 
   const [smoothedLandmarks, setSmoothedLandmarks] = useState<Landmark[]>([]);
 
@@ -43,6 +51,21 @@ const useMediaPipe = ({
             numPoses: 1, // 한 명의 포즈만 감지
           }
         );
+
+        // Object Detector 모델 생성 및 설정
+        objectDetectorRef.current = await ObjectDetector.createFromOptions(
+          vision,
+          {
+            baseOptions: {
+              modelAssetPath: `https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite`,
+              delegate: "GPU",
+            },
+            scoreThreshold: 0.5,
+            runningMode: "VIDEO",
+            // 바벨 원판이 frisbee로 인식되어서 frisbee 카테고리만 허용
+            categoryAllowlist: ["frisbee"],
+          }
+        );
       } catch (error) {
         console.error("Failed to load PoseLandmarker:", error);
         console.error("Failed to load AI model. Please try again.");
@@ -55,6 +78,9 @@ const useMediaPipe = ({
     return () => {
       if (poseLandmarkerRef.current) {
         poseLandmarkerRef.current.close();
+      }
+      if (objectDetectorRef.current) {
+        objectDetectorRef.current.close();
       }
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
@@ -153,8 +179,9 @@ const useMediaPipe = ({
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const poseLandmarker = poseLandmarkerRef.current;
+    const objectDetector = objectDetectorRef.current;
 
-    if (!video || !canvas || !poseLandmarker) {
+    if (!video || !canvas || !poseLandmarker || !objectDetector) {
       return;
     }
 
@@ -170,13 +197,95 @@ const useMediaPipe = ({
       }
 
       try {
-        const results = poseLandmarker.detectForVideo(video, performance.now());
+        const nowInMs = performance.now();
+        const results = poseLandmarker.detectForVideo(video, nowInMs);
+        const objectResults = objectDetector.detectForVideo(video, nowInMs);
 
         // 캔버스 초기화
         canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
 
         // 비디오 프레임 그리기
         canvasCtx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        let barbellPosition: { x: number; y: number } | null = null;
+        const scaleX = canvas.width / video.videoWidth;
+        const scaleY = canvas.height / video.videoHeight;
+
+        // 객체 감지 결과 그리기
+        if (objectResults.detections) {
+          // TODO: 바벨 원판 위치 수집 로직 배열이어야 하는지 검토 필요
+          const barbellPlates: Array<{
+            x: number;
+            y: number;
+            height: number;
+            originX: number;
+            originY: number;
+            width: number;
+          }> = [];
+
+          for (const detection of objectResults.detections) {
+            if (detection.boundingBox) {
+              const { originX, originY, width, height } = detection.boundingBox;
+              barbellPlates.push({
+                x: (originX + width / 2) * scaleX,
+                y: (originY + height / 2) * scaleY,
+                height: height,
+                originX,
+                originY,
+                width,
+              });
+            }
+          }
+
+          // 2단계: 바벨 위치 계산
+          if (barbellPlates.length > 0) {
+            // 가장 큰 플레이트 찾기 - 기준 플레이트로 사용
+            const detectedPlate = barbellPlates.reduce((max, current) =>
+              current.height > max.height ? current : max
+            );
+
+            // 기준 플레이트 설정 또는 업데이트
+            if (!referencePlate.current) {
+              // 첫 감지: 가장 큰 것을 기준으로 설정
+              referencePlate.current = {
+                x: detectedPlate.x,
+                y: detectedPlate.y,
+                height: detectedPlate.height,
+              };
+              barbellPosition = {
+                x: detectedPlate.x,
+                y: detectedPlate.y,
+              };
+            } else {
+              // 기준 플레이트와 비슷한 크기의 플레이트 찾기 (±10% 범위)
+              const similarPlate = barbellPlates.find(
+                (f) =>
+                  Math.abs(f.height - referencePlate.current!.height) /
+                    referencePlate.current!.height <
+                  0.1
+              );
+
+              if (similarPlate) {
+                // 기준 플레이트와 비슷한 것 감지 → 기준 업데이트
+                referencePlate.current = {
+                  x: similarPlate.x,
+                  y: similarPlate.y,
+                  height: similarPlate.height,
+                };
+                barbellPosition = {
+                  x: similarPlate.x,
+                  y: similarPlate.y,
+                };
+              } else {
+                // 다른 플레이트만 감지됨 → Y만 사용, X는 기준 유지
+                barbellPosition = {
+                  x: referencePlate.current.x,
+                  y: detectedPlate.y,
+                };
+              }
+            }
+          }
+        }
 
         if (results.landmarks) {
           for (const landmark of results.landmarks) {
@@ -187,31 +296,6 @@ const useMediaPipe = ({
               smoothedLandmarks
             );
             setSmoothedLandmarks(stabilizedLandmark);
-
-            // 바벨 위치 감지 (카메라에 가까운 손목 사용)
-            const LEFT_WRIST = 15;
-            const RIGHT_WRIST = 16;
-
-            const leftWrist = stabilizedLandmark[LEFT_WRIST];
-            const rightWrist = stabilizedLandmark[RIGHT_WRIST];
-
-            // 양쪽 손목 가시성 검증 (임계값 0.5)
-            const leftValid =
-              leftWrist?.visibility && leftWrist.visibility > 0.5;
-            const rightValid =
-              rightWrist?.visibility && rightWrist.visibility > 0.5;
-
-            let barbellPosition: { x: number; y: number } | null = null;
-
-            if (leftValid && rightValid) {
-              // z값이 큰 쪽 = 카메라에 가까운 손목 선택
-              const closerWrist =
-                leftWrist.z > rightWrist.z ? leftWrist : rightWrist;
-              barbellPosition = {
-                x: closerWrist.x * canvas.width,
-                y: closerWrist.y * canvas.height,
-              };
-            }
 
             // 궤적 그리기 (별도 캔버스)
             if (barbellPosition && trajectoryCanvasRef.current) {
