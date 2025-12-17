@@ -339,8 +339,8 @@ const useMediaPipe = ({
 
               if (trajectoryCtx && previousBarbellPos.current) {
                 // 이전 위치 → 현재 위치 선 그리기
-                trajectoryCtx.strokeStyle = "rgba(0, 255, 0, 0.8)";
-                trajectoryCtx.lineWidth = 8;
+                trajectoryCtx.strokeStyle = "rgba(255, 50, 50, 0.9)";
+                trajectoryCtx.lineWidth = 10;
                 trajectoryCtx.lineCap = "round";
                 trajectoryCtx.beginPath();
                 trajectoryCtx.moveTo(
