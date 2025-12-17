@@ -18,6 +18,9 @@ const useMediaPipe = ({
   // media pipe pose landmarker 객체 인스턴스 저장
   const poseLandmarkerRef = useRef<PoseLandmarker>(null);
   const objectDetectorRef = useRef<ObjectDetector>(null);
+  const maskCanvasRef = useRef<HTMLCanvasElement>(
+    document.createElement("canvas")
+  );
   // 애니메이션 루프 제어
   const animationFrameId = useRef<number | null>(null);
   // 이전 바벨 위치 저장 (선 연결용)
@@ -49,6 +52,7 @@ const useMediaPipe = ({
             },
             runningMode: "VIDEO", // 비디오 모드로 설정
             numPoses: 1, // 한 명의 포즈만 감지
+            outputSegmentationMasks: true, // 세그멘테이션 마스크 출력 활성화
           }
         );
 
@@ -206,6 +210,37 @@ const useMediaPipe = ({
 
         // 비디오 프레임 그리기
         canvasCtx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Segmentation mask 그리기
+        if (results.segmentationMasks && results.segmentationMasks.length > 0) {
+          const mask = results.segmentationMasks[0];
+
+          const maskCanvas = maskCanvasRef.current;
+          maskCanvas.width = mask.width;
+          maskCanvas.height = mask.height;
+          const maskCtx = maskCanvas.getContext("2d");
+
+          if (maskCtx) {
+            // Float32Array를 ImageData로 변환
+            const imageData = maskCtx.createImageData(mask.width, mask.height);
+            const maskData = mask.getAsFloat32Array();
+
+            for (let i = 0; i < maskData.length; i++) {
+              const pixelIndex = i * 4;
+              // 마스크 값 (0-1)을 사용하여 반투명 효과 적용
+              const maskValue = maskData[i];
+
+              imageData.data[pixelIndex] = 88; // R
+              imageData.data[pixelIndex + 1] = 125; // G
+              imageData.data[pixelIndex + 2] = 205; // B
+              imageData.data[pixelIndex + 3] = maskValue * 179; // Alpha (투명도)
+            }
+
+            maskCtx.putImageData(imageData, 0, 0);
+            // 마스크를 메인 캔버스에 그리기
+            canvasCtx.drawImage(maskCanvas, 0, 0, canvas.width, canvas.height);
+          }
+        }
 
         let barbellPosition: { x: number; y: number } | null = null;
         const scaleX = canvas.width / video.videoWidth;
