@@ -384,26 +384,17 @@ const useMediaPipe = ({
                 canvasCtx.arc(
                   point.x * canvas.width,
                   point.y * canvas.height,
-                  4, // 관절점 크기를 더 작게
+                  12, // 관절점 크기를 더 작게
                   0,
                   2 * Math.PI
                 );
-                canvasCtx.fillStyle = "rgba(255, 0, 0, 0.7)"; // 반투명 빨간색
-                canvasCtx.fill();
-                canvasCtx.strokeStyle = "rgba(255, 255, 255, 0.8)";
-                canvasCtx.lineWidth = 1.5;
-                canvasCtx.stroke();
 
-                // 관절점 번호 표시 (신뢰도가 높을 때만)
-                // if (point.visibility > 0.5) {
-                //   canvasCtx.fillStyle = "rgba(255, 255, 255, 0.9)";
-                //   canvasCtx.font = "bold 10px Arial";
-                //   canvasCtx.fillText(
-                //     index.toString(),
-                //     point.x * canvas.width + 8,
-                //     point.y * canvas.height - 8,
-                //   );
-                // }
+                canvasCtx.fillStyle = "rgba(0, 0, 0)";
+                canvasCtx.fill();
+
+                canvasCtx.strokeStyle = "rgba(255, 255, 255)";
+                canvasCtx.lineWidth = 4;
+                canvasCtx.stroke();
               }
             });
 
@@ -458,8 +449,8 @@ const useMediaPipe = ({
                   endPoint.x * canvas.width,
                   endPoint.y * canvas.height
                 );
-                canvasCtx.strokeStyle = "rgba(255, 255, 0, 0.6)"; // 반투명 노란색
-                canvasCtx.lineWidth = 2;
+                canvasCtx.strokeStyle = "rgba(255, 255, 255)";
+                canvasCtx.lineWidth = 4;
                 canvasCtx.stroke();
               }
             });
