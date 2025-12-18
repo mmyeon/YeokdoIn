@@ -2,20 +2,35 @@ import {
   FilesetResolver,
   Landmark,
   PoseLandmarker,
+  ObjectDetector,
 } from "@mediapipe/tasks-vision";
 import { RefObject, useCallback, useEffect, useRef, useState } from "react";
 
 const useMediaPipe = ({
   videoRef,
   canvasRef,
+  trajectoryCanvasRef,
 }: {
   videoRef: RefObject<HTMLVideoElement | null>;
   canvasRef: RefObject<HTMLCanvasElement | null>;
+  trajectoryCanvasRef: RefObject<HTMLCanvasElement | null>;
 }) => {
   // media pipe pose landmarker 객체 인스턴스 저장
   const poseLandmarkerRef = useRef<PoseLandmarker>(null);
+  const objectDetectorRef = useRef<ObjectDetector>(null);
+  const maskCanvasRef = useRef<HTMLCanvasElement>(
+    document.createElement("canvas")
+  );
   // 애니메이션 루프 제어
   const animationFrameId = useRef<number | null>(null);
+  // 이전 바벨 위치 저장 (선 연결용)
+  const previousBarbellPos = useRef<{ x: number; y: number } | null>(null);
+  // 기준 플레이트 정보 저장
+  const referencePlate = useRef<{
+    x: number;
+    y: number;
+    height: number;
+  } | null>(null);
 
   const [smoothedLandmarks, setSmoothedLandmarks] = useState<Landmark[]>([]);
 
@@ -37,6 +52,22 @@ const useMediaPipe = ({
             },
             runningMode: "VIDEO", // 비디오 모드로 설정
             numPoses: 1, // 한 명의 포즈만 감지
+            outputSegmentationMasks: true, // 세그멘테이션 마스크 출력 활성화
+          }
+        );
+
+        // Object Detector 모델 생성 및 설정
+        objectDetectorRef.current = await ObjectDetector.createFromOptions(
+          vision,
+          {
+            baseOptions: {
+              modelAssetPath: `https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite`,
+              delegate: "GPU",
+            },
+            scoreThreshold: 0.5,
+            runningMode: "VIDEO",
+            // 바벨 원판이 frisbee로 인식되어서 frisbee 카테고리만 허용
+            categoryAllowlist: ["frisbee"],
           }
         );
       } catch (error) {
@@ -51,6 +82,9 @@ const useMediaPipe = ({
     return () => {
       if (poseLandmarkerRef.current) {
         poseLandmarkerRef.current.close();
+      }
+      if (objectDetectorRef.current) {
+        objectDetectorRef.current.close();
       }
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
@@ -149,8 +183,9 @@ const useMediaPipe = ({
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const poseLandmarker = poseLandmarkerRef.current;
+    const objectDetector = objectDetectorRef.current;
 
-    if (!video || !canvas || !poseLandmarker) {
+    if (!video || !canvas || !poseLandmarker || !objectDetector) {
       return;
     }
 
@@ -166,13 +201,126 @@ const useMediaPipe = ({
       }
 
       try {
-        const results = poseLandmarker.detectForVideo(video, performance.now());
+        const nowInMs = performance.now();
+        const results = poseLandmarker.detectForVideo(video, nowInMs);
+        const objectResults = objectDetector.detectForVideo(video, nowInMs);
 
         // 캔버스 초기화
         canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
 
         // 비디오 프레임 그리기
         canvasCtx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Segmentation mask 그리기
+        if (results.segmentationMasks && results.segmentationMasks.length > 0) {
+          const mask = results.segmentationMasks[0];
+
+          const maskCanvas = maskCanvasRef.current;
+          maskCanvas.width = mask.width;
+          maskCanvas.height = mask.height;
+          const maskCtx = maskCanvas.getContext("2d");
+
+          if (maskCtx) {
+            // Float32Array를 ImageData로 변환
+            const imageData = maskCtx.createImageData(mask.width, mask.height);
+            const maskData = mask.getAsFloat32Array();
+
+            for (let i = 0; i < maskData.length; i++) {
+              const pixelIndex = i * 4;
+              // 마스크 값 (0-1)을 사용하여 반투명 효과 적용
+              const maskValue = maskData[i];
+
+              imageData.data[pixelIndex] = 88; // R
+              imageData.data[pixelIndex + 1] = 125; // G
+              imageData.data[pixelIndex + 2] = 205; // B
+              imageData.data[pixelIndex + 3] = maskValue * 179; // Alpha (투명도)
+            }
+
+            maskCtx.putImageData(imageData, 0, 0);
+            // 마스크를 메인 캔버스에 그리기
+            canvasCtx.drawImage(maskCanvas, 0, 0, canvas.width, canvas.height);
+          }
+        }
+
+        let barbellPosition: { x: number; y: number } | null = null;
+        const scaleX = canvas.width / video.videoWidth;
+        const scaleY = canvas.height / video.videoHeight;
+
+        // 객체 감지 결과 그리기
+        if (objectResults.detections) {
+          // TODO: 바벨 원판 위치 수집 로직 배열이어야 하는지 검토 필요
+          const barbellPlates: Array<{
+            x: number;
+            y: number;
+            height: number;
+            originX: number;
+            originY: number;
+            width: number;
+          }> = [];
+
+          for (const detection of objectResults.detections) {
+            if (detection.boundingBox) {
+              const { originX, originY, width, height } = detection.boundingBox;
+              barbellPlates.push({
+                x: (originX + width / 2) * scaleX,
+                y: (originY + height / 2) * scaleY,
+                height: height,
+                originX,
+                originY,
+                width,
+              });
+            }
+          }
+
+          // 2단계: 바벨 위치 계산
+          if (barbellPlates.length > 0) {
+            // 가장 큰 플레이트 찾기 - 기준 플레이트로 사용
+            const detectedPlate = barbellPlates.reduce((max, current) =>
+              current.height > max.height ? current : max
+            );
+
+            // 기준 플레이트 설정 또는 업데이트
+            if (!referencePlate.current) {
+              // 첫 감지: 가장 큰 것을 기준으로 설정
+              referencePlate.current = {
+                x: detectedPlate.x,
+                y: detectedPlate.y,
+                height: detectedPlate.height,
+              };
+              barbellPosition = {
+                x: detectedPlate.x,
+                y: detectedPlate.y,
+              };
+            } else {
+              // 기준 플레이트와 비슷한 크기의 플레이트 찾기 (±10% 범위)
+              const similarPlate = barbellPlates.find(
+                (f) =>
+                  Math.abs(f.height - referencePlate.current!.height) /
+                    referencePlate.current!.height <
+                  0.1
+              );
+
+              if (similarPlate) {
+                // 기준 플레이트와 비슷한 것 감지 → 기준 업데이트
+                referencePlate.current = {
+                  x: similarPlate.x,
+                  y: similarPlate.y,
+                  height: similarPlate.height,
+                };
+                barbellPosition = {
+                  x: similarPlate.x,
+                  y: similarPlate.y,
+                };
+              } else {
+                // 다른 플레이트만 감지됨 → Y만 사용, X는 기준 유지
+                barbellPosition = {
+                  x: referencePlate.current.x,
+                  y: detectedPlate.y,
+                };
+              }
+            }
+          }
+        }
 
         if (results.landmarks) {
           for (const landmark of results.landmarks) {
@@ -183,6 +331,30 @@ const useMediaPipe = ({
               smoothedLandmarks
             );
             setSmoothedLandmarks(stabilizedLandmark);
+
+            // 궤적 그리기 (별도 캔버스)
+            if (barbellPosition && trajectoryCanvasRef.current) {
+              const trajectoryCtx =
+                trajectoryCanvasRef.current.getContext("2d");
+
+              if (trajectoryCtx && previousBarbellPos.current) {
+                // 이전 위치 → 현재 위치 선 그리기
+                trajectoryCtx.strokeStyle = "rgba(255, 50, 50, 0.9)";
+                trajectoryCtx.lineWidth = 10;
+                trajectoryCtx.lineCap = "round";
+                trajectoryCtx.beginPath();
+                trajectoryCtx.moveTo(
+                  previousBarbellPos.current.x,
+                  previousBarbellPos.current.y
+                );
+                trajectoryCtx.lineTo(barbellPosition.x, barbellPosition.y);
+                trajectoryCtx.stroke();
+              }
+
+              // 현재 위치를 다음 프레임을 위해 저장
+              previousBarbellPos.current = barbellPosition;
+            }
+            // 손목 안 보이면: previousBarbellPos 유지 (다음에 보일 때 직선으로 연결됨)
 
             // 기본 MediaPipe 관절점과 연결선 그리기 제거
             // drawingUtils.drawLandmarks(landmark, {
@@ -212,26 +384,17 @@ const useMediaPipe = ({
                 canvasCtx.arc(
                   point.x * canvas.width,
                   point.y * canvas.height,
-                  4, // 관절점 크기를 더 작게
+                  12, // 관절점 크기를 더 작게
                   0,
                   2 * Math.PI
                 );
-                canvasCtx.fillStyle = "rgba(255, 0, 0, 0.7)"; // 반투명 빨간색
-                canvasCtx.fill();
-                canvasCtx.strokeStyle = "rgba(255, 255, 255, 0.8)";
-                canvasCtx.lineWidth = 1.5;
-                canvasCtx.stroke();
 
-                // 관절점 번호 표시 (신뢰도가 높을 때만)
-                // if (point.visibility > 0.5) {
-                //   canvasCtx.fillStyle = "rgba(255, 255, 255, 0.9)";
-                //   canvasCtx.font = "bold 10px Arial";
-                //   canvasCtx.fillText(
-                //     index.toString(),
-                //     point.x * canvas.width + 8,
-                //     point.y * canvas.height - 8,
-                //   );
-                // }
+                canvasCtx.fillStyle = "rgba(0, 0, 0)";
+                canvasCtx.fill();
+
+                canvasCtx.strokeStyle = "rgba(255, 255, 255)";
+                canvasCtx.lineWidth = 4;
+                canvasCtx.stroke();
               }
             });
 
@@ -286,8 +449,8 @@ const useMediaPipe = ({
                   endPoint.x * canvas.width,
                   endPoint.y * canvas.height
                 );
-                canvasCtx.strokeStyle = "rgba(255, 255, 0, 0.6)"; // 반투명 노란색
-                canvasCtx.lineWidth = 2;
+                canvasCtx.strokeStyle = "rgba(255, 255, 255)";
+                canvasCtx.lineWidth = 4;
                 canvasCtx.stroke();
               }
             });
