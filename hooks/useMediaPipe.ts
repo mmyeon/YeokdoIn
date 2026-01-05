@@ -17,12 +17,13 @@ import {
   MEDIAPIPE_WASM_URL,
   POSE_MODEL_URL,
   OBJECT_MODEL_URL,
-  SEGMENTATION_MASK_COLOR,
   TRAJECTORY_LINE_STYLE,
   JOINT_STYLE,
   CONNECTION_LINE_STYLE,
   JOINTS_TO_DISPLAY,
   SKELETON_CONNECTIONS,
+  SEGMENTATION_MASK_BACKGROUND_COLOR,
+  SEGMENTATION_MASK_COLOR,
 } from "./constants";
 
 const useMediaPipe = ({
@@ -250,8 +251,8 @@ const useMediaPipe = ({
           if (drawingUtils.current) {
             drawingUtils.current.drawConfidenceMask(
               mask,
-              [0, 0, 0, 0], // 1. backgroundTexture: 배경 -> 투명
-              [88, 125, 205, 179] // 2. overlayTexture: 사람(확률 높은 곳) -> 파란색 반투명 (179 = 0.7 Alpha)
+              SEGMENTATION_MASK_BACKGROUND_COLOR,
+              SEGMENTATION_MASK_COLOR
             );
           }
         }
