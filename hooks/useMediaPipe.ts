@@ -25,7 +25,8 @@ import {
   SEGMENTATION_MASK_BACKGROUND_COLOR,
   SEGMENTATION_MASK_COLOR,
 } from "./constants";
-import { smoothLandmarks } from "./utils/landmark-processing";
+import { smoothLandmarks, stabilizeLandmarks } from "./utils/landmark-processing";
+import { detectBarbellPosition, type ReferencePlate } from "./utils/barbell-detection";
 
 const useMediaPipe = ({
   videoRef,
@@ -47,11 +48,7 @@ const useMediaPipe = ({
   // 바벨의 이전 프레임 위치 (궤적 그리기용)
   const previousBarbellPos = useRef<{ x: number; y: number } | null>(null);
   // 기준 바벨 원판 정보 (크기 및 위치 추적용)
-  const referencePlate = useRef<{
-    x: number;
-    y: number;
-    height: number;
-  } | null>(null);
+  const referencePlate = useRef<ReferencePlate | null>(null);
 
   // WebGL2 기반 세그멘테이션 마스크 렌더링 유틸리티
   const drawingUtils = useRef<DrawingUtils>(null);
@@ -131,36 +128,6 @@ const useMediaPipe = ({
   // 랜드마크 히스토리 (스무딩용)
   const landmarkHistory = useRef<Landmark[][]>([]);
 
-  // 관절 위치 안정화 함수 (이동 거리 기반)
-  const stabilizeLandmarks = (
-    currentLandmarks: Landmark[],
-    previousLandmarks: Landmark[]
-  ) => {
-    if (!previousLandmarks || previousLandmarks.length === 0) {
-      return currentLandmarks;
-    }
-
-    return currentLandmarks.map((landmark, index) => {
-      if (!landmark || !previousLandmarks[index]) return landmark;
-
-      const prev = previousLandmarks[index];
-      const dx = Math.abs(landmark.x - prev.x);
-      const dy = Math.abs(landmark.y - prev.y);
-
-      // 이동 거리가 너무 크면 이전 위치 유지
-      if (dx > MAX_MOVEMENT || dy > MAX_MOVEMENT) {
-        return {
-          ...landmark,
-          x: prev.x,
-          y: prev.y,
-          z: prev.z,
-        };
-      }
-
-      return landmark;
-    });
-  };
-
   const detectPoseInVideo = useCallback(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -207,84 +174,21 @@ const useMediaPipe = ({
           }
         }
 
+        // 바벨 위치 감지
         let barbellPosition: { x: number; y: number } | null = null;
         const scaleX = canvas.width / video.videoWidth;
         const scaleY = canvas.height / video.videoHeight;
 
-        // 객체 감지 결과 그리기
-        if (objectDetectionResults.detections) {
-          // TODO: 바벨 원판 위치 수집 로직 배열이어야 하는지 검토 필요
-          const barbellPlates: Array<{
-            x: number;
-            y: number;
-            height: number;
-            originX: number;
-            originY: number;
-            width: number;
-          }> = [];
+        const barbellDetectionResult = detectBarbellPosition(
+          objectDetectionResults.detections,
+          referencePlate.current,
+          { plateSizeTolerance: PLATE_SIZE_TOLERANCE },
+          { scaleX, scaleY }
+        );
 
-          for (const detection of objectDetectionResults.detections) {
-            if (detection.boundingBox) {
-              const { originX, originY, width, height } = detection.boundingBox;
-              barbellPlates.push({
-                x: (originX + width / 2) * scaleX,
-                y: (originY + height / 2) * scaleY,
-                height: height,
-                originX,
-                originY,
-                width,
-              });
-            }
-          }
-
-          // 2단계: 바벨 위치 계산
-          if (barbellPlates.length > 0) {
-            // 가장 큰 플레이트 찾기 - 기준 플레이트로 사용
-            const detectedPlate = barbellPlates.reduce((max, current) =>
-              current.height > max.height ? current : max
-            );
-
-            // 기준 플레이트 설정 또는 업데이트
-            if (!referencePlate.current) {
-              // 첫 감지: 가장 큰 것을 기준으로 설정
-              referencePlate.current = {
-                x: detectedPlate.x,
-                y: detectedPlate.y,
-                height: detectedPlate.height,
-              };
-              barbellPosition = {
-                x: detectedPlate.x,
-                y: detectedPlate.y,
-              };
-            } else {
-              // 기준 플레이트와 비슷한 크기의 플레이트 찾기 (±10% 범위)
-              const similarPlate = barbellPlates.find(
-                (f) =>
-                  Math.abs(f.height - referencePlate.current!.height) /
-                    referencePlate.current!.height <
-                  PLATE_SIZE_TOLERANCE
-              );
-
-              if (similarPlate) {
-                // 기준 플레이트와 비슷한 것 감지 → 기준 업데이트
-                referencePlate.current = {
-                  x: similarPlate.x,
-                  y: similarPlate.y,
-                  height: similarPlate.height,
-                };
-                barbellPosition = {
-                  x: similarPlate.x,
-                  y: similarPlate.y,
-                };
-              } else {
-                // 다른 플레이트만 감지됨 → Y만 사용, X는 기준 유지
-                barbellPosition = {
-                  x: referencePlate.current.x,
-                  y: detectedPlate.y,
-                };
-              }
-            }
-          }
+        if (barbellDetectionResult) {
+          barbellPosition = barbellDetectionResult.position;
+          referencePlate.current = barbellDetectionResult.newReference;
         }
 
         if (poseResults.landmarks) {
@@ -302,7 +206,8 @@ const useMediaPipe = ({
 
             const stabilizedLandmark = stabilizeLandmarks(
               smoothingResult.smoothed,
-              smoothedLandmarks
+              smoothedLandmarks,
+              MAX_MOVEMENT
             );
             setSmoothedLandmarks(stabilizedLandmark);
 
