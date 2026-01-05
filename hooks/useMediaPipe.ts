@@ -6,6 +6,24 @@ import {
   DrawingUtils,
 } from "@mediapipe/tasks-vision";
 import { RefObject, useCallback, useEffect, useRef, useState } from "react";
+import {
+  SMOOTHING_WINDOW,
+  MAX_MOVEMENT,
+  VISIBILITY_THRESHOLD_FOR_AVERAGING,
+  VISIBILITY_THRESHOLD_FOR_DISPLAY,
+  VISIBILITY_THRESHOLD_FOR_CONNECTION,
+  OBJECT_DETECTION_SCORE_THRESHOLD,
+  PLATE_SIZE_TOLERANCE,
+  MEDIAPIPE_WASM_URL,
+  POSE_MODEL_URL,
+  OBJECT_MODEL_URL,
+  SEGMENTATION_MASK_COLOR,
+  TRAJECTORY_LINE_STYLE,
+  JOINT_STYLE,
+  CONNECTION_LINE_STYLE,
+  JOINTS_TO_DISPLAY,
+  SKELETON_CONNECTIONS,
+} from "./constants";
 
 const useMediaPipe = ({
   videoRef,
@@ -39,16 +57,14 @@ const useMediaPipe = ({
     const createPoseLandmarker = async () => {
       try {
         // MediaPipe Vision Tasks 초기화
-        const vision = await FilesetResolver.forVisionTasks(
-          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"
-        );
+        const vision = await FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_URL);
 
         // Pose Landmarker 모델 생성 및 설정
         poseLandmarkerRef.current = await PoseLandmarker.createFromOptions(
           vision,
           {
             baseOptions: {
-              modelAssetPath: `https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task`,
+              modelAssetPath: POSE_MODEL_URL,
               delegate: "GPU", // GPU 가속 사용
             },
             runningMode: "VIDEO", // 비디오 모드로 설정
@@ -63,10 +79,10 @@ const useMediaPipe = ({
           vision,
           {
             baseOptions: {
-              modelAssetPath: `https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite`,
+              modelAssetPath: OBJECT_MODEL_URL,
               delegate: "GPU",
             },
-            scoreThreshold: 0.5,
+            scoreThreshold: OBJECT_DETECTION_SCORE_THRESHOLD,
             runningMode: "VIDEO",
             // 바벨 원판이 frisbee로 인식되어서 frisbee 카테고리만 허용
             categoryAllowlist: ["frisbee"],
@@ -108,14 +124,13 @@ const useMediaPipe = ({
   }, []);
 
   const landmarkHistory = useRef<Landmark[][]>([]);
-  const smoothingWindow = 5; // 스무딩에 사용할 프레임 수
 
   const smoothLandmarks = (currentLandmarks: Landmark[]) => {
     // 현재 랜드마크를 히스토리에 추가
     landmarkHistory.current.push(currentLandmarks);
 
     // 히스토리 크기 제한
-    if (landmarkHistory.current.length > smoothingWindow) {
+    if (landmarkHistory.current.length > SMOOTHING_WINDOW) {
       landmarkHistory.current.shift();
     }
 
@@ -139,7 +154,7 @@ const useMediaPipe = ({
         if (
           frame[index] &&
           frame[index].visibility &&
-          frame[index].visibility! > 0.3
+          frame[index].visibility! > VISIBILITY_THRESHOLD_FOR_AVERAGING
         ) {
           sumX += frame[index].x;
           sumY += frame[index].y;
@@ -171,8 +186,6 @@ const useMediaPipe = ({
       return currentLandmarks;
     }
 
-    const maxMovement = 0.05; // 최대 허용 이동 거리 (5%)
-
     return currentLandmarks.map((landmark, index) => {
       if (!landmark || !previousLandmarks[index]) return landmark;
 
@@ -181,7 +194,7 @@ const useMediaPipe = ({
       const dy = Math.abs(landmark.y - prev.y);
 
       // 이동 거리가 너무 크면 이전 위치 유지
-      if (dx > maxMovement || dy > maxMovement) {
+      if (dx > MAX_MOVEMENT || dy > MAX_MOVEMENT) {
         return {
           ...landmark,
           x: prev.x,
@@ -288,7 +301,7 @@ const useMediaPipe = ({
                 (f) =>
                   Math.abs(f.height - referencePlate.current!.height) /
                     referencePlate.current!.height <
-                  0.1
+                  PLATE_SIZE_TOLERANCE
               );
 
               if (similarPlate) {
@@ -330,8 +343,8 @@ const useMediaPipe = ({
 
               if (trajectoryCtx && previousBarbellPos.current) {
                 // 이전 위치 → 현재 위치 선 그리기
-                trajectoryCtx.strokeStyle = "rgba(255, 50, 50, 0.9)";
-                trajectoryCtx.lineWidth = 10;
+                trajectoryCtx.strokeStyle = TRAJECTORY_LINE_STYLE.COLOR;
+                trajectoryCtx.lineWidth = TRAJECTORY_LINE_STYLE.WIDTH;
                 trajectoryCtx.lineCap = "round";
                 trajectoryCtx.beginPath();
                 trajectoryCtx.moveTo(
@@ -361,64 +374,35 @@ const useMediaPipe = ({
             // );
 
             // 사용자가 지정한 관절점만 그리기 (신뢰도 필터링 적용)
-            const customJoints = [
-              23, 24, 25, 26, 13, 14, 11, 12, 15, 16, 27, 28, 31, 32, 29, 30,
-              22, 21, 31,
-            ]; // 왼쪽/오른쪽 엉덩이, 왼쪽/오른쪽 무릎 등
-
-            customJoints.forEach((index) => {
+            JOINTS_TO_DISPLAY.forEach((index) => {
               const point = stabilizedLandmark[index];
-              if (point && point.visibility && point.visibility > 0.3) {
+              if (
+                point &&
+                point.visibility &&
+                point.visibility > VISIBILITY_THRESHOLD_FOR_DISPLAY
+              ) {
                 // 신뢰도 30% 이상만 표시
                 // 관절점 그리기
                 canvasCtx.beginPath();
                 canvasCtx.arc(
                   point.x * canvas.width,
                   point.y * canvas.height,
-                  12, // 관절점 크기를 더 작게
+                  JOINT_STYLE.RADIUS,
                   0,
                   2 * Math.PI
                 );
 
-                canvasCtx.fillStyle = "rgba(0, 0, 0)";
+                canvasCtx.fillStyle = JOINT_STYLE.FILL_COLOR;
                 canvasCtx.fill();
 
-                canvasCtx.strokeStyle = "rgba(255, 255, 255)";
-                canvasCtx.lineWidth = 4;
+                canvasCtx.strokeStyle = JOINT_STYLE.STROKE_COLOR;
+                canvasCtx.lineWidth = JOINT_STYLE.STROKE_WIDTH;
                 canvasCtx.stroke();
               }
             });
 
             // 사용자가 지정한 관절 연결선 그리기 (신뢰도 필터링 적용)
-            const customConnections = [
-              // 왼쪽 다리 연결
-              [23, 25], // 왼쪽 엉덩이 - 왼쪽 무릎
-              [25, 27], // 왼쪽 무릎 - 왼쪽 발목
-              // 오른쪽 다리 연결
-              [24, 26], // 오른쪽 엉덩이 - 오른쪽 무릎
-              [26, 28], // 오른쪽 무릎 - 오른쪽 발목
-              // 어깨 연결
-              [11, 12], // 왼쪽 어깨 - 오른쪽 어깨
-              // 팔 연결
-              [11, 13], // 왼쪽 어깨 - 왼쪽 팔꿈치
-              [11, 23], // 왼쪽 어깨 - 왼쪽 팔꿈치
-              [13, 15], // 왼쪽 팔꿈치 - 왼쪽 손목
-              [12, 14], // 오른쪽 어깨 - 오른쪽 팔꿈치
-              [12, 24], // 오른쪽 어깨 - 오른쪽 팔꿈치
-              [14, 16], // 오른쪽 팔꿈치 - 오른쪽 손목
-              // 왼발 3지점 연결 (발목-발뒤꿈치-발끝)
-              [27, 29], // 왼쪽 발목 - 왼쪽 발뒤꿈치
-              [29, 31], // 왼쪽 발뒤꿈치 - 왼쪽 발끝
-              // [27, 31], // 왼쪽 발목 - 왼쪽 발끝 (삼각형 완성)
-              // 오른발 3지점 연결 (발목-발뒤꿈치-발끝)
-              [28, 30], // 오른쪽 발목 - 오른쪽 발뒤꿈치
-              [30, 32], // 오른쪽 발뒤꿈치 - 오른쪽 발끝
-              // [28, 32], // 오른쪽 발목 - 오른쪽 발끝 (삼각형 완성)
-              // 고관절 연결
-              [23, 24],
-            ];
-
-            customConnections.forEach(([start, end]) => {
+            SKELETON_CONNECTIONS.forEach(([start, end]) => {
               const startPoint = stabilizedLandmark[start];
               const endPoint = stabilizedLandmark[end];
 
@@ -427,9 +411,9 @@ const useMediaPipe = ({
                 startPoint &&
                 endPoint &&
                 startPoint.visibility &&
-                startPoint.visibility > 0.4 &&
+                startPoint.visibility > VISIBILITY_THRESHOLD_FOR_CONNECTION &&
                 endPoint.visibility &&
-                endPoint.visibility > 0.4
+                endPoint.visibility > VISIBILITY_THRESHOLD_FOR_CONNECTION
               ) {
                 canvasCtx.beginPath();
                 canvasCtx.moveTo(
@@ -440,8 +424,8 @@ const useMediaPipe = ({
                   endPoint.x * canvas.width,
                   endPoint.y * canvas.height
                 );
-                canvasCtx.strokeStyle = "rgba(255, 255, 255)";
-                canvasCtx.lineWidth = 4;
+                canvasCtx.strokeStyle = CONNECTION_LINE_STYLE.COLOR;
+                canvasCtx.lineWidth = CONNECTION_LINE_STYLE.WIDTH;
                 canvasCtx.stroke();
               }
             });
