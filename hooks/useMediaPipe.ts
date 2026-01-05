@@ -228,9 +228,6 @@ const useMediaPipe = ({
         // 캔버스 초기화
         canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // 비디오 프레임 그리기
-        // canvasCtx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
         if (results.segmentationMasks && results.segmentationMasks.length > 0) {
           const mask = results.segmentationMasks[0];
 
