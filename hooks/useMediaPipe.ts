@@ -25,6 +25,7 @@ import {
   SEGMENTATION_MASK_BACKGROUND_COLOR,
   SEGMENTATION_MASK_COLOR,
 } from "./constants";
+import { smoothLandmarks } from "./utils/landmark-processing";
 
 const useMediaPipe = ({
   videoRef,
@@ -127,59 +128,8 @@ const useMediaPipe = ({
     };
   }, []);
 
+  // 랜드마크 히스토리 (스무딩용)
   const landmarkHistory = useRef<Landmark[][]>([]);
-
-  const smoothLandmarks = (currentLandmarks: Landmark[]) => {
-    // 현재 랜드마크를 히스토리에 추가
-    landmarkHistory.current.push(currentLandmarks);
-
-    // 히스토리 크기 제한
-    if (landmarkHistory.current.length > SMOOTHING_WINDOW) {
-      landmarkHistory.current.shift();
-    }
-
-    // 충분한 프레임이 쌓이지 않았으면 현재 랜드마크 반환
-    if (landmarkHistory.current.length < 3) {
-      return currentLandmarks;
-    }
-
-    // 각 관절점에 대해 평균 위치 계산
-    const smoothed = currentLandmarks.map((landmark, index) => {
-      if (!landmark) return landmark;
-
-      let sumX = 0,
-        sumY = 0,
-        sumZ = 0,
-        sumVisibility = 0;
-      let validCount = 0;
-
-      // 히스토리에서 유효한 값들의 평균 계산
-      landmarkHistory.current.forEach((frame) => {
-        if (
-          frame[index] &&
-          frame[index].visibility &&
-          frame[index].visibility! > VISIBILITY_THRESHOLD_FOR_AVERAGING
-        ) {
-          sumX += frame[index].x;
-          sumY += frame[index].y;
-          sumZ += frame[index].z;
-          sumVisibility += frame[index].visibility!;
-          validCount++;
-        }
-      });
-
-      if (validCount === 0) return landmark;
-
-      return {
-        x: sumX / validCount,
-        y: sumY / validCount,
-        z: sumZ / validCount,
-        visibility: sumVisibility / validCount,
-      };
-    });
-
-    return smoothed;
-  };
 
   // 관절 위치 안정화 함수 (이동 거리 기반)
   const stabilizeLandmarks = (
@@ -340,9 +290,18 @@ const useMediaPipe = ({
         if (poseResults.landmarks) {
           for (const poseLandmarks of poseResults.landmarks) {
             // 관절 위치 스무딩 및 안정화 적용
-            const smoothedLandmark = smoothLandmarks(poseLandmarks);
+            const smoothingResult = smoothLandmarks(
+              poseLandmarks,
+              landmarkHistory.current,
+              {
+                smoothingWindow: SMOOTHING_WINDOW,
+                visibilityThreshold: VISIBILITY_THRESHOLD_FOR_AVERAGING,
+              }
+            );
+            landmarkHistory.current = smoothingResult.newHistory;
+
             const stabilizedLandmark = stabilizeLandmarks(
-              smoothedLandmark,
+              smoothingResult.smoothed,
               smoothedLandmarks
             );
             setSmoothedLandmarks(stabilizedLandmark);

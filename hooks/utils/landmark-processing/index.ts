@@ -1,0 +1,1 @@
+export { smoothLandmarks } from "./smoothing";
