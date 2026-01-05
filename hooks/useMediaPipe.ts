@@ -200,14 +200,7 @@ const useMediaPipe = ({
     const poseLandmarker = poseLandmarkerRef.current;
     const objectDetector = objectDetectorRef.current;
 
-    if (
-      !video ||
-      !canvas ||
-      !poseLandmarker ||
-      !objectDetector ||
-      !drawingUtils.current
-    )
-      return;
+    if (!video || !canvas || !poseLandmarker || !objectDetector) return;
 
     const canvasCtx = canvas.getContext("2d");
     if (!canvasCtx) return;
