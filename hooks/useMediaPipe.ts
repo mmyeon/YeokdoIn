@@ -36,19 +36,22 @@ const useMediaPipe = ({
   trajectoryCanvasRef: RefObject<HTMLCanvasElement | null>;
   maskCanvasRef?: RefObject<HTMLCanvasElement | null>;
 }) => {
+  // MediaPipe Pose Landmarker 인스턴스 참조
   const poseLandmarkerRef = useRef<PoseLandmarker>(null);
+  // MediaPipe Object Detector 인스턴스 참조
   const objectDetectorRef = useRef<ObjectDetector>(null);
   // 애니메이션 루프 제어
   const animationFrameId = useRef<number | null>(null);
-  // 이전 바벨 위치 저장 (선 연결용)
+  // 바벨의 이전 프레임 위치 (궤적 그리기용)
   const previousBarbellPos = useRef<{ x: number; y: number } | null>(null);
-  // 기준 플레이트 정보 저장
+  // 기준 바벨 원판 정보 (크기 및 위치 추적용)
   const referencePlate = useRef<{
     x: number;
     y: number;
     height: number;
   } | null>(null);
 
+  // WebGL2 기반 세그멘테이션 마스크 렌더링 유틸리티
   const drawingUtils = useRef<DrawingUtils>(null);
 
   const [smoothedLandmarks, setSmoothedLandmarks] = useState<Landmark[]>([]);
@@ -228,14 +231,21 @@ const useMediaPipe = ({
 
       try {
         const nowInMs = performance.now();
-        const results = poseLandmarker.detectForVideo(video, nowInMs);
-        const objectResults = objectDetector.detectForVideo(video, nowInMs);
+        const poseResults = poseLandmarker.detectForVideo(video, nowInMs);
+        const objectDetectionResults = objectDetector.detectForVideo(
+          video,
+          nowInMs
+        );
 
         // 캔버스 초기화
         canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
 
-        if (results.segmentationMasks && results.segmentationMasks.length > 0) {
-          const mask = results.segmentationMasks[0];
+        // Segmentation mask 그리기
+        if (
+          poseResults.segmentationMasks &&
+          poseResults.segmentationMasks.length > 0
+        ) {
+          const mask = poseResults.segmentationMasks[0];
 
           if (drawingUtils.current) {
             drawingUtils.current.drawConfidenceMask(
@@ -251,7 +261,7 @@ const useMediaPipe = ({
         const scaleY = canvas.height / video.videoHeight;
 
         // 객체 감지 결과 그리기
-        if (objectResults.detections) {
+        if (objectDetectionResults.detections) {
           // TODO: 바벨 원판 위치 수집 로직 배열이어야 하는지 검토 필요
           const barbellPlates: Array<{
             x: number;
@@ -262,7 +272,7 @@ const useMediaPipe = ({
             width: number;
           }> = [];
 
-          for (const detection of objectResults.detections) {
+          for (const detection of objectDetectionResults.detections) {
             if (detection.boundingBox) {
               const { originX, originY, width, height } = detection.boundingBox;
               barbellPlates.push({
@@ -326,10 +336,10 @@ const useMediaPipe = ({
           }
         }
 
-        if (results.landmarks) {
-          for (const landmark of results.landmarks) {
+        if (poseResults.landmarks) {
+          for (const poseLandmarks of poseResults.landmarks) {
             // 관절 위치 스무딩 및 안정화 적용
-            const smoothedLandmark = smoothLandmarks(landmark);
+            const smoothedLandmark = smoothLandmarks(poseLandmarks);
             const stabilizedLandmark = stabilizeLandmarks(
               smoothedLandmark,
               smoothedLandmarks
