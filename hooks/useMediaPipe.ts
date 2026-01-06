@@ -10,23 +10,25 @@ import {
   SMOOTHING_WINDOW,
   MAX_MOVEMENT,
   VISIBILITY_THRESHOLD_FOR_AVERAGING,
-  VISIBILITY_THRESHOLD_FOR_DISPLAY,
-  VISIBILITY_THRESHOLD_FOR_CONNECTION,
   OBJECT_DETECTION_SCORE_THRESHOLD,
   PLATE_SIZE_TOLERANCE,
   MEDIAPIPE_WASM_URL,
   POSE_MODEL_URL,
   OBJECT_MODEL_URL,
-  TRAJECTORY_LINE_STYLE,
-  JOINT_STYLE,
-  CONNECTION_LINE_STYLE,
-  JOINTS_TO_DISPLAY,
-  SKELETON_CONNECTIONS,
-  SEGMENTATION_MASK_BACKGROUND_COLOR,
-  SEGMENTATION_MASK_COLOR,
 } from "./constants";
-import { smoothLandmarks, stabilizeLandmarks } from "./utils/landmark-processing";
-import { detectBarbellPosition, type ReferencePlate } from "./utils/barbell-detection";
+import {
+  smoothLandmarks,
+  stabilizeLandmarks,
+} from "./utils/landmark-processing";
+import {
+  detectBarbellPosition,
+  type ReferencePlate,
+} from "./utils/barbell-detection";
+import {
+  renderSkeleton,
+  renderTrajectory,
+  renderSegmentationMask,
+} from "./utils/rendering";
 
 const useMediaPipe = ({
   videoRef,
@@ -158,21 +160,8 @@ const useMediaPipe = ({
         // 캔버스 초기화
         canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Segmentation mask 그리기
-        if (
-          poseResults.segmentationMasks &&
-          poseResults.segmentationMasks.length > 0
-        ) {
-          const mask = poseResults.segmentationMasks[0];
-
-          if (drawingUtils.current) {
-            drawingUtils.current.drawConfidenceMask(
-              mask,
-              SEGMENTATION_MASK_BACKGROUND_COLOR,
-              SEGMENTATION_MASK_COLOR
-            );
-          }
-        }
+        // Segmentation mask 렌더링
+        renderSegmentationMask(poseResults.segmentationMasks, drawingUtils);
 
         // 바벨 위치 감지
         let barbellPosition: { x: number; y: number } | null = null;
@@ -211,29 +200,12 @@ const useMediaPipe = ({
             );
             setSmoothedLandmarks(stabilizedLandmark);
 
-            // 궤적 그리기 (별도 캔버스)
-            if (barbellPosition && trajectoryCanvasRef.current) {
-              const trajectoryCtx =
-                trajectoryCanvasRef.current.getContext("2d");
-
-              if (trajectoryCtx && previousBarbellPos.current) {
-                // 이전 위치 → 현재 위치 선 그리기
-                trajectoryCtx.strokeStyle = TRAJECTORY_LINE_STYLE.COLOR;
-                trajectoryCtx.lineWidth = TRAJECTORY_LINE_STYLE.WIDTH;
-                trajectoryCtx.lineCap = "round";
-                trajectoryCtx.beginPath();
-                trajectoryCtx.moveTo(
-                  previousBarbellPos.current.x,
-                  previousBarbellPos.current.y
-                );
-                trajectoryCtx.lineTo(barbellPosition.x, barbellPosition.y);
-                trajectoryCtx.stroke();
-              }
-
-              // 현재 위치를 다음 프레임을 위해 저장
-              previousBarbellPos.current = barbellPosition;
-            }
-            // 손목 안 보이면: previousBarbellPos 유지 (다음에 보일 때 직선으로 연결됨)
+            // 바벨 궤적 렌더링
+            renderTrajectory(
+              barbellPosition,
+              previousBarbellPos,
+              trajectoryCanvasRef.current?.getContext("2d") ?? null
+            );
 
             // 기본 MediaPipe 관절점과 연결선 그리기 제거
             // drawingUtils.drawLandmarks(landmark, {
@@ -248,62 +220,8 @@ const useMediaPipe = ({
             //   { color: "white", lineWidth: 2 },
             // );
 
-            // 사용자가 지정한 관절점만 그리기 (신뢰도 필터링 적용)
-            JOINTS_TO_DISPLAY.forEach((index) => {
-              const point = stabilizedLandmark[index];
-              if (
-                point &&
-                point.visibility &&
-                point.visibility > VISIBILITY_THRESHOLD_FOR_DISPLAY
-              ) {
-                // 신뢰도 30% 이상만 표시
-                // 관절점 그리기
-                canvasCtx.beginPath();
-                canvasCtx.arc(
-                  point.x * canvas.width,
-                  point.y * canvas.height,
-                  JOINT_STYLE.RADIUS,
-                  0,
-                  2 * Math.PI
-                );
-
-                canvasCtx.fillStyle = JOINT_STYLE.FILL_COLOR;
-                canvasCtx.fill();
-
-                canvasCtx.strokeStyle = JOINT_STYLE.STROKE_COLOR;
-                canvasCtx.lineWidth = JOINT_STYLE.STROKE_WIDTH;
-                canvasCtx.stroke();
-              }
-            });
-
-            // 사용자가 지정한 관절 연결선 그리기 (신뢰도 필터링 적용)
-            SKELETON_CONNECTIONS.forEach(([start, end]) => {
-              const startPoint = stabilizedLandmark[start];
-              const endPoint = stabilizedLandmark[end];
-
-              // 두 관절점 모두 신뢰도가 높을 때만 연결선 그리기
-              if (
-                startPoint &&
-                endPoint &&
-                startPoint.visibility &&
-                startPoint.visibility > VISIBILITY_THRESHOLD_FOR_CONNECTION &&
-                endPoint.visibility &&
-                endPoint.visibility > VISIBILITY_THRESHOLD_FOR_CONNECTION
-              ) {
-                canvasCtx.beginPath();
-                canvasCtx.moveTo(
-                  startPoint.x * canvas.width,
-                  startPoint.y * canvas.height
-                );
-                canvasCtx.lineTo(
-                  endPoint.x * canvas.width,
-                  endPoint.y * canvas.height
-                );
-                canvasCtx.strokeStyle = CONNECTION_LINE_STYLE.COLOR;
-                canvasCtx.lineWidth = CONNECTION_LINE_STYLE.WIDTH;
-                canvasCtx.stroke();
-              }
-            });
+            // 스켈레톤 렌더링 (관절점 + 연결선)
+            renderSkeleton(stabilizedLandmark, canvasCtx, canvas);
           }
         }
       } catch (error) {
