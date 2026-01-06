@@ -7,9 +7,6 @@ import {
 } from "@mediapipe/tasks-vision";
 import { RefObject, useCallback, useEffect, useRef, useState } from "react";
 import {
-  SMOOTHING_WINDOW,
-  MAX_MOVEMENT,
-  VISIBILITY_THRESHOLD_FOR_AVERAGING,
   OBJECT_DETECTION_SCORE_THRESHOLD,
   PLATE_SIZE_TOLERANCE,
   MEDIAPIPE_WASM_URL,
@@ -185,18 +182,13 @@ const useMediaPipe = ({
             // 관절 위치 스무딩 및 안정화 적용
             const smoothingResult = smoothLandmarks(
               poseLandmarks,
-              landmarkHistory.current,
-              {
-                smoothingWindow: SMOOTHING_WINDOW,
-                visibilityThreshold: VISIBILITY_THRESHOLD_FOR_AVERAGING,
-              }
+              landmarkHistory.current
             );
             landmarkHistory.current = smoothingResult.newHistory;
 
             const stabilizedLandmark = stabilizeLandmarks(
               smoothingResult.smoothed,
-              smoothedLandmarks,
-              MAX_MOVEMENT
+              smoothedLandmarks
             );
             setSmoothedLandmarks(stabilizedLandmark);
 
