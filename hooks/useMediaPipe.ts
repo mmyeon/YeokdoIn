@@ -127,6 +127,81 @@ const useMediaPipe = ({
   // 랜드마크 히스토리 (스무딩용)
   const landmarkHistory = useRef<Landmark[][]>([]);
 
+  // 프레임별 감지 및 렌더링 처리
+  const processFrame = useCallback(
+    (
+      video: HTMLVideoElement,
+      canvas: HTMLCanvasElement,
+      poseLandmarker: PoseLandmarker,
+      objectDetector: ObjectDetector
+    ) => {
+      const canvasCtx = canvas.getContext("2d");
+      if (!canvasCtx) return;
+      const nowInMs = performance.now();
+      const poseResults = poseLandmarker.detectForVideo(video, nowInMs);
+      const objectDetectionResults = objectDetector.detectForVideo(
+        video,
+        nowInMs
+      );
+
+      // 캔버스 초기화
+      canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Segmentation mask 렌더링
+      renderSegmentationMask(poseResults.segmentationMasks, drawingUtils);
+
+      // 바벨 위치 감지
+      let barbellPosition: { x: number; y: number } | null = null;
+      const scaleX = canvas.width / video.videoWidth;
+      const scaleY = canvas.height / video.videoHeight;
+
+      const barbellDetectionResult = detectBarbellPosition(
+        objectDetectionResults.detections,
+        referencePlate.current,
+        { plateSizeTolerance: PLATE_SIZE_TOLERANCE },
+        { scaleX, scaleY }
+      );
+
+      if (barbellDetectionResult) {
+        barbellPosition = barbellDetectionResult.position;
+        referencePlate.current = barbellDetectionResult.newReference;
+      }
+
+      if (poseResults.landmarks) {
+        for (const poseLandmarks of poseResults.landmarks) {
+          // 관절 위치 스무딩 및 안정화 적용
+          const smoothingResult = smoothLandmarks(
+            poseLandmarks,
+            landmarkHistory.current
+          );
+          landmarkHistory.current = smoothingResult.newHistory;
+
+          const stabilizedLandmark = stabilizeLandmarks(
+            smoothingResult.smoothed,
+            smoothedLandmarks
+          );
+          setSmoothedLandmarks(stabilizedLandmark);
+
+          // 바벨 궤적 렌더링
+          renderTrajectory(
+            barbellPosition,
+            previousBarbellPos,
+            trajectoryCanvasRef.current?.getContext("2d") ?? null
+          );
+
+          // 스켈레톤 렌더링 (관절점 + 연결선)
+          renderSkeleton(stabilizedLandmark, canvasCtx, canvas);
+        }
+      }
+    },
+    [smoothedLandmarks, trajectoryCanvasRef]
+  );
+
+  // 비디오 재생 상태 확인 (일시정지/종료 시 애니메이션 중단)
+  const shouldStopDetection = useCallback((video: HTMLVideoElement) => {
+    return video.paused || video.ended;
+  }, []);
+
   const detectPoseInVideo = useCallback(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -135,87 +210,11 @@ const useMediaPipe = ({
 
     if (!video || !canvas || !poseLandmarker || !objectDetector) return;
 
-    const canvasCtx = canvas.getContext("2d");
-    if (!canvasCtx) return;
-
     const performDetection = async () => {
-      if (video.paused || video.ended) {
-        if (animationFrameId.current) {
-          cancelAnimationFrame(animationFrameId.current);
-        }
-        return;
-      }
+      if (shouldStopDetection(video)) return;
 
       try {
-        const nowInMs = performance.now();
-        const poseResults = poseLandmarker.detectForVideo(video, nowInMs);
-        const objectDetectionResults = objectDetector.detectForVideo(
-          video,
-          nowInMs
-        );
-
-        // 캔버스 초기화
-        canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Segmentation mask 렌더링
-        renderSegmentationMask(poseResults.segmentationMasks, drawingUtils);
-
-        // 바벨 위치 감지
-        let barbellPosition: { x: number; y: number } | null = null;
-        const scaleX = canvas.width / video.videoWidth;
-        const scaleY = canvas.height / video.videoHeight;
-
-        const barbellDetectionResult = detectBarbellPosition(
-          objectDetectionResults.detections,
-          referencePlate.current,
-          { plateSizeTolerance: PLATE_SIZE_TOLERANCE },
-          { scaleX, scaleY }
-        );
-
-        if (barbellDetectionResult) {
-          barbellPosition = barbellDetectionResult.position;
-          referencePlate.current = barbellDetectionResult.newReference;
-        }
-
-        if (poseResults.landmarks) {
-          for (const poseLandmarks of poseResults.landmarks) {
-            // 관절 위치 스무딩 및 안정화 적용
-            const smoothingResult = smoothLandmarks(
-              poseLandmarks,
-              landmarkHistory.current
-            );
-            landmarkHistory.current = smoothingResult.newHistory;
-
-            const stabilizedLandmark = stabilizeLandmarks(
-              smoothingResult.smoothed,
-              smoothedLandmarks
-            );
-            setSmoothedLandmarks(stabilizedLandmark);
-
-            // 바벨 궤적 렌더링
-            renderTrajectory(
-              barbellPosition,
-              previousBarbellPos,
-              trajectoryCanvasRef.current?.getContext("2d") ?? null
-            );
-
-            // 기본 MediaPipe 관절점과 연결선 그리기 제거
-            // drawingUtils.drawLandmarks(landmark, {
-            //   radius: 5,
-            //   color: "blue",
-            // });
-
-            // 기본 MediaPipe 관절 연결선 그리기 제거
-            // drawingUtils.drawConnectors(
-            //   landmark,
-            //   PoseLandmarker.POSE_CONNECTIONS,
-            //   { color: "white", lineWidth: 2 },
-            // );
-
-            // 스켈레톤 렌더링 (관절점 + 연결선)
-            renderSkeleton(stabilizedLandmark, canvasCtx, canvas);
-          }
-        }
+        processFrame(video, canvas, poseLandmarker, objectDetector);
       } catch (error) {
         console.error("Error detecting pose:", error);
       }
@@ -226,14 +225,7 @@ const useMediaPipe = ({
 
     // 감지 루프 시작
     animationFrameId.current = requestAnimationFrame(performDetection);
-
-    return () => {
-      // 진행 중인 애니메이션 프레임 취소
-      if (animationFrameId.current) {
-        cancelAnimationFrame(animationFrameId.current);
-      }
-    };
-  }, []);
+  }, [processFrame, shouldStopDetection, canvasRef, videoRef]);
 
   return {
     detectPoseInVideo,
