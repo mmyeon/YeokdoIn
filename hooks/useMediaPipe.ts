@@ -5,7 +5,7 @@ import {
   ObjectDetector,
   DrawingUtils,
 } from "@mediapipe/tasks-vision";
-import { RefObject, useCallback, useEffect, useRef, useState } from "react";
+import { RefObject, useCallback, useEffect, useRef } from "react";
 import {
   OBJECT_DETECTION_SCORE_THRESHOLD,
   PLATE_SIZE_TOLERANCE,
@@ -42,6 +42,9 @@ const useMediaPipe = ({
   const poseLandmarkerRef = useRef<PoseLandmarker>(null);
   // MediaPipe Object Detector 인스턴스 참조
   const objectDetectorRef = useRef<ObjectDetector>(null);
+  // 랜드마크 히스토리 (스무딩용)
+  const landmarkHistory = useRef<Landmark[][]>([]);
+  const smoothedLandmarksRef = useRef<Landmark[]>([]);
   // 애니메이션 루프 제어
   const animationFrameId = useRef<number | null>(null);
   // 바벨의 이전 프레임 위치 (궤적 그리기용)
@@ -51,8 +54,6 @@ const useMediaPipe = ({
 
   // WebGL2 기반 세그멘테이션 마스크 렌더링 유틸리티
   const drawingUtils = useRef<DrawingUtils>(null);
-
-  const [smoothedLandmarks, setSmoothedLandmarks] = useState<Landmark[]>([]);
 
   // MediaPipe 모델 초기화
   useEffect(() => {
@@ -123,9 +124,6 @@ const useMediaPipe = ({
     };
   }, []);
 
-  // 랜드마크 히스토리 (스무딩용)
-  const landmarkHistory = useRef<Landmark[][]>([]);
-
   // 프레임별 감지 및 렌더링 처리
   const processFrame = useCallback(
     (
@@ -146,9 +144,6 @@ const useMediaPipe = ({
       // 캔버스 초기화
       canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Segmentation mask 렌더링
-      renderSegmentationMask(poseResults.segmentationMasks, drawingUtils);
-
       // 바벨 위치 감지
       let barbellPosition: { x: number; y: number } | null = null;
       const scaleX = canvas.width / video.videoWidth;
@@ -166,7 +161,7 @@ const useMediaPipe = ({
         referencePlate.current = barbellDetectionResult.newReference;
       }
 
-      if (poseResults.landmarks) {
+      if (poseResults) {
         for (const poseLandmarks of poseResults.landmarks) {
           // 관절 위치 스무딩 및 안정화 적용
           const smoothingResult = smoothLandmarks(
@@ -177,9 +172,12 @@ const useMediaPipe = ({
 
           const stabilizedLandmark = stabilizeLandmarks(
             smoothingResult.smoothed,
-            smoothedLandmarks
+            smoothedLandmarksRef.current
           );
-          setSmoothedLandmarks(stabilizedLandmark);
+          smoothedLandmarksRef.current = stabilizedLandmark;
+
+          // Segmentation mask 렌더링
+          renderSegmentationMask(poseResults.segmentationMasks, drawingUtils);
 
           // 바벨 궤적 렌더링
           renderTrajectory(
@@ -193,7 +191,7 @@ const useMediaPipe = ({
         }
       }
     },
-    [smoothedLandmarks, trajectoryCanvasRef]
+    []
   );
 
   // 비디오 재생 상태 확인 (일시정지/종료 시 애니메이션 중단)
@@ -224,7 +222,7 @@ const useMediaPipe = ({
 
     // 감지 루프 시작
     animationFrameId.current = requestAnimationFrame(performDetection);
-  }, [processFrame, shouldStopDetection, canvasRef, videoRef]);
+  }, [processFrame, shouldStopDetection]);
 
   return {
     detectPoseInVideo,
