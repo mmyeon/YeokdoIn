@@ -54,28 +54,29 @@ const useMediaPipe = ({
 
   const [smoothedLandmarks, setSmoothedLandmarks] = useState<Landmark[]>([]);
 
+  // MediaPipe 모델 초기화
   useEffect(() => {
-    const createPoseLandmarker = async () => {
+    const initializeMediaPipe = async () => {
       try {
-        // MediaPipe Vision Tasks 초기화
+        // Vision Tasks 초기화
         const vision = await FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_URL);
 
-        // Pose Landmarker 모델 생성 및 설정
+        // PoseLandmarker 생성
         poseLandmarkerRef.current = await PoseLandmarker.createFromOptions(
           vision,
           {
             baseOptions: {
               modelAssetPath: POSE_MODEL_URL,
-              delegate: "GPU", // GPU 가속 사용
+              delegate: "GPU",
             },
-            runningMode: "VIDEO", // 비디오 모드로 설정
-            numPoses: 1, // 한 명의 포즈만 감지
-            outputSegmentationMasks: true, // 세그멘테이션 마스크 출력 활성화
-            canvas: maskCanvasRef?.current || undefined, // 세그멘테이션 마스크를 그릴 캔버스
+            runningMode: "VIDEO",
+            numPoses: 1,
+            outputSegmentationMasks: true,
+            canvas: maskCanvasRef?.current || undefined,
           }
         );
 
-        // Object Detector 모델 생성 및 설정
+        // ObjectDetector 생성
         objectDetectorRef.current = await ObjectDetector.createFromOptions(
           vision,
           {
@@ -85,11 +86,11 @@ const useMediaPipe = ({
             },
             scoreThreshold: OBJECT_DETECTION_SCORE_THRESHOLD,
             runningMode: "VIDEO",
-            // 바벨 원판이 frisbee로 인식되어서 frisbee 카테고리만 허용
             categoryAllowlist: ["frisbee"],
           }
         );
 
+        // DrawingUtils 초기화
         if (maskCanvasRef?.current) {
           const glContext = maskCanvasRef.current.getContext("webgl2");
           if (glContext) {
@@ -99,12 +100,11 @@ const useMediaPipe = ({
           }
         }
       } catch (error) {
-        console.error("Failed to load PoseLandmarker:", error);
-        console.error("Failed to load AI model. Please try again.");
+        console.error("Failed to load MediaPipe models:", error);
       }
     };
 
-    createPoseLandmarker();
+    initializeMediaPipe();
 
     // 컴포넌트 언마운트 시 정리
     return () => {
@@ -117,7 +117,6 @@ const useMediaPipe = ({
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
       }
-
       if (drawingUtils.current) {
         drawingUtils.current.close();
       }
