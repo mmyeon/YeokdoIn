@@ -13,10 +13,9 @@ import {
   POSE_MODEL_URL,
   OBJECT_MODEL_URL,
 } from "./constants";
-import {
-  smoothLandmarks,
-  stabilizeLandmarks,
-} from "./utils/landmark-processing";
+import {} from // smoothLandmarks,
+// stabilizeLandmarks,
+"./utils/landmark-processing";
 import {
   detectBarbellPosition,
   type ReferencePlate,
@@ -42,9 +41,9 @@ const useMediaPipe = ({
   const poseLandmarkerRef = useRef<PoseLandmarker>(null);
   // MediaPipe Object Detector 인스턴스 참조
   const objectDetectorRef = useRef<ObjectDetector>(null);
-  // 랜드마크 히스토리 (스무딩용)
-  const landmarkHistory = useRef<Landmark[][]>([]);
-  const smoothedLandmarksRef = useRef<Landmark[]>([]);
+  // // 랜드마크 히스토리 (스무딩용)
+  // const landmarkHistory = useRef<Landmark[][]>([]);
+  // const smoothedLandmarksRef = useRef<Landmark[]>([]);
   // 애니메이션 루프 제어
   const animationFrameId = useRef<number | null>(null);
   // 바벨의 이전 프레임 위치 (궤적 그리기용)
@@ -164,17 +163,17 @@ const useMediaPipe = ({
       if (poseResults) {
         for (const poseLandmarks of poseResults.landmarks) {
           // 관절 위치 스무딩 및 안정화 적용
-          const smoothingResult = smoothLandmarks(
-            poseLandmarks,
-            landmarkHistory.current
-          );
-          landmarkHistory.current = smoothingResult.newHistory;
+          // const smoothingResult = smoothLandmarks(
+          //   poseLandmarks,
+          //   landmarkHistory.current
+          // );
+          // landmarkHistory.current = smoothingResult.newHistory;
 
-          const stabilizedLandmark = stabilizeLandmarks(
-            smoothingResult.smoothed,
-            smoothedLandmarksRef.current
-          );
-          smoothedLandmarksRef.current = stabilizedLandmark;
+          // const stabilizedLandmark = stabilizeLandmarks(
+          //   smoothingResult.smoothed,
+          //   smoothedLandmarksRef.current
+          // );
+          // smoothedLandmarksRef.current = stabilizedLandmark;
 
           // Segmentation mask 렌더링
           renderSegmentationMask(poseResults.segmentationMasks, drawingUtils);
@@ -187,7 +186,8 @@ const useMediaPipe = ({
           );
 
           // 스켈레톤 렌더링 (관절점 + 연결선)
-          renderSkeleton(stabilizedLandmark, canvasCtx, canvas);
+          // renderSkeleton(stabilizedLandmark, canvasCtx, canvas);
+          renderSkeleton(poseLandmarks, canvasCtx, canvas);
         }
       }
     },
