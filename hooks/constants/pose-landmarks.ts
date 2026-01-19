@@ -1,0 +1,118 @@
+/**
+ * MediaPipe PoseLandmarker 관절점 인덱스 정의
+ * 참고: https://developers.google.com/mediapipe/solutions/vision/pose_landmarker
+ */
+
+// ============================================
+// 포즈 랜드마크 인덱스 맵
+// ============================================
+
+export const POSE_LANDMARK = {
+  // 어깨
+  LEFT_SHOULDER: 11,
+  RIGHT_SHOULDER: 12,
+
+  // 팔꿈치
+  LEFT_ELBOW: 13,
+  RIGHT_ELBOW: 14,
+
+  // 손목
+  LEFT_WRIST: 15,
+  RIGHT_WRIST: 16,
+
+  // 손가락
+  LEFT_PINKY: 21,
+  LEFT_INDEX: 22,
+
+  // 엉덩이 (고관절)
+  LEFT_HIP: 23,
+  RIGHT_HIP: 24,
+
+  // 무릎
+  LEFT_KNEE: 25,
+  RIGHT_KNEE: 26,
+
+  // 발목
+  LEFT_ANKLE: 27,
+  RIGHT_ANKLE: 28,
+
+  // 발뒤꿈치
+  LEFT_HEEL: 29,
+  RIGHT_HEEL: 30,
+
+  // 발끝
+  LEFT_FOOT_INDEX: 31,
+  RIGHT_FOOT_INDEX: 32,
+} as const;
+
+// ============================================
+// 표시할 관절점 목록
+// ============================================
+
+/** 화면에 그릴 관절점 인덱스 배열 */
+export const JOINTS_TO_DISPLAY = [
+  // 다리
+  POSE_LANDMARK.LEFT_HIP,
+  POSE_LANDMARK.RIGHT_HIP,
+  POSE_LANDMARK.LEFT_KNEE,
+  POSE_LANDMARK.RIGHT_KNEE,
+  POSE_LANDMARK.LEFT_ANKLE,
+  POSE_LANDMARK.RIGHT_ANKLE,
+
+  // 어깨와 팔
+  POSE_LANDMARK.LEFT_SHOULDER,
+  POSE_LANDMARK.RIGHT_SHOULDER,
+  POSE_LANDMARK.LEFT_ELBOW,
+  POSE_LANDMARK.RIGHT_ELBOW,
+  POSE_LANDMARK.LEFT_WRIST,
+  POSE_LANDMARK.RIGHT_WRIST,
+
+  // 발
+  POSE_LANDMARK.LEFT_HEEL,
+  POSE_LANDMARK.RIGHT_HEEL,
+  POSE_LANDMARK.LEFT_FOOT_INDEX,
+  POSE_LANDMARK.RIGHT_FOOT_INDEX,
+
+  // 손가락
+  POSE_LANDMARK.LEFT_PINKY,
+  POSE_LANDMARK.LEFT_INDEX,
+] as const;
+
+// ============================================
+// 스켈레톤 연결선 정의
+// ============================================
+
+/** 관절점 간 연결선 정의 [시작점, 끝점] */
+export const SKELETON_CONNECTIONS = [
+  // 왼쪽 다리
+  [POSE_LANDMARK.LEFT_HIP, POSE_LANDMARK.LEFT_KNEE],
+  [POSE_LANDMARK.LEFT_KNEE, POSE_LANDMARK.LEFT_ANKLE],
+
+  // 오른쪽 다리
+  [POSE_LANDMARK.RIGHT_HIP, POSE_LANDMARK.RIGHT_KNEE],
+  [POSE_LANDMARK.RIGHT_KNEE, POSE_LANDMARK.RIGHT_ANKLE],
+
+  // 어깨
+  [POSE_LANDMARK.LEFT_SHOULDER, POSE_LANDMARK.RIGHT_SHOULDER],
+
+  // 왼팔
+  [POSE_LANDMARK.LEFT_SHOULDER, POSE_LANDMARK.LEFT_ELBOW],
+  [POSE_LANDMARK.LEFT_SHOULDER, POSE_LANDMARK.LEFT_HIP],
+  [POSE_LANDMARK.LEFT_ELBOW, POSE_LANDMARK.LEFT_WRIST],
+
+  // 오른팔
+  [POSE_LANDMARK.RIGHT_SHOULDER, POSE_LANDMARK.RIGHT_ELBOW],
+  [POSE_LANDMARK.RIGHT_SHOULDER, POSE_LANDMARK.RIGHT_HIP],
+  [POSE_LANDMARK.RIGHT_ELBOW, POSE_LANDMARK.RIGHT_WRIST],
+
+  // 왼발
+  [POSE_LANDMARK.LEFT_ANKLE, POSE_LANDMARK.LEFT_HEEL],
+  [POSE_LANDMARK.LEFT_HEEL, POSE_LANDMARK.LEFT_FOOT_INDEX],
+
+  // 오른발
+  [POSE_LANDMARK.RIGHT_ANKLE, POSE_LANDMARK.RIGHT_HEEL],
+  [POSE_LANDMARK.RIGHT_HEEL, POSE_LANDMARK.RIGHT_FOOT_INDEX],
+
+  // 고관절
+  [POSE_LANDMARK.LEFT_HIP, POSE_LANDMARK.RIGHT_HIP],
+] as const;
