@@ -11,14 +11,14 @@ const PLATE_COLORS: Record<
   }
 > = {
   25: {
-    color: "bg-red-600",
+    color: "bg-red-900",
     borderColor: "border-red-800",
     label: "25kg",
     height: "h-20",
     width: "w-4",
   },
   20: {
-    color: "bg-blue-600",
+    color: "bg-blue-900",
     borderColor: "border-blue-800",
     label: "20kg",
     height: "h-[72px]",
@@ -46,14 +46,14 @@ const PLATE_COLORS: Record<
     width: "w-2.5",
   },
   2.5: {
-    color: "bg-red-400",
+    color: "bg-red-600",
     borderColor: "border-red-600",
     label: "2.5kg",
     height: "h-10",
     width: "w-2",
   },
   2: {
-    color: "bg-blue-400",
+    color: "bg-blue-600",
     borderColor: "border-blue-600",
     label: "2kg",
     height: "h-9",
@@ -126,11 +126,12 @@ const PlateVisualizer = ({ oneSidePlates }: PlateVisualizerProps) => {
       </div>
 
       {/* 정면 뷰 - 플레이트 원형 */}
-      <div className="flex flex-wrap gap-2 items-center">
+      <div className="flex flex-wrap gap-2 flex-col">
         <div className="text-sm font-semibold text-gray-700">
           한쪽 플레이트 총무게: {totalOneSideWeight}kg
         </div>
-        <>
+
+        <div className="flex items-center gap-2">
           {oneSidePlates.map((plate, index) => {
             const plateConfig = PLATE_COLORS[plate];
             if (!plateConfig) return null;
@@ -152,7 +153,7 @@ const PlateVisualizer = ({ oneSidePlates }: PlateVisualizerProps) => {
             return (
               <div
                 key={index}
-                className={`${plateConfig.color} ${frontSize} rounded-full border-2 ${plateConfig.borderColor} relative flex items-center justify-center group transition-transform hover:scale-110`}
+                className={`${plateConfig.color} ${frontSize} rounded-full border-2 ${plateConfig.borderColor} relative flex items-center justify-center group transition-transform`}
               >
                 {/* 중앙 구멍 */}
                 <div className="bg-white rounded-full w-1/2 h-1/2 border-2" />
@@ -164,7 +165,7 @@ const PlateVisualizer = ({ oneSidePlates }: PlateVisualizerProps) => {
               </div>
             );
           })}
-        </>
+        </div>
       </div>
     </div>
   );
