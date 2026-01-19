@@ -17,7 +17,7 @@ export async function getUserDefaultBarbelWeight(): Promise<
 
   if (error) handleDatabaseError(error);
 
-  return data?.[0].default_barbell_weight ?? null;
+  return data?.[0]?.default_barbell_weight ?? null;
 }
 
 export async function saveBarbellWeight(barbellWeight: number) {

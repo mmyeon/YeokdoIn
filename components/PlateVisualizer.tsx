@@ -1,5 +1,18 @@
 import { Plates } from "@/types/training";
 
+const PLATE_SIZE: Record<number, string> = {
+  25: "w-20 h-20",
+  20: "w-[72px] h-[72px]",
+  15: "w-16 h-16",
+  10: "w-14 h-14",
+  5: "w-12 h-12",
+  2.5: "w-10 h-10",
+  2: "w-9 h-9",
+  1.5: "w-8 h-8",
+  1: "w-7 h-7",
+  0.5: "w-6 h-6",
+};
+
 const PLATE_COLORS: Record<
   number,
   {
@@ -106,7 +119,7 @@ const PlateVisualizer = ({ oneSidePlates }: PlateVisualizerProps) => {
       {/* 측면 뷰 - 바벨 + 플레이트 */}
       <div className="flex items-center h-24">
         {/* 바벨 바 */}
-        <div className="absolute left-0 h-3 right-0 bg-gray-700 rounded-4xl shadow-md z-0 border-2 border-gray-900" />
+        <div className="absolute left-0 h-3 right-0 bg-gray-700 rounded-1xl shadow-md z-0 border-2 border-gray-900" />
 
         {/* 플레이트들 (겹쳐지도록 absolute) */}
         <div className="absolute left-30 flex items-center">
@@ -117,7 +130,7 @@ const PlateVisualizer = ({ oneSidePlates }: PlateVisualizerProps) => {
             return (
               <div
                 key={index}
-                className={`${plateConfig.color} ${plateConfig.height} ${plateConfig.width} rounded-md ${plateConfig.borderColor} group transition-transform hover:scale-105 hover:z-50 left-[${index * 6}px] border-2`}
+                className={`${plateConfig.color} ${plateConfig.height} ${plateConfig.width} rounded-md ${plateConfig.borderColor} group transition-transform hover:scale-105 hover:z-50 border-2`}
                 title={plateConfig.label}
               ></div>
             );
@@ -136,24 +149,10 @@ const PlateVisualizer = ({ oneSidePlates }: PlateVisualizerProps) => {
             const plateConfig = PLATE_COLORS[plate];
             if (!plateConfig) return null;
 
-            // 정면 뷰 크기 (원형)
-            const frontSize = {
-              25: "w-20 h-20",
-              20: "w-[72px] h-[72px]",
-              15: "w-16 h-16",
-              10: "w-14 h-14",
-              5: "w-12 h-12",
-              2.5: "w-10 h-10",
-              2: "w-9 h-9",
-              1.5: "w-8 h-8",
-              1: "w-7 h-7",
-              0.5: "w-6 h-6",
-            }[plate];
-
             return (
               <div
                 key={index}
-                className={`${plateConfig.color} ${frontSize} rounded-full border-2 ${plateConfig.borderColor} relative flex items-center justify-center group transition-transform`}
+                className={`${plateConfig.color} ${PLATE_SIZE[plate]} rounded-full border-2 ${plateConfig.borderColor} relative flex items-center justify-center group transition-transform`}
               >
                 {/* 중앙 구멍 */}
                 <div className="bg-white rounded-full w-1/2 h-1/2 border-2" />

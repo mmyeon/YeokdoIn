@@ -63,23 +63,18 @@ const CalculationCards = ({
                     <span
                       className={`flex items-center ${weightGap > 0 ? "text-red-500" : "text-blue-500"} gap-0.5 text-sm`}
                     >
-                      <span
-                        className={`flex items-center ${weightGap > 0 ? "text-red-500" : "text-blue-500"} gap-0.5 text-sm`}
-                      >
-                        <div className="min-h-[24px] flex items-center">
-                          {" "}
-                          {weightGap !== 0 && (
-                            <>
-                              <span>이전 무게보다 {Math.abs(weightGap)}kg</span>
-                              {weightGap > 0 ? (
-                                <ArrowUp className="w-4 h-4 ml-1" />
-                              ) : (
-                                <ArrowDown className="w-4 h-4 ml-1" />
-                              )}
-                            </>
-                          )}
-                        </div>
-                      </span>
+                      <div className="min-h-[24px] flex items-center">
+                        {weightGap !== 0 && (
+                          <>
+                            <span>이전 무게보다 {Math.abs(weightGap)}kg</span>
+                            {weightGap > 0 ? (
+                              <ArrowUp className="w-4 h-4 ml-1" />
+                            ) : (
+                              <ArrowDown className="w-4 h-4 ml-1" />
+                            )}
+                          </>
+                        )}
+                      </div>
                     </span>
 
                     <PlateVisualizer oneSidePlates={item.plates} />
