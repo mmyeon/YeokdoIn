@@ -8,14 +8,16 @@ import {
 } from "@/types/personalRecords";
 import { handleDatabaseError } from "@/utils/database";
 
-export async function getUserDefaultBarbelWeight(): Promise<UserSettingRow | null> {
+export async function getUserDefaultBarbelWeight(): Promise<
+  UserSettingRow["default_barbell_weight"] | null
+> {
   const supabase = await supabaseServerClient();
 
   const { data, error } = await supabase.from("user-settings").select("*");
 
   if (error) handleDatabaseError(error);
 
-  return data?.[0] ?? null;
+  return data?.[0]?.default_barbell_weight ?? null;
 }
 
 export async function saveBarbellWeight(barbellWeight: number) {

@@ -17,7 +17,4 @@ export const programPercentagesAtom = atomWithStorage<WeightPercentage[]>(
   []
 );
 
-// TODO: 프로그램 무게 계산 페이지 개선 후 삭제
-export const barbellWeightAtom = atom<number | null>(null);
-
 export const personalRecordsAtom = atom<PersonalRecordInfo | null>(null);
