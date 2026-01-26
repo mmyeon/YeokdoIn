@@ -64,7 +64,7 @@ const VideoController = ({
       video.removeEventListener("loadedmetadata", updateDuration);
       video.removeEventListener("volumechange", updateVolume);
     };
-  }, [videoRef]);
+  }, []);
 
   return (
     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
