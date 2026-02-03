@@ -241,6 +241,7 @@ const useMediaPipe = ({
               SEGMENTATION_MASK_BACKGROUND_COLOR,
               SEGMENTATION_MASK_COLOR
             );
+            mask.close();
           }
         }
 
