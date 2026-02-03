@@ -12,6 +12,8 @@ import {
   MEDIAPIPE_WASM_URL,
   POSE_MODEL_URL,
   OBJECT_MODEL_URL,
+  SEGMENTATION_MASK_BACKGROUND_COLOR,
+  SEGMENTATION_MASK_COLOR,
 } from "./constants";
 import {} from // smoothLandmarks,
 // stabilizeLandmarks,
@@ -20,11 +22,7 @@ import {
   detectBarbellPosition,
   type ReferencePlate,
 } from "./utils/barbell-detection";
-import {
-  renderSkeleton,
-  renderTrajectory,
-  renderSegmentationMask,
-} from "./utils/rendering";
+import { renderSkeleton, renderTrajectory } from "./utils/rendering";
 
 const useMediaPipe = ({
   videoRef,
@@ -233,6 +231,19 @@ const useMediaPipe = ({
       }
 
       if (poseResults) {
+        // Segmentation mask 렌더링
+        if (poseResults.segmentationMasks && drawingUtils.current) {
+          const mask = poseResults.segmentationMasks[0];
+
+          if (mask) {
+            drawingUtils.current.drawConfidenceMask(
+              mask,
+              SEGMENTATION_MASK_BACKGROUND_COLOR,
+              SEGMENTATION_MASK_COLOR
+            );
+          }
+        }
+
         for (const poseLandmarks of poseResults.landmarks) {
           // 관절 위치 스무딩 및 안정화 적용
           // const smoothingResult = smoothLandmarks(
@@ -246,9 +257,6 @@ const useMediaPipe = ({
           //   smoothedLandmarksRef.current
           // );
           // smoothedLandmarksRef.current = stabilizedLandmark;
-
-          // Segmentation mask 렌더링
-          renderSegmentationMask(poseResults.segmentationMasks, drawingUtils);
 
           // 바벨 궤적 렌더링
           renderTrajectory(
