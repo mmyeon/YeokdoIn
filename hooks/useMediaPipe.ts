@@ -56,42 +56,59 @@ const useMediaPipe = ({
 
   // MediaPipe 모델 초기화
   useEffect(() => {
+    let isMounted = true;
+
     const initializeMediaPipe = async () => {
       try {
         // Vision Tasks 초기화
         const vision = await FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_URL);
 
+        if (!isMounted) {
+          console.log("Component unmounted during initialization");
+          return;
+        }
+
         // PoseLandmarker 생성
-        poseLandmarkerRef.current = await PoseLandmarker.createFromOptions(
-          vision,
-          {
-            baseOptions: {
-              modelAssetPath: POSE_MODEL_URL,
-              delegate: "GPU",
-            },
-            runningMode: "VIDEO",
-            numPoses: 1,
-            outputSegmentationMasks: true,
-            canvas: maskCanvasRef?.current || undefined,
-          }
-        );
+        const poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath: POSE_MODEL_URL,
+            delegate: "GPU",
+          },
+          runningMode: "VIDEO",
+          numPoses: 1,
+          outputSegmentationMasks: true,
+          canvas: maskCanvasRef?.current || undefined,
+        });
+
+        if (!isMounted) {
+          console.log("Component unmounted, cleaning up PoseLandmarker");
+          poseLandmarker.close();
+          return;
+        }
+
+        poseLandmarkerRef.current = poseLandmarker;
 
         // ObjectDetector 생성
-        objectDetectorRef.current = await ObjectDetector.createFromOptions(
-          vision,
-          {
-            baseOptions: {
-              modelAssetPath: OBJECT_MODEL_URL,
-              delegate: "GPU",
-            },
-            scoreThreshold: OBJECT_DETECTION_SCORE_THRESHOLD,
-            runningMode: "VIDEO",
-            categoryAllowlist: ["frisbee"],
-          }
-        );
+        const objectDetector = await ObjectDetector.createFromOptions(vision, {
+          baseOptions: {
+            modelAssetPath: OBJECT_MODEL_URL,
+            delegate: "GPU",
+          },
+          scoreThreshold: OBJECT_DETECTION_SCORE_THRESHOLD,
+          runningMode: "VIDEO",
+          categoryAllowlist: ["frisbee"],
+        });
+
+        if (!isMounted) {
+          console.log("Component unmounted, cleaning up ObjectDetector");
+          objectDetector.close();
+          return;
+        }
+
+        objectDetectorRef.current = objectDetector;
 
         // DrawingUtils 초기화
-        if (maskCanvasRef?.current) {
+        if (maskCanvasRef?.current && isMounted) {
           const glContext = maskCanvasRef.current.getContext("webgl2");
           if (glContext) {
             drawingUtils.current = new DrawingUtils(glContext);
@@ -108,18 +125,73 @@ const useMediaPipe = ({
 
     // 컴포넌트 언마운트 시 정리
     return () => {
+      isMounted = false;
+
+      // PoseLandmarker 정리
       if (poseLandmarkerRef.current) {
-        poseLandmarkerRef.current.close();
+        try {
+          poseLandmarkerRef.current.close();
+          poseLandmarkerRef.current = null;
+        } catch (error) {
+          console.error("Error closing PoseLandmarker:", error);
+        }
       }
+
+      // ObjectDetector 정리
       if (objectDetectorRef.current) {
-        objectDetectorRef.current.close();
+        try {
+          objectDetectorRef.current.close();
+          objectDetectorRef.current = null;
+        } catch (error) {
+          console.error("Error closing ObjectDetector:", error);
+        }
       }
+
+      // AnimationFrame 정리
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
+        animationFrameId.current = null;
       }
+
+      // DrawingUtils 정리
       if (drawingUtils.current) {
-        drawingUtils.current.close();
+        try {
+          drawingUtils.current.close();
+          drawingUtils.current = null;
+        } catch (error) {
+          console.error("Error closing DrawingUtils:", error);
+        }
       }
+
+      // Canvas context 정리
+      [canvasRef, trajectoryCanvasRef, maskCanvasRef].forEach((ref) => {
+        if (ref?.current) {
+          const canvas = ref.current;
+
+          // 2D context 정리
+          const ctx2d = canvas.getContext("2d");
+          if (ctx2d) {
+            ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+          }
+
+          // WebGL context 정리
+          const gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
+          if (gl) {
+            // 화면 지우기
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+            // Context 강제 해제
+            const loseContext = gl.getExtension("WEBGL_lose_context");
+            if (loseContext) {
+              loseContext.loseContext();
+            }
+          }
+
+          // 크기 초기화
+          canvas.width = 0;
+          canvas.height = 0;
+        }
+      });
     };
   }, []);
 
