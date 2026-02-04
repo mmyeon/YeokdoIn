@@ -232,15 +232,16 @@ const useMediaPipe = ({
 
       if (poseResults) {
         // Segmentation mask 렌더링
-        if (poseResults.segmentationMasks && drawingUtils.current) {
+        if (poseResults.segmentationMasks) {
           const mask = poseResults.segmentationMasks[0];
 
           if (mask) {
-            drawingUtils.current.drawConfidenceMask(
-              mask,
-              SEGMENTATION_MASK_BACKGROUND_COLOR,
-              SEGMENTATION_MASK_COLOR
-            );
+            if (drawingUtils.current)
+              drawingUtils.current.drawConfidenceMask(
+                mask,
+                SEGMENTATION_MASK_BACKGROUND_COLOR,
+                SEGMENTATION_MASK_COLOR
+              );
             mask.close();
           }
         }
