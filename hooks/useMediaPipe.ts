@@ -36,7 +36,7 @@ const useMediaPipe = ({
   maskCanvasRef?: RefObject<HTMLCanvasElement | null>;
 }) => {
   // MediaPipe Pose Landmarker 인스턴스 참조
-  const poseLandmarkerRef = useRef<PoseLandmarker>(null);
+  const poseLandmarkerRef = useRef<PoseLandmarker | null>(null);
   // MediaPipe Object Detector 인스턴스 참조
   const objectDetectorRef = useRef<ObjectDetector>(null);
   // // 랜드마크 히스토리 (스무딩용)
@@ -50,7 +50,7 @@ const useMediaPipe = ({
   const referencePlate = useRef<ReferencePlate | null>(null);
 
   // WebGL2 기반 세그멘테이션 마스크 렌더링 유틸리티
-  const drawingUtils = useRef<DrawingUtils>(null);
+  const drawingUtils = useRef<DrawingUtils | null>(null);
 
   // MediaPipe 모델 초기화
   useEffect(() => {
