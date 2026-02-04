@@ -141,6 +141,13 @@ Middleware (`middleware.ts`) protects authenticated routes:
 
 ## Development Guidelines
 
+### Pull Request Guidelines
+
+**IMPORTANT**: When creating pull requests for this project:
+
+- Always use Korean language for PR titles and descriptions
+- Follow the commit message convention already used in the project (e.g., `[feat]`, `[fix]`, `[refactor]`)
+
 ### Database Type Generation
 
 After schema changes in Supabase:

@@ -5,14 +5,14 @@ import { X } from "lucide-react";
 import VideoPlayer from "./VideoPlayer";
 
 const VideoDisplay = ({
-  uploadedFile,
+  videoUrl,
   handleRemoveFile,
 }: {
-  uploadedFile: File;
+  videoUrl: string;
   handleRemoveFile: () => void;
 }) => {
   return (
-    <VideoPlayer videoUrl={URL.createObjectURL(uploadedFile)}>
+    <VideoPlayer videoUrl={videoUrl}>
       <Button
         variant="ghost"
         size="sm"
