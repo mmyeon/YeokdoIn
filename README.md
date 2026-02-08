@@ -36,7 +36,7 @@ MediaPipe 통합 및 메모리 최적화
 1. Docker Desktop 실행 (필수)
 
 2. 로컬 Supabase 시작
-npx supabase start
+`npx supabase start`
 
 3. 의존성 설치 및 개발 서버 실행
 npm install
