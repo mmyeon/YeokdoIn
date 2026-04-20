@@ -17,7 +17,7 @@ Weightlifting training assistant — track programs, analyze movements, manage P
 
 **Feature-based architecture** with 3-tier layers:
 
-```
+```text
 features/[name]/
 ├── ui/      # React components, hooks (depends on model/ and api/)
 ├── model/   # Pure logic, no I/O, no React

@@ -111,9 +111,22 @@ describe('parseNotation', () => {
     expect(() => parseNotation('back squat x3')).toThrow(NotationParseError);
   });
 
-  it('0 reps 또는 0 sets는 검증에서 거부된다', () => {
-    expect(() => parseNotation('back squat 70% 0x3')).toThrow();
-    expect(() => parseNotation('back squat 70% 5x0')).toThrow();
+  it('0 또는 음수 reps/sets는 NotationParseError로 거부된다', () => {
+    expect(() => parseNotation('back squat 70% 0x3')).toThrow(NotationParseError);
+    expect(() => parseNotation('back squat 70% 5x0')).toThrow(NotationParseError);
+  });
+
+  it('소수 reps/sets는 NotationParseError로 거부된다', () => {
+    expect(() => parseNotation('back squat 70% 5.5x3')).toThrow(NotationParseError);
+    expect(() => parseNotation('back squat 70% 5x3.5')).toThrow(NotationParseError);
+  });
+
+  it('퍼센트 없는 복합 reps도 파싱된다', () => {
+    const program = parseNotation('back squat (3+1)x3');
+    expect(program.blocks[0].movements[0].name).toBe('back squat');
+    expect(program.blocks[0].movements[0].modifiers).toEqual([]);
+    expect(program.blocks[0].reps).toEqual({ type: 'complex', reps: [3, 1] });
+    expect(program.blocks[0].sets).toBe(3);
   });
 
   it('절대 중량 블록에도 퍼센트가 있으면 파싱한다', () => {

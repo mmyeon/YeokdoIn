@@ -98,6 +98,7 @@ class Parser {
       if (t.type === 'IDENT') {
         words.push(this.consume().value);
       } else if (t.type === 'LPAREN') {
+        if (this.isComplexRepsAhead()) break;
         inlineModifiers.push(this.parseParenContent());
       } else {
         break;
@@ -134,15 +135,15 @@ class Parser {
   private parseReps(): RepScheme {
     if (this.check('LPAREN')) {
       this.consume();
-      const reps: number[] = [parseInt(this.expect('NUMBER').value, 10)];
+      const reps: number[] = [Number(this.expect('NUMBER').value)];
       while (this.match('PLUS')) {
-        reps.push(parseInt(this.expect('NUMBER').value, 10));
+        reps.push(Number(this.expect('NUMBER').value));
       }
       this.expect('RPAREN');
       return { type: 'complex', reps };
     }
     if (this.check('NUMBER')) {
-      return { type: 'simple', reps: parseInt(this.consume().value, 10) };
+      return { type: 'simple', reps: Number(this.consume().value) };
     }
     throw new NotationParseError(
       'Expected reps (number or parenthesized group)',
@@ -159,7 +160,23 @@ class Parser {
       );
     }
     this.consume();
-    return parseInt(this.expect('NUMBER').value, 10);
+    return Number(this.expect('NUMBER').value);
+  }
+
+  private isComplexRepsAhead(): boolean {
+    let offset = 0;
+    if (this.peek(offset).type !== 'LPAREN') return false;
+    offset += 1;
+    if (this.peek(offset).type !== 'NUMBER') return false;
+    offset += 1;
+    while (this.peek(offset).type === 'PLUS') {
+      offset += 1;
+      if (this.peek(offset).type !== 'NUMBER') return false;
+      offset += 1;
+    }
+    if (this.peek(offset).type !== 'RPAREN') return false;
+    const next = this.peek(offset + 1);
+    return next.type === 'IDENT' && next.value.toLowerCase() === 'x';
   }
 }
 
@@ -167,5 +184,14 @@ export function parseNotation(input: string): Program {
   const tokens = tokenize(input);
   const parser = new Parser(tokens);
   const program = parser.parseProgram();
-  return programSchema.parse(program) as Program;
+  const result = programSchema.safeParse(program);
+  if (!result.success) {
+    const issue = result.error.issues[0];
+    const path = issue?.path.join('.') ?? '';
+    const message = path
+      ? `Schema validation failed at ${path}: ${issue.message}`
+      : (issue?.message ?? 'Schema validation failed');
+    throw new NotationParseError(message, 0);
+  }
+  return result.data as Program;
 }
