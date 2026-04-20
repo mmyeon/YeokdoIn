@@ -70,7 +70,7 @@ class Parser {
         movements.push(this.parseMovement());
       }
     } else if (inheritedMovements && inheritedMovements.length > 0) {
-      movements = inheritedMovements.map((m) => ({ ...m }));
+      movements = inheritedMovements.map((m) => ({ ...m, modifiers: [...m.modifiers] }));
     }
 
     let percentage: number | null = null;

@@ -98,4 +98,47 @@ describe('parseNotation', () => {
     expect(program.blocks[0].percentage).toBe(60);
     expect(program.blocks[0].movements).toHaveLength(2);
   });
+
+  it('빈 문자열은 NotationParseError를 던진다', () => {
+    expect(() => parseNotation('')).toThrow(NotationParseError);
+  });
+
+  it('공백만 있는 입력은 NotationParseError를 던진다', () => {
+    expect(() => parseNotation('   ')).toThrow(NotationParseError);
+  });
+
+  it('reps 없이 세트 마커만 있는 입력은 NotationParseError를 던진다', () => {
+    expect(() => parseNotation('back squat x3')).toThrow(NotationParseError);
+  });
+
+  it('0 또는 음수 reps는 Zod 검증에서 거부된다', () => {
+    expect(() => parseNotation('back squat 70% 0x3')).toThrow();
+    expect(() => parseNotation('back squat 70% 5x0')).toThrow();
+  });
+
+  it('절대 중량 블록에도 퍼센트가 있으면 파싱한다', () => {
+    const program = parseNotation('sots press 50% 5x3');
+    expect(program.blocks[0].percentage).toBe(50);
+    expect(program.blocks[0].movements[0].name).toBe('sots press');
+  });
+
+  it('콤마 이후 블록이 이전 블록의 동작을 상속한다', () => {
+    const program = parseNotation('back squat 75% 3x3, 80% 2x2');
+    expect(program.blocks).toHaveLength(2);
+    expect(program.blocks[1].movements.map((m) => m.name)).toEqual(['back squat']);
+    expect(program.blocks[1].percentage).toBe(80);
+  });
+
+  it('상속된 동작의 modifiers는 원본과 독립적이다', () => {
+    const program = parseNotation('back squat (slow) 75% 3x3, 80% 2x2');
+    const first = program.blocks[0].movements[0];
+    const second = program.blocks[1].movements[0];
+    expect(second.modifiers).toEqual(['slow']);
+    expect(second.modifiers).not.toBe(first.modifiers);
+  });
+
+  it('reps 뒤에 오는 블록 단위 modifier를 수집한다', () => {
+    const program = parseNotation('back squat 70% 5x3 (heavy)');
+    expect(program.blocks[0].modifiers).toEqual(['heavy']);
+  });
 });

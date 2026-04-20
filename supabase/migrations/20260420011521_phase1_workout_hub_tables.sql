@@ -10,11 +10,13 @@ CREATE TABLE IF NOT EXISTS "public"."programs" (
     "title" text,
     "raw_notation" text NOT NULL,
     "parsed_data" jsonb NOT NULL,
-    "created_at" timestamp with time zone DEFAULT now() NOT NULL,
-    "updated_at" timestamp with time zone
+    "created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 
 COMMENT ON TABLE "public"."programs" IS '파싱된 프로그램 템플릿';
+
+CREATE INDEX "programs_user_created_idx"
+    ON "public"."programs" ("user_id", "created_at" DESC);
 
 ALTER TABLE "public"."programs" ENABLE ROW LEVEL SECURITY;
 
@@ -53,6 +55,11 @@ CREATE TABLE IF NOT EXISTS "public"."workout_sessions" (
 );
 
 COMMENT ON TABLE "public"."workout_sessions" IS '운동 세션 (하루 단위)';
+
+CREATE INDEX "workout_sessions_user_date_idx"
+    ON "public"."workout_sessions" ("user_id", "session_date" DESC);
+CREATE INDEX "workout_sessions_program_idx"
+    ON "public"."workout_sessions" ("program_id");
 
 ALTER TABLE "public"."workout_sessions" ENABLE ROW LEVEL SECURITY;
 
@@ -96,6 +103,9 @@ CREATE TABLE IF NOT EXISTS "public"."workout_sets" (
 );
 
 COMMENT ON TABLE "public"."workout_sets" IS '세트 단위 로그';
+
+CREATE INDEX "workout_sets_session_idx"
+    ON "public"."workout_sets" ("session_id");
 
 ALTER TABLE "public"."workout_sets" ENABLE ROW LEVEL SECURITY;
 
@@ -200,6 +210,9 @@ COMMENT ON TABLE "public"."movement_aliases" IS '표기 → 캐노니컬 운동 
 
 CREATE UNIQUE INDEX "movement_aliases_user_alias_lower_idx"
     ON "public"."movement_aliases" ("user_id", lower("alias"));
+
+CREATE INDEX "movement_aliases_exercise_idx"
+    ON "public"."movement_aliases" ("exercise_id");
 
 ALTER TABLE "public"."movement_aliases" ENABLE ROW LEVEL SECURITY;
 

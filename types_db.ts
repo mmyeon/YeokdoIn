@@ -172,7 +172,6 @@ export type Database = {
           parsed_data: Json
           raw_notation: string
           title: string | null
-          updated_at: string | null
           user_id: string
         }
         Insert: {
@@ -181,7 +180,6 @@ export type Database = {
           parsed_data: Json
           raw_notation: string
           title?: string | null
-          updated_at?: string | null
           user_id: string
         }
         Update: {
@@ -190,7 +188,6 @@ export type Database = {
           parsed_data?: Json
           raw_notation?: string
           title?: string | null
-          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
