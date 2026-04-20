@@ -111,7 +111,7 @@ describe('parseNotation', () => {
     expect(() => parseNotation('back squat x3')).toThrow(NotationParseError);
   });
 
-  it('0 또는 음수 reps는 Zod 검증에서 거부된다', () => {
+  it('0 reps 또는 0 sets는 검증에서 거부된다', () => {
     expect(() => parseNotation('back squat 70% 0x3')).toThrow();
     expect(() => parseNotation('back squat 70% 5x0')).toThrow();
   });
