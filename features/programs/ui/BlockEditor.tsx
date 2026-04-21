@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -52,6 +53,20 @@ export function BlockEditor({
   onRemove,
   canRemove,
 }: BlockEditorProps) {
+  const [repsDraft, setRepsDraft] = useState(() => repsToString(block.reps));
+
+  // 외부에서 block.reps가 바뀌면 드래프트를 동기화한다.
+  // 사용자가 입력 중인 값이 현재 block.reps와 이미 일치한다면 덮어쓰지 않는다.
+  useEffect(() => {
+    const canonical = repsToString(block.reps);
+    const parsedDraft = parseRepsInput(repsDraft);
+    if (!parsedDraft || repsToString(parsedDraft) !== canonical) {
+      setRepsDraft(canonical);
+    }
+    // repsDraft는 의도적으로 의존성에서 제외 (사용자 입력 중 클로버 방지)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [block.reps]);
+
   return (
     <div className="rounded-lg border p-4 space-y-3 bg-card">
       <div className="flex items-center justify-between">
@@ -92,9 +107,14 @@ export function BlockEditor({
             value={block.percentage ?? ''}
             onChange={(e) => {
               const v = e.target.value;
-              onChange(
-                setPercentage(block, v === '' ? null : Number(v)),
-              );
+              if (v === '') {
+                onChange(setPercentage(block, null));
+                return;
+              }
+              const n = Number(v);
+              if (Number.isFinite(n) && n >= 0 && n <= 100) {
+                onChange(setPercentage(block, n));
+              }
             }}
             placeholder="%"
           />
@@ -102,10 +122,21 @@ export function BlockEditor({
         <div className="space-y-1">
           <Label className="text-xs">Reps</Label>
           <Input
-            value={repsToString(block.reps)}
+            value={repsDraft}
             onChange={(e) => {
-              const parsed = parseRepsInput(e.target.value);
+              const next = e.target.value;
+              setRepsDraft(next);
+              const parsed = parseRepsInput(next);
               if (parsed) onChange(setReps(block, parsed));
+            }}
+            onBlur={() => {
+              const parsed = parseRepsInput(repsDraft);
+              if (parsed) {
+                onChange(setReps(block, parsed));
+              } else {
+                // 잘못된 입력이면 마지막 유효 값으로 되돌린다.
+                setRepsDraft(repsToString(block.reps));
+              }
             }}
             placeholder="5 또는 3+1"
           />

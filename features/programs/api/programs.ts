@@ -44,6 +44,7 @@ export async function saveProgram(input: SaveProgramInput): Promise<ProgramRow> 
       user_id: payload.user_id,
       title: payload.title,
       raw_notation: payload.raw_notation,
+      // Supabase Json type is recursive; Zod-derived Program is structurally compatible but TS can't prove it.
       parsed_data: payload.parsed_data as unknown as Json,
     })
     .select('*')

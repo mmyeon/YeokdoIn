@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { ROUTES } from '@/routes';
 import { useDeleteProgram, usePrograms } from '@/hooks/usePrograms';
 import type { ProgramRow } from '@/features/programs/api/programs';
-import type { Program } from '@/features/notation/model/types';
+import { programSchema } from '@/features/notation/model/schemas';
 
 function formatDate(iso: string): string {
   const date = new Date(iso);
@@ -20,9 +20,11 @@ function formatDate(iso: string): string {
 }
 
 function summarize(row: ProgramRow): string {
-  const parsed = row.parsed_data as unknown as Program | null;
-  const blockCount = parsed?.blocks?.length ?? 0;
-  const first = parsed?.blocks?.[0];
+  const parseResult = programSchema.safeParse(row.parsed_data);
+  const parsed = parseResult.success ? parseResult.data : null;
+  if (!parsed) return row.raw_notation;
+  const blockCount = parsed.blocks.length;
+  const first = parsed.blocks[0];
   const firstName = first?.movements?.[0]?.name ?? '';
   const suffix = blockCount > 1 ? ` 외 ${blockCount - 1}개 블록` : '';
   return firstName ? `${firstName}${suffix}` : row.raw_notation;

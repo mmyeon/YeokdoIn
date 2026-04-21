@@ -90,7 +90,12 @@ export default function ProgramInputPage() {
           />
 
           {program && !parseError && (
-            <ProgramForm program={program} onChange={setProgram} />
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                노테이션을 다시 수정하면 블록 편집 내용은 초기화됩니다.
+              </p>
+              <ProgramForm program={program} onChange={setProgram} />
+            </div>
           )}
 
           <Button
