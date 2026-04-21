@@ -16,6 +16,12 @@ describe("normalizeAlias", () => {
   it("빈 문자열은 빈 문자열을 반환한다", () => {
     expect(normalizeAlias("   ")).toBe("");
   });
+
+  it("NFD로 분해된 한글을 NFC로 합성해 동일 키로 정규화한다", () => {
+    const composed = "가"; // '가' (NFC)
+    const decomposed = "가"; // '가' (NFD: ᄀ + ᅡ)
+    expect(normalizeAlias(composed)).toBe(normalizeAlias(decomposed));
+  });
 });
 
 describe("isValidAlias", () => {

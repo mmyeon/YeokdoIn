@@ -15,6 +15,11 @@ async function requireUserId(): Promise<string> {
   return userId;
 }
 
+// `.ilike`에 전달되는 값은 SQL LIKE 패턴으로 해석되므로 `%`, `_`, `\`를 이스케이프한다.
+function escapeIlikePattern(value: string): string {
+  return value.replace(/([%_\\])/g, "\\$1");
+}
+
 /**
  * 현재 사용자의 모든 별명을 조회한다. 운동 종목 이름을 조인하여 반환.
  */
@@ -56,7 +61,8 @@ export async function listAliases(): Promise<AliasWithExercise[]> {
  */
 export async function upsertAlias(
   alias: string,
-  exerciseId: number
+  exerciseId: number,
+  id?: number
 ): Promise<AliasRow> {
   if (!isValidAlias(alias)) {
     throw new Error("별명은 1자 이상 50자 이하로 입력해 주세요.");
@@ -64,8 +70,14 @@ export async function upsertAlias(
 
   const supabase = await supabaseServerClient();
   const userId = await requireUserId();
-  const trimmed = alias.trim();
+  const trimmed = alias.trim().normalize("NFC");
   const normalized = normalizeAlias(alias);
+  const ilikePattern = escapeIlikePattern(normalized);
+
+  // 편집 모드: id가 주어지면 해당 행을 직접 update한다.
+  if (id !== undefined) {
+    return updateAliasById(id, userId, trimmed, exerciseId);
+  }
 
   // DB의 UNIQUE INDEX는 (user_id, lower(alias))이므로 동일 사용자의
   // 기존 별명을 먼저 확인해 id 기준으로 update, 없으면 insert 한다.
@@ -73,7 +85,7 @@ export async function upsertAlias(
     .from("movement_aliases")
     .select("id")
     .eq("user_id", userId)
-    .ilike("alias", normalized)
+    .ilike("alias", ilikePattern)
     .maybeSingle();
   if (findError) handleDatabaseError(findError);
 
@@ -97,7 +109,7 @@ export async function upsertAlias(
       .from("movement_aliases")
       .select("id")
       .eq("user_id", userId)
-      .ilike("alias", normalized)
+      .ilike("alias", ilikePattern)
       .maybeSingle();
     if (lookupError) handleDatabaseError(lookupError);
     if (winner?.id) {
@@ -154,15 +166,15 @@ export async function resolveAliases(
   const supabase = await supabaseServerClient();
   const userId = await requireUserId();
 
-  const normalizedToOriginal = new Map<string, string>();
+  const normalizedToOriginals = new Map<string, string[]>();
   for (const n of names) {
     const norm = normalizeAlias(n);
-    if (norm && !normalizedToOriginal.has(norm)) {
-      normalizedToOriginal.set(norm, n);
-    }
+    if (!norm) continue;
+    const originals = normalizedToOriginals.get(norm) ?? [];
+    originals.push(n);
+    normalizedToOriginals.set(norm, originals);
   }
-  const normalizedKeys = Array.from(normalizedToOriginal.keys());
-  if (normalizedKeys.length === 0) return {};
+  if (normalizedToOriginals.size === 0) return {};
 
   const { data, error } = await supabase
     .from("movement_aliases")
@@ -173,8 +185,9 @@ export async function resolveAliases(
   const result: Record<string, number> = {};
   for (const row of data ?? []) {
     const norm = normalizeAlias(row.alias);
-    const original = normalizedToOriginal.get(norm);
-    if (original !== undefined) {
+    const originals = normalizedToOriginals.get(norm);
+    if (!originals) continue;
+    for (const original of originals) {
       result[original] = row.exercise_id;
     }
   }

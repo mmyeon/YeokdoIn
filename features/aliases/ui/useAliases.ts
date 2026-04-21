@@ -28,12 +28,14 @@ export function useUpsertAlias(
 
   return useMutation({
     mutationFn: ({
+      id,
       alias,
       exerciseId,
     }: {
+      id?: number;
       alias: string;
       exerciseId: number;
-    }) => upsertAlias(alias, exerciseId),
+    }) => upsertAlias(alias, exerciseId, id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [ALIASES_KEY] });
       onSuccess();

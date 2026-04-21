@@ -187,7 +187,7 @@ function AliasEditRow({ initial, onClose }: AliasEditRowProps) {
       toast.error("운동 종목을 선택해 주세요.");
       return;
     }
-    upsert.mutate({ alias: aliasText, exerciseId });
+    upsert.mutate({ id: initial?.id, alias: aliasText, exerciseId });
   }
 
   return (
