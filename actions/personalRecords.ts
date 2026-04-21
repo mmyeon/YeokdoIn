@@ -160,17 +160,7 @@ export async function addPRHistoryEntry(input: AddPRHistoryInput): Promise<void>
   });
   if (historyError) handleDatabaseError(historyError);
 
-  const { error: cacheError } = await supabase.from("personal-records").upsert(
-    {
-      user_id: userId,
-      exercise_id: input.exerciseId,
-      weight: input.newWeight,
-      pr_date: input.prDate,
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "user_id, exercise_id" }
-  );
-  if (cacheError) handleDatabaseError(cacheError);
+  await recomputeCache(input.exerciseId, userId);
 }
 
 type UpdatePRHistoryInput = {
@@ -209,9 +199,7 @@ export async function updatePRHistoryEntry(
     .eq("user_id", userId);
   if (updateError) handleDatabaseError(updateError);
 
-  if (patch.newWeight !== undefined) {
-    await recomputeCache(before.exercise_id as number, userId);
-  }
+  await recomputeCache(before.exercise_id as number, userId);
 }
 
 export async function deletePRHistoryEntry(id: number): Promise<void> {
@@ -313,12 +301,7 @@ export async function updateRecordWeight(
   });
   if (historyError) handleDatabaseError(historyError);
 
-  const { error } = await supabase
-    .from("personal-records")
-    .update({ weight: newWeight, updated_at: new Date().toISOString() })
-    .eq("id", recordId)
-    .eq("user_id", userId);
-  if (error) handleDatabaseError(error);
+  await recomputeCache(record.exercise_id, userId);
 }
 
 export async function deleteRecord(

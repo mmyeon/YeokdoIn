@@ -1,13 +1,8 @@
 "use client";
 
-import { Button } from "../ui/button";
-import { History, Trash2 } from "lucide-react";
+import { History } from "lucide-react";
 import { useState } from "react";
-import {
-  usePersonalRecords,
-  useDeletePersonalRecord,
-} from "@/hooks/usePersonalRecords";
-import { toast } from "sonner";
+import { usePersonalRecords } from "@/hooks/usePersonalRecords";
 import { PersonalRecordInfo } from "@/types/personalRecords";
 import PRTimelineDialog from "./PRTimelineDialog";
 
@@ -17,23 +12,6 @@ const PersonalRecordList = () => {
 
   const { data: records = [], isLoading: isLoadingRecords } =
     usePersonalRecords();
-
-  const deleteRecordMutation = useDeletePersonalRecord(
-    () => toast.success("개인 기록이 삭제되었습니다."),
-    () => toast.error("개인 기록 삭제 중 오류가 발생했습니다.")
-  );
-
-  async function handleDeleteRecord(
-    record: PersonalRecordInfo,
-    event: React.MouseEvent
-  ) {
-    event.stopPropagation();
-    const ok = window.confirm(
-      `${record.exerciseName}의 모든 기록을 삭제할까요? 이력 포함 삭제됩니다.`
-    );
-    if (!ok) return;
-    await deleteRecordMutation.mutateAsync(record.id);
-  }
 
   if (isLoadingRecords) {
     return (
@@ -64,15 +42,6 @@ const PersonalRecordList = () => {
             <div className="flex items-center gap-3">
               <div className="text-muted-foreground">{record.weight} kg</div>
               <History className="h-4 w-4 text-muted-foreground" />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => handleDeleteRecord(record, e)}
-                disabled={deleteRecordMutation.isPending}
-                className="h-8 w-8 p-0"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
             </div>
           </div>
         ))}

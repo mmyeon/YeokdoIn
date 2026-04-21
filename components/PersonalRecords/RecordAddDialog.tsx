@@ -49,18 +49,21 @@ const RecordAddDialog = () => {
 
         <div className="grid grid-cols-[auto_1fr] items-center gap-3">
           <Label htmlFor="exercise">운동 종목</Label>
-          <WorkoutSelect onSelect={(id) => setExerciseId(id)} />
+          <WorkoutSelect
+            selectedId={exerciseId || undefined}
+            onSelect={(id) => setExerciseId(id)}
+          />
         </div>
 
         <PRHistoryEntryEditor
           submitLabel="저장하기"
           isPending={addMutation.isPending}
-          onSubmit={async (draft) => {
+          onSubmit={(draft) => {
             if (!exerciseId) {
               toast.error("운동 종목을 선택해 주세요.");
               return;
             }
-            await addMutation.mutateAsync({
+            addMutation.mutate({
               exerciseId,
               newWeight: draft.newWeight,
               prDate: draft.prDate,

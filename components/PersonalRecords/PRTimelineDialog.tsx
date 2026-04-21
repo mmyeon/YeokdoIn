@@ -28,9 +28,14 @@ interface PRTimelineDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-function formatDelta(entry: PRHistoryEntry): { label: string; tone: "up" | "down" | "new" } {
-  if (entry.previousWeight === null) return { label: "첫 기록", tone: "new" };
-  const delta = entry.newWeight - entry.previousWeight;
+function formatDelta(
+  history: PRHistoryEntry[],
+  index: number
+): { label: string; tone: "up" | "down" | "new" } {
+  const current = history[index];
+  const prev = history[index + 1];
+  if (!prev) return { label: "첫 기록", tone: "new" };
+  const delta = current.newWeight - prev.newWeight;
   if (delta === 0) return { label: "±0kg", tone: "new" };
   const sign = delta > 0 ? "+" : "";
   return {
@@ -77,9 +82,9 @@ export default function PRTimelineDialog({
     () => toast.error("기록 삭제 중 오류가 발생했습니다.")
   );
 
-  async function handleDelete(entryId: number) {
+  function handleDelete(entryId: number) {
     if (!window.confirm("이 기록을 삭제할까요?")) return;
-    await deleteMutation.mutateAsync(entryId);
+    deleteMutation.mutate(entryId);
   }
 
   return (
@@ -103,14 +108,14 @@ export default function PRTimelineDialog({
             <PRHistoryEntryEditor
               submitLabel="추가"
               isPending={addMutation.isPending}
-              onSubmit={(draft) =>
-                addMutation.mutateAsync({
+              onSubmit={(draft) => {
+                addMutation.mutate({
                   exerciseId,
                   newWeight: draft.newWeight,
                   prDate: draft.prDate,
                   note: draft.note,
-                })
-              }
+                });
+              }}
               onCancel={() => setIsAdding(false)}
             />
           </div>
@@ -137,8 +142,8 @@ export default function PRTimelineDialog({
               아직 기록이 없습니다.
             </div>
           ) : (
-            history.map((entry) => {
-              const delta = formatDelta(entry);
+            history.map((entry, index) => {
+              const delta = formatDelta(history, index);
               const isEditing = editingId === entry.id;
               return (
                 <div
@@ -154,16 +159,16 @@ export default function PRTimelineDialog({
                       }}
                       submitLabel="수정"
                       isPending={updateMutation.isPending}
-                      onSubmit={(draft) =>
-                        updateMutation.mutateAsync({
+                      onSubmit={(draft) => {
+                        updateMutation.mutate({
                           id: entry.id,
                           patch: {
                             newWeight: draft.newWeight,
                             prDate: draft.prDate,
                             note: draft.note,
                           },
-                        })
-                      }
+                        });
+                      }}
                       onCancel={() => setEditingId(null)}
                     />
                   ) : (
