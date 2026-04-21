@@ -6,41 +6,12 @@ import {
   personalRecordAtom,
   programPercentagesAtom,
 } from "@/entities/training/atoms/liftsAtom";
-import { Lift, Plates, WeightPercentage } from "@/types/training";
+import { Lift, WeightPercentage } from "@/types/training";
 import CalculationCards from "./CalculationCards";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LIFT_INFO } from "@/shared/constants";
 import { useBarbellWeight } from "@/hooks/useBarbellWeight";
-
-const AVAILABLE_PLATES: Plates = [25, 20, 15, 10, 5, 2.5, 2, 1.5, 1, 0.5];
-
-/**
- * 바벨 무게를 제외한 남은 무게를 플레이트로 계산
- * 양쪽에 2개씩 적용 (한쪽 플레이트만 반환)
- *
- * @param totalWeight - 전체 무게
- * @param barbellWeight - 바벨 무게
- * @returns 한쪽에 필요한 플레이트 배열 (무거운 것부터)
- */
-function calculatePlates(remainingWeight: number): Plates {
-  // 전체 무게 - 바벨 무게
-
-  if (remainingWeight <= 0) return [];
-
-  // 남은 무게 / 2 = 한쪽 무게
-  let oneSideWeight = remainingWeight / 2;
-  const plates: Plates = [];
-
-  // 플레이트 무거운 것부터 적용
-  for (const plate of AVAILABLE_PLATES) {
-    while (oneSideWeight >= plate) {
-      plates.push(plate);
-      oneSideWeight -= plate;
-    }
-  }
-
-  return plates;
-}
+import { calculatePlates } from "@/features/programs/model/plates";
 
 /**
  * 프로그램 퍼센트와 개인 기록(PR)을 기반으로 각 프로그램의 중량과 플레이트 조합을 계산합니다.
