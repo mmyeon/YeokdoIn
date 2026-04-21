@@ -15,6 +15,21 @@ export type PersonalRecordInfo = {
   exerciseName: ExercisesRow["name"];
 };
 
+export type PRHistoryRow = Database["public"]["Tables"]["pr_history"]["Row"];
+
+export type PRHistorySource = "manual" | "auto_detected_from_workout";
+
+export type PRHistoryEntry = {
+  id: PRHistoryRow["id"];
+  exerciseId: PRHistoryRow["exercise_id"];
+  previousWeight: PRHistoryRow["previous_weight"];
+  newWeight: PRHistoryRow["new_weight"];
+  prDate: PRHistoryRow["pr_date"];
+  note: PRHistoryRow["note"];
+  source: PRHistorySource;
+  createdAt: PRHistoryRow["created_at"];
+};
+
 export type Exercises = {
   id: ExercisesRow["id"];
   name: ExercisesRow["name"];
