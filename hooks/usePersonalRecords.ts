@@ -7,6 +7,10 @@ import {
   addRecord,
   getExercises,
   getUserPersonalRecords,
+  getPRHistory,
+  addPRHistoryEntry,
+  updatePRHistoryEntry,
+  deletePRHistoryEntry,
 } from "@/actions/personalRecords";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { PersonalRecordInfo } from "@/types/personalRecords";
@@ -48,14 +52,11 @@ export const useUpdatePersonalRecord = (
       return updateRecordWeight(recordId, newWeight);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.PERSONAL_RECORDS],
-      });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PERSONAL_RECORDS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PR_HISTORY] });
       onSuccess();
     },
-    onError: (error) => {
-      onError(error);
-    },
+    onError: (error) => onError(error),
   });
 };
 
@@ -69,14 +70,11 @@ export const useDeletePersonalRecord = (
   return useMutation({
     mutationFn: deleteRecord,
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.PERSONAL_RECORDS],
-      });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PERSONAL_RECORDS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PR_HISTORY] });
       onSuccess();
     },
-    onError: (error) => {
-      onError(error);
-    },
+    onError: (error) => onError(error),
   });
 };
 
@@ -90,13 +88,77 @@ export const useAddPersonalRecord = (
   return useMutation({
     mutationFn: addRecord,
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.PERSONAL_RECORDS],
-      });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PERSONAL_RECORDS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PR_HISTORY] });
       onSuccess();
     },
-    onError: (error) => {
-      onError(error);
+    onError: (error) => onError(error),
+  });
+};
+
+// PR 이력 조회
+export const usePRHistory = (exerciseId: number | null) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.PR_HISTORY, exerciseId],
+    queryFn: () => getPRHistory(exerciseId as number),
+    enabled: exerciseId !== null,
+  });
+};
+
+// PR 이력 추가 (dual-write 진입점)
+export const useAddPRHistoryEntry = (
+  onSuccess: () => void,
+  onError: (error: Error) => void
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: addPRHistoryEntry,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PERSONAL_RECORDS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PR_HISTORY] });
+      onSuccess();
     },
+    onError: (error) => onError(error),
+  });
+};
+
+export const useUpdatePRHistoryEntry = (
+  onSuccess: () => void,
+  onError: (error: Error) => void
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      patch,
+    }: {
+      id: number;
+      patch: { newWeight?: number; prDate?: string; note?: string | null };
+    }) => updatePRHistoryEntry(id, patch),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PERSONAL_RECORDS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PR_HISTORY] });
+      onSuccess();
+    },
+    onError: (error) => onError(error),
+  });
+};
+
+export const useDeletePRHistoryEntry = (
+  onSuccess: () => void,
+  onError: (error: Error) => void
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deletePRHistoryEntry,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PERSONAL_RECORDS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PR_HISTORY] });
+      onSuccess();
+    },
+    onError: (error) => onError(error),
   });
 };

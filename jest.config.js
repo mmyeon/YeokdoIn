@@ -2,13 +2,17 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  testMatch: ['**/features/**/__tests__/**/*.test.ts'],
+  testMatch: [
+    '**/features/**/__tests__/**/*.test.ts',
+    '**/actions/__tests__/**/*.test.ts',
+  ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
   },
   collectCoverageFrom: [
     'features/notation/model/**/*.ts',
     '!features/notation/model/**/__tests__/**',
+    'actions/personalRecords.ts',
   ],
   coverageThreshold: {
     'features/notation/model/': {
