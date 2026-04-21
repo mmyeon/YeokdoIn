@@ -70,6 +70,7 @@ export default function PRHistoryEntryEditor({
             id="pr-date"
             type="date"
             value={prDate}
+            max={todayISO()}
             onChange={(e) => setPrDate(e.target.value)}
           />
         </div>
