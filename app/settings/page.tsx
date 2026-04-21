@@ -20,6 +20,10 @@ const SETTINGS_LIST = [
     title: "바벨 무게",
     route: ROUTES.SETTINGS.BARBELL_WEIGHT,
   },
+  {
+    title: "동작 별명",
+    route: ROUTES.SETTINGS.MOVEMENT_ALIASES,
+  },
 ];
 
 const Settings = () => {

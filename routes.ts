@@ -15,6 +15,7 @@ export const ROUTES = {
     GOALS: "/settings/goals",
     PERSONAL_RECORD: "/settings/personal-records",
     BARBELL_WEIGHT: "/settings/barbell-weight",
+    MOVEMENT_ALIASES: "/settings/movement-aliases",
   },
 };
 
