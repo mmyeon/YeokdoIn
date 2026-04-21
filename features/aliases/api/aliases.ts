@@ -36,13 +36,19 @@ export async function listAliases(): Promise<AliasWithExercise[]> {
 
   if (error) handleDatabaseError(error);
 
-  return (data ?? []).map((row) => ({
-    id: row.id,
-    alias: row.alias,
-    exerciseId: row.exercise_id,
-    exerciseName: row.exercises?.name ?? "",
-    createdAt: row.created_at,
-  }));
+  return (data ?? []).map((row) => {
+    // Supabase FK 조인은 관계 설정에 따라 객체 또는 배열로 반환될 수 있다.
+    const exercisesRel = Array.isArray(row.exercises)
+      ? row.exercises[0]
+      : row.exercises;
+    return {
+      id: row.id,
+      alias: row.alias,
+      exerciseId: row.exercise_id,
+      exerciseName: exercisesRel?.name ?? "(알 수 없는 운동)",
+      createdAt: row.created_at,
+    };
+  });
 }
 
 /**
@@ -72,15 +78,7 @@ export async function upsertAlias(
   if (findError) handleDatabaseError(findError);
 
   if (existing?.id) {
-    const { data, error } = await supabase
-      .from("movement_aliases")
-      .update({ alias: trimmed, exercise_id: exerciseId })
-      .eq("id", existing.id)
-      .eq("user_id", userId)
-      .select()
-      .single();
-    if (error) handleDatabaseError(error);
-    return data as AliasRow;
+    return updateAliasById(existing.id, userId, trimmed, exerciseId);
   }
 
   const { data, error } = await supabase
@@ -92,8 +90,41 @@ export async function upsertAlias(
     })
     .select()
     .single();
+
+  // 동시 삽입으로 UNIQUE INDEX 위반(23505)이 발생하면 기존 행을 조회해 update로 전환한다.
+  if (error?.code === "23505") {
+    const { data: winner, error: lookupError } = await supabase
+      .from("movement_aliases")
+      .select("id")
+      .eq("user_id", userId)
+      .ilike("alias", normalized)
+      .maybeSingle();
+    if (lookupError) handleDatabaseError(lookupError);
+    if (winner?.id) {
+      return updateAliasById(winner.id, userId, trimmed, exerciseId);
+    }
+  }
+
   if (error) handleDatabaseError(error);
-  return data as AliasRow;
+  return data;
+}
+
+async function updateAliasById(
+  id: number,
+  userId: string,
+  trimmed: string,
+  exerciseId: number
+): Promise<AliasRow> {
+  const supabase = await supabaseServerClient();
+  const { data, error } = await supabase
+    .from("movement_aliases")
+    .update({ alias: trimmed, exercise_id: exerciseId })
+    .eq("id", id)
+    .eq("user_id", userId)
+    .select()
+    .single();
+  if (error) handleDatabaseError(error);
+  return data;
 }
 
 /**

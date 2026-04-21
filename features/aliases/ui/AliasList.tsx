@@ -4,6 +4,17 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input/input";
 import WorkoutSelect from "@/components/PersonalRecords/WorkoutSelect";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import {
   useAliases,
@@ -18,13 +29,26 @@ import { Pencil, Trash2, X, Check, Plus } from "lucide-react";
  * 별명 목록 관리 컴포넌트. 추가/수정/삭제 기능 제공.
  */
 function AliasList() {
-  const { data: aliases = [], isLoading } = useAliases();
+  const { data: aliases = [], isLoading, isError, refetch } = useAliases();
   const [isAdding, setIsAdding] = useState(false);
 
   if (isLoading) {
     return (
       <div className="flex justify-center p-6 text-muted-foreground">
         로딩 중...
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-6 text-center">
+        <p className="text-sm text-destructive">
+          별명을 불러오지 못했습니다.
+        </p>
+        <Button variant="outline" size="sm" onClick={() => refetch()}>
+          다시 시도
+        </Button>
       </div>
     );
   }
@@ -100,15 +124,36 @@ function AliasItem({ alias }: AliasItemProps) {
         >
           <Pencil className="w-4 h-4" />
         </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => deleteMutation.mutate(alias.id)}
-          disabled={deleteMutation.isPending}
-          aria-label="삭제"
-        >
-          <Trash2 className="w-4 h-4" />
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              disabled={deleteMutation.isPending}
+              aria-label="삭제"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                정말 이 별명을 삭제하시겠습니까?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                &ldquo;{alias.alias}&rdquo; 별명이 삭제됩니다.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>취소</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => deleteMutation.mutate(alias.id)}
+              >
+                삭제
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </li>
   );
