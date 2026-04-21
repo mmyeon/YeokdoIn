@@ -24,9 +24,9 @@ export function calculatePlates(remainingWeight: number): Plates {
 
 /**
  * PR과 퍼센트로부터 처방 중량(kg)을 계산한다.
- * 0.5kg 단위로 반올림한다 (플레이트 최소 단위에 맞춤).
+ * 1kg 단위로 반올림한다 (양쪽 대칭 최소 단위 0.5kg × 2 = 1kg).
  */
 export function computePrescribedWeight(pr: number, percentage: number): number {
   const raw = (pr * percentage) / 100;
-  return Math.round(raw * 2) / 2;
+  return Math.round(raw);
 }

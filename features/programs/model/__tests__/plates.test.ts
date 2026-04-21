@@ -28,11 +28,12 @@ describe("calculatePlates", () => {
 });
 
 describe("computePrescribedWeight", () => {
-  it("PR과 퍼센트를 곱하고 0.5kg 단위로 반올림한다", () => {
+  it("PR과 퍼센트를 곱하고 1kg 단위로 반올림한다", () => {
     expect(computePrescribedWeight(100, 60)).toBe(60);
     expect(computePrescribedWeight(85, 60)).toBe(51); // 51.0
     expect(computePrescribedWeight(87, 60)).toBe(52); // 52.2 → 52
     expect(computePrescribedWeight(88, 60)).toBe(53); // 52.8 → 53
+    expect(computePrescribedWeight(101, 50)).toBe(51); // 50.5 → 51 (0.5kg 단위 방지)
   });
 
   it("퍼센트가 0이면 0kg을 반환한다", () => {
