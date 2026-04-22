@@ -51,38 +51,6 @@ export type Database = {
         }
         Relationships: []
       }
-      movement_aliases: {
-        Row: {
-          alias: string
-          created_at: string
-          exercise_id: number
-          id: number
-          user_id: string
-        }
-        Insert: {
-          alias: string
-          created_at?: string
-          exercise_id: number
-          id?: number
-          user_id: string
-        }
-        Update: {
-          alias?: string
-          created_at?: string
-          exercise_id?: number
-          id?: number
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "movement_aliases_exercise_id_fkey"
-            columns: ["exercise_id"]
-            isOneToOne: false
-            referencedRelation: "exercises"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       "personal-records": {
         Row: {
           created_at: string | null

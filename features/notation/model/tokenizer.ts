@@ -18,8 +18,6 @@ export interface Token {
 }
 
 const IDENT_START = /[A-Za-z\uAC00-\uD7A3]/;
-// TODO(phase1B): tighten to disallow trailing/consecutive dots (e.g., "abc.", "abc..def")
-//                once movement_aliases canonicalization rejects unknown names.
 const IDENT_CONT = /[A-Za-z\uAC00-\uD7A3.]/;
 const DIGIT = /[0-9]/;
 
