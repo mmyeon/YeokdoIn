@@ -21,33 +21,150 @@ button:disabled {
 
 @custom-variant dark (&:is(.dark *));
 
-/* YeokdoIn Design System v0.2 — namespaced --yd-* tokens (single source of truth) */
-:root {
-  --yd-bg: #F6F6F3;  --yd-surface: #FFFFFF;  --yd-elevated: #FFFFFF;  --yd-line: #E2E2DD;
-  --yd-text: #0E1012;  --yd-text-muted: #5C6370;  --yd-text-dim: #A3ACB3;
-  --yd-primary: #3F8A00;  --yd-primary-hover: #357500;  --yd-primary-pressed: #2B6000;
-  --yd-primary-subtle: #E8F5D6;  --yd-on-primary: #FFFFFF;
-  --yd-success: #0A8F72;  --yd-success-subtle: #D6F5ED;  --yd-on-success: #FFFFFF;
-  --yd-warn: #B45309;  --yd-warn-subtle: #FEF3C7;
-  --yd-error: #DC2626;  --yd-error-subtle: #FEE2E2;  --yd-on-error: #FFFFFF;
-  --yd-info: #2563EB;  --yd-info-subtle: #DBEAFE;
-  --yd-pr: #B8960A;  --yd-pr-glow: #D4AB0C;  --yd-pr-subtle: #FEF9C3;  --yd-on-pr: #FFFFFF;
-  --yd-rpe-6: #0A8F72;  --yd-rpe-7: #4D7C0F;  --yd-rpe-8: #A16207;  --yd-rpe-9: #C2410C;  --yd-rpe-10: #DC2626;
-  --yd-focus: #3F8A0066;
-}
+/* YeokdoIn Design System v0.2 — namespaced --yd-* tokens (single source of truth)
+   Dark is primary (per spec). Light opts in via [data-theme="light"] / .light. */
+:root,
+.dark,
+[data-theme="dark"] {
+  /* Surfaces */
+  --yd-bg: #0A0B0C;  --yd-surface: #111214;  --yd-elevated: #171A1C;
+  --yd-overlay: rgba(8,9,10,0.72);
+  --yd-line: #22262A;  --yd-line-strong: #2F353A;
 
-.dark, [data-theme="dark"] {
-  --yd-bg: #0A0B0C;  --yd-surface: #111214;  --yd-elevated: #171A1C;  --yd-line: #22262A;
+  /* Text */
   --yd-text: #F2F4F5;  --yd-text-muted: #A3ACB3;  --yd-text-dim: #5C6370;
+  --yd-text-inverse: #0A0B0C;
+
+  /* Primary (lime) */
   --yd-primary: #B4FF39;  --yd-primary-hover: #9FE830;  --yd-primary-pressed: #8BD028;
   --yd-primary-subtle: #1A2E08;  --yd-on-primary: #0A0B0C;
-  --yd-success: #00D4AA;  --yd-success-subtle: #0A2E25;  --yd-on-success: #0A2E25;
-  --yd-warn: #F59E0B;  --yd-warn-subtle: #3D2707;
-  --yd-error: #EF4444;  --yd-error-subtle: #3B1111;  --yd-on-error: #FEE2E2;
-  --yd-info: #3B82F6;  --yd-info-subtle: #0F1D3D;
-  --yd-pr: #FFD600;  --yd-pr-glow: #FFE44D;  --yd-pr-subtle: #3D3200;  --yd-on-pr: #3D2800;
-  --yd-rpe-6: #00D4AA;  --yd-rpe-7: #84CC16;  --yd-rpe-8: #EAB308;  --yd-rpe-9: #F97316;  --yd-rpe-10: #EF4444;
-  --yd-focus: #B4FF3966;
+  --yd-primary-soft: rgba(180,255,57,0.14);
+  --yd-primary-ring: rgba(180,255,57,0.40);
+
+  /* Success (teal) */
+  --yd-success: #00D4AA;  --yd-success-hover: #00BD98;
+  --yd-success-subtle: #0A2E25;  --yd-on-success: #0A2E25;
+  --yd-success-soft: rgba(0,212,170,0.14);
+
+  /* Warn */
+  --yd-warn: #F59E0B;  --yd-warn-hover: #D97706;
+  --yd-warn-subtle: #3D2707;  --yd-on-warn: #3D2707;
+  --yd-warn-soft: rgba(245,158,11,0.16);
+
+  /* Error */
+  --yd-error: #EF4444;  --yd-error-hover: #DC2626;
+  --yd-error-subtle: #3B1111;  --yd-on-error: #FEE2E2;
+  --yd-error-soft: rgba(239,68,68,0.14);
+
+  /* Info */
+  --yd-info: #3B82F6;  --yd-info-hover: #2563EB;
+  --yd-info-subtle: #0F1D3D;  --yd-on-info: #DBEAFE;
+  --yd-info-soft: rgba(59,130,246,0.14);
+
+  /* PR (gold) */
+  --yd-pr: #FFD600;  --yd-pr-glow: #FFE44D;
+  --yd-pr-subtle: #3D3200;  --yd-on-pr: #3D2800;
+  --yd-pr-soft: rgba(255,214,0,0.14);
+
+  /* RPE spectrum */
+  --yd-rpe-6: #00D4AA;  --yd-rpe-7: #84CC16;  --yd-rpe-8: #EAB308;
+  --yd-rpe-9: #F97316;  --yd-rpe-10: #EF4444;
+
+  /* Focus */
+  --yd-focus-ring: rgba(180,255,57,0.40);
+  --yd-focus: 0 0 0 2px var(--yd-bg), 0 0 0 4px var(--yd-focus-ring);
+
+  /* Elevation */
+  --yd-shadow-1: 0 1px 0 rgba(255,255,255,0.02) inset, 0 1px 2px rgba(0,0,0,0.4);
+  --yd-shadow-2: 0 1px 0 rgba(255,255,255,0.03) inset, 0 6px 16px -6px rgba(0,0,0,0.6);
+  --yd-shadow-3: 0 1px 0 rgba(255,255,255,0.04) inset, 0 24px 48px -12px rgba(0,0,0,0.7);
+}
+
+.light,
+[data-theme="light"] {
+  --yd-bg: #F6F6F3;  --yd-surface: #FFFFFF;  --yd-elevated: #FFFFFF;
+  --yd-overlay: rgba(10,11,12,0.40);
+  --yd-line: #E2E2DD;  --yd-line-strong: #D3D3CC;
+
+  --yd-text: #0E1012;  --yd-text-muted: #5C6370;  --yd-text-dim: #A3ACB3;
+  --yd-text-inverse: #FFFFFF;
+
+  --yd-primary: #3F8A00;  --yd-primary-hover: #357500;  --yd-primary-pressed: #2B6000;
+  --yd-primary-subtle: #E8F5D6;  --yd-on-primary: #FFFFFF;
+  --yd-primary-soft: rgba(63,138,0,0.10);
+  --yd-primary-ring: rgba(63,138,0,0.30);
+
+  --yd-success: #0A8F72;  --yd-success-hover: #087A62;
+  --yd-success-subtle: #D6F5ED;  --yd-on-success: #FFFFFF;
+  --yd-success-soft: rgba(10,143,114,0.10);
+
+  --yd-warn: #B45309;  --yd-warn-hover: #92400E;
+  --yd-warn-subtle: #FEF3C7;  --yd-on-warn: #FFFFFF;
+  --yd-warn-soft: rgba(180,83,9,0.12);
+
+  --yd-error: #DC2626;  --yd-error-hover: #B91C1C;
+  --yd-error-subtle: #FEE2E2;  --yd-on-error: #FFFFFF;
+  --yd-error-soft: rgba(220,38,38,0.10);
+
+  --yd-info: #2563EB;  --yd-info-hover: #1D4ED8;
+  --yd-info-subtle: #DBEAFE;  --yd-on-info: #FFFFFF;
+  --yd-info-soft: rgba(37,99,235,0.10);
+
+  --yd-pr: #B8960A;  --yd-pr-glow: #D4AB0C;
+  --yd-pr-subtle: #FEF9C3;  --yd-on-pr: #FFFFFF;
+  --yd-pr-soft: rgba(184,150,10,0.12);
+
+  --yd-rpe-6: #0A8F72;  --yd-rpe-7: #4D7C0F;  --yd-rpe-8: #A16207;
+  --yd-rpe-9: #C2410C;  --yd-rpe-10: #DC2626;
+
+  --yd-focus-ring: rgba(63,138,0,0.40);
+  --yd-focus: 0 0 0 2px var(--yd-bg), 0 0 0 4px var(--yd-focus-ring);
+
+  --yd-shadow-1: 0 1px 2px rgba(18,20,22,0.06);
+  --yd-shadow-2: 0 6px 16px -6px rgba(18,20,22,0.14);
+  --yd-shadow-3: 0 24px 48px -12px rgba(18,20,22,0.22);
+}
+
+/* Theme-agnostic foundation tokens (radius / spacing / typography / motion) */
+:root {
+  /* Radius */
+  --yd-r-sm: 6px;  --yd-r-md: 10px;  --yd-r-lg: 16px;  --yd-r-xl: 22px;  --yd-r-full: 999px;
+
+  /* Spacing (4px base) */
+  --yd-s-1: 4px;  --yd-s-2: 8px;  --yd-s-3: 12px;  --yd-s-4: 16px;
+  --yd-s-5: 24px;  --yd-s-6: 32px;  --yd-s-7: 48px;  --yd-s-8: 64px;
+
+  /* Type families */
+  --yd-font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --yd-font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Type scale (shorthand font shorthand: weight size/line family) */
+  --yd-t-display: 600 40px/1.05 var(--yd-font-sans);
+  --yd-t-h1:      600 28px/1.15 var(--yd-font-sans);
+  --yd-t-h2:      600 22px/1.2  var(--yd-font-sans);
+  --yd-t-h3:      600 17px/1.3  var(--yd-font-sans);
+  --yd-t-body:    400 15px/1.5  var(--yd-font-sans);
+  --yd-t-body-s:  400 13px/1.45 var(--yd-font-sans);
+  --yd-t-caption: 500 11px/1.3  var(--yd-font-sans);
+  --yd-t-num-xl:  600 56px/1    var(--yd-font-mono);
+  --yd-t-num-lg:  600 32px/1    var(--yd-font-mono);
+  --yd-t-num-md:  600 20px/1    var(--yd-font-mono);
+  --yd-t-num-sm:  500 13px/1    var(--yd-font-mono);
+  --yd-t-notation:500 14px/1.4  var(--yd-font-mono);
+
+  /* Motion */
+  --yd-dur-fast: 120ms;
+  --yd-dur-base: 200ms;
+  --yd-dur-slow: 360ms;
+  --yd-ease-out:    cubic-bezier(0.2, 0.7, 0.2, 1);
+  --yd-ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+/* Tabular numerals helper — apply to weight/reps/time displays */
+.yd-num,
+.yd-mono {
+  font-feature-settings: "tnum" 1, "zero" 1, "ss01" 1;
+  font-variant-numeric: tabular-nums;
 }
 
 /* shadcn semantic tokens — mapped onto --yd-* so a single edit themes both systems */
@@ -131,34 +248,48 @@ button:disabled {
   --color-yd-surface: var(--yd-surface);
   --color-yd-elevated: var(--yd-elevated);
   --color-yd-line: var(--yd-line);
+  --color-yd-line-strong: var(--yd-line-strong);
   --color-yd-text: var(--yd-text);
   --color-yd-text-muted: var(--yd-text-muted);
   --color-yd-text-dim: var(--yd-text-dim);
+  --color-yd-text-inverse: var(--yd-text-inverse);
   --color-yd-primary: var(--yd-primary);
   --color-yd-primary-hover: var(--yd-primary-hover);
   --color-yd-primary-pressed: var(--yd-primary-pressed);
   --color-yd-primary-subtle: var(--yd-primary-subtle);
+  --color-yd-primary-soft: var(--yd-primary-soft);
   --color-yd-on-primary: var(--yd-on-primary);
   --color-yd-success: var(--yd-success);
+  --color-yd-success-hover: var(--yd-success-hover);
   --color-yd-success-subtle: var(--yd-success-subtle);
+  --color-yd-success-soft: var(--yd-success-soft);
   --color-yd-on-success: var(--yd-on-success);
   --color-yd-warn: var(--yd-warn);
+  --color-yd-warn-hover: var(--yd-warn-hover);
   --color-yd-warn-subtle: var(--yd-warn-subtle);
+  --color-yd-warn-soft: var(--yd-warn-soft);
+  --color-yd-on-warn: var(--yd-on-warn);
   --color-yd-error: var(--yd-error);
+  --color-yd-error-hover: var(--yd-error-hover);
   --color-yd-error-subtle: var(--yd-error-subtle);
+  --color-yd-error-soft: var(--yd-error-soft);
   --color-yd-on-error: var(--yd-on-error);
   --color-yd-info: var(--yd-info);
+  --color-yd-info-hover: var(--yd-info-hover);
   --color-yd-info-subtle: var(--yd-info-subtle);
+  --color-yd-info-soft: var(--yd-info-soft);
+  --color-yd-on-info: var(--yd-on-info);
   --color-yd-pr: var(--yd-pr);
   --color-yd-pr-glow: var(--yd-pr-glow);
   --color-yd-pr-subtle: var(--yd-pr-subtle);
+  --color-yd-pr-soft: var(--yd-pr-soft);
   --color-yd-on-pr: var(--yd-on-pr);
   --color-yd-rpe-6: var(--yd-rpe-6);
   --color-yd-rpe-7: var(--yd-rpe-7);
   --color-yd-rpe-8: var(--yd-rpe-8);
   --color-yd-rpe-9: var(--yd-rpe-9);
   --color-yd-rpe-10: var(--yd-rpe-10);
-  --color-yd-focus: var(--yd-focus);
+  --color-yd-focus: var(--yd-focus-ring);
 }
 
 /* 
