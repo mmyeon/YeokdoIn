@@ -73,6 +73,56 @@ const config: Config = {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        yd: {
+          bg: "var(--yd-bg)",
+          surface: "var(--yd-surface)",
+          elevated: "var(--yd-elevated)",
+          line: "var(--yd-line)",
+          text: {
+            DEFAULT: "var(--yd-text)",
+            muted: "var(--yd-text-muted)",
+            dim: "var(--yd-text-dim)",
+          },
+          primary: {
+            DEFAULT: "var(--yd-primary)",
+            hover: "var(--yd-primary-hover)",
+            pressed: "var(--yd-primary-pressed)",
+            subtle: "var(--yd-primary-subtle)",
+          },
+          "on-primary": "var(--yd-on-primary)",
+          success: {
+            DEFAULT: "var(--yd-success)",
+            subtle: "var(--yd-success-subtle)",
+          },
+          "on-success": "var(--yd-on-success)",
+          warn: {
+            DEFAULT: "var(--yd-warn)",
+            subtle: "var(--yd-warn-subtle)",
+          },
+          error: {
+            DEFAULT: "var(--yd-error)",
+            subtle: "var(--yd-error-subtle)",
+          },
+          "on-error": "var(--yd-on-error)",
+          info: {
+            DEFAULT: "var(--yd-info)",
+            subtle: "var(--yd-info-subtle)",
+          },
+          pr: {
+            DEFAULT: "var(--yd-pr)",
+            glow: "var(--yd-pr-glow)",
+            subtle: "var(--yd-pr-subtle)",
+          },
+          "on-pr": "var(--yd-on-pr)",
+          rpe: {
+            "6": "var(--yd-rpe-6)",
+            "7": "var(--yd-rpe-7)",
+            "8": "var(--yd-rpe-8)",
+            "9": "var(--yd-rpe-9)",
+            "10": "var(--yd-rpe-10)",
+          },
+          focus: "var(--yd-focus)",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
