@@ -19,7 +19,6 @@ async function requireUserId(): Promise<string> {
 export interface SaveProgramInput {
   rawNotation: string;
   parsed: Program;
-  title?: string | null;
 }
 
 export async function saveProgram(input: SaveProgramInput): Promise<ProgramRow> {
@@ -35,7 +34,6 @@ export async function saveProgram(input: SaveProgramInput): Promise<ProgramRow> 
     userId,
     rawNotation: input.rawNotation,
     parsed: parseResult.data as Program,
-    title: input.title,
   });
 
   const { data, error } = await supabase

@@ -28,25 +28,13 @@ describe('buildProgramSavePayload', () => {
     });
   });
 
-  it('rawNotation 과 title 의 앞뒤 공백을 제거한다', () => {
+  it('rawNotation 의 앞뒤 공백을 제거한다', () => {
     const payload = buildProgramSavePayload({
       userId: 'u1',
       rawNotation: '   back squat 70% 5x3   ',
       parsed: program,
-      title: '   월요일 하체   ',
     });
     expect(payload.raw_notation).toBe('back squat 70% 5x3');
-    expect(payload.title).toBe('월요일 하체');
-  });
-
-  it('빈 title 문자열은 null 로 저장한다', () => {
-    const payload = buildProgramSavePayload({
-      userId: 'u1',
-      rawNotation: 'back squat 70% 5x3',
-      parsed: program,
-      title: '   ',
-    });
-    expect(payload.title).toBeNull();
   });
 
   it('rawNotation 이 비어 있으면 에러를 던진다', () => {

@@ -11,12 +11,12 @@ export interface BuildPayloadInput {
   userId: string;
   rawNotation: string;
   parsed: Program;
-  title?: string | null;
 }
 
 /**
  * 프로그램 저장용 insert payload 를 생성한다.
  * 순수 함수: 입력 객체를 변형하지 않고, DB 스키마(programs)에 맞는 새 객체를 반환한다.
+ * title 컬럼은 현재 사용하지 않으며 항상 null 로 저장한다.
  */
 export function buildProgramSavePayload(
   input: BuildPayloadInput,
@@ -28,13 +28,10 @@ export function buildProgramSavePayload(
   if (!input.userId) {
     throw new Error('사용자 ID가 필요합니다.');
   }
-  const rawTitle = input.title ?? null;
-  const title =
-    rawTitle === null ? null : rawTitle.trim() === '' ? null : rawTitle.trim();
 
   return {
     user_id: input.userId,
-    title,
+    title: null,
     raw_notation: rawNotation,
     parsed_data: input.parsed,
   };

@@ -1,29 +1,27 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Input } from '@/components/ui/input/input';
-import { Label } from '@/components/ui/label';
 import BackButton from '@/components/BackButton';
-import { NotationTextarea } from '@/features/programs/ui/NotationTextarea';
 import { ProgramForm } from '@/features/programs/ui/ProgramForm';
 import { ProgramList } from '@/features/programs/ui/ProgramList';
 import { useSaveProgram } from '@/hooks/usePrograms';
 import { ROUTES } from '@/routes';
 import type { Program } from '@/features/notation/model/types';
+import { createEmptyBlock } from '@/features/programs/model/update';
+import { serializeProgram } from '@/features/programs/model/serialize';
+import { programSchema } from '@/features/notation/model/schemas';
 
-// TODO(1C-4): /training/program-runner/[id] 라우트 페이지 구현 예정.
-//   저장 직후 이 경로로 리다이렉트하므로, 현재는 404가 날 수 있다.
+function createInitialProgram(): Program {
+  return { blocks: [createEmptyBlock()] };
+}
 
 export default function ProgramInputPage() {
   const router = useRouter();
-  const [rawNotation, setRawNotation] = useState('');
-  const [title, setTitle] = useState('');
-  const [program, setProgram] = useState<Program | null>(null);
-  const [parseError, setParseError] = useState<string | null>(null);
+  const [program, setProgram] = useState<Program>(createInitialProgram);
 
   const { mutate: save, isPending } = useSaveProgram({
     onSuccess: (row) => {
@@ -33,26 +31,14 @@ export default function ProgramInputPage() {
     onError: (e) => toast.error(e.message ?? '저장에 실패했습니다.'),
   });
 
-  const handleParsed = useCallback(
-    (next: Program | null, error: string | null) => {
-      setProgram(next);
-      setParseError(error);
-    },
-    [],
-  );
-
-  const canSave =
-    !isPending &&
-    program !== null &&
-    parseError === null &&
-    rawNotation.trim().length > 0;
+  const validation = programSchema.safeParse(program);
+  const canSave = !isPending && validation.success;
 
   const handleSave = () => {
-    if (!program) return;
+    if (!validation.success) return;
     save({
-      rawNotation,
+      rawNotation: serializeProgram(program),
       parsed: program,
-      title: title.trim() === '' ? null : title,
     });
   };
 
@@ -67,36 +53,11 @@ export default function ProgramInputPage() {
         <CardHeader className="pb-0">
           <h2 className="text-base font-semibold">새 프로그램</h2>
           <p className="text-xs text-muted-foreground">
-            코치 표기를 붙여넣으면 자동으로 블록이 만들어집니다.
+            블록별로 동작, %, reps, sets 를 입력하세요.
           </p>
         </CardHeader>
         <CardContent className="space-y-4 pt-4">
-          <div className="space-y-2">
-            <Label htmlFor="program-title" className="text-sm font-medium">
-              제목 (선택)
-            </Label>
-            <Input
-              id="program-title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="예) 월요일 하체"
-            />
-          </div>
-
-          <NotationTextarea
-            value={rawNotation}
-            onChange={setRawNotation}
-            onParsed={handleParsed}
-          />
-
-          {program && !parseError && (
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">
-                노테이션을 다시 수정하면 블록 편집 내용은 초기화됩니다.
-              </p>
-              <ProgramForm program={program} onChange={setProgram} />
-            </div>
-          )}
+          <ProgramForm program={program} onChange={setProgram} />
 
           <Button
             type="button"

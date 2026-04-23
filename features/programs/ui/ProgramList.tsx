@@ -62,9 +62,7 @@ export function ProgramList() {
               <p className="text-xs text-muted-foreground">
                 {formatDate(row.created_at)}
               </p>
-              <p className="font-medium truncate">
-                {row.title ?? summarize(row)}
-              </p>
+              <p className="font-medium truncate">{summarize(row)}</p>
               <p className="text-xs text-muted-foreground truncate">
                 {row.raw_notation}
               </p>

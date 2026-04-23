@@ -4,17 +4,30 @@ import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
-import type {
-  Block,
-  RepScheme,
-} from '@/features/notation/model/types';
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Plus, Trash2, X } from 'lucide-react';
+import type { Block, RepScheme } from '@/features/notation/model/types';
+import {
+  addMovement,
+  removeMovementAt,
   setMovementName,
   setPercentage,
   setReps,
   setSets,
+  toggleBlockModifier,
 } from '@/features/programs/model/update';
+import {
+  MOVEMENT_GROUPS,
+  MOVEMENT_MODIFIERS,
+} from '@/features/programs/model/movements';
 
 interface BlockEditorProps {
   block: Block;
@@ -46,6 +59,8 @@ function parseRepsInput(value: string): RepScheme | null {
   return { type: 'simple', reps: n };
 }
 
+const MAX_MOVEMENTS_PER_BLOCK = 2;
+
 export function BlockEditor({
   block,
   index,
@@ -55,17 +70,16 @@ export function BlockEditor({
 }: BlockEditorProps) {
   const [repsDraft, setRepsDraft] = useState(() => repsToString(block.reps));
 
-  // 외부에서 block.reps가 바뀌면 드래프트를 동기화한다.
-  // 사용자가 입력 중인 값이 현재 block.reps와 이미 일치한다면 덮어쓰지 않는다.
   useEffect(() => {
     const canonical = repsToString(block.reps);
     const parsedDraft = parseRepsInput(repsDraft);
     if (!parsedDraft || repsToString(parsedDraft) !== canonical) {
       setRepsDraft(canonical);
     }
-    // repsDraft는 의도적으로 의존성에서 제외 (사용자 입력 중 클로버 방지)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [block.reps]);
+
+  const canAddMovement = block.movements.length < MAX_MOVEMENTS_PER_BLOCK;
 
   return (
     <div className="rounded-lg border p-4 space-y-3 bg-card">
@@ -87,15 +101,57 @@ export function BlockEditor({
       <div className="space-y-2">
         <Label className="text-xs">동작</Label>
         {block.movements.map((m, mi) => (
-          <Input
-            key={mi}
-            value={m.name}
-            onChange={(e) =>
-              onChange(setMovementName(block, mi, e.target.value))
-            }
-            placeholder="동작 이름"
-          />
+          <div key={mi} className="flex gap-2">
+            <Select
+              value={m.name || undefined}
+              onValueChange={(value) =>
+                onChange(setMovementName(block, mi, value))
+              }
+            >
+              <SelectTrigger className="w-full" aria-label={`동작 ${mi + 1}`}>
+                <SelectValue placeholder="동작 선택" />
+              </SelectTrigger>
+              <SelectContent>
+                {MOVEMENT_GROUPS.map((group) => (
+                  <SelectGroup key={group.category}>
+                    <SelectLabel>{group.category}</SelectLabel>
+                    {group.items.map((name) => (
+                      <SelectItem key={name} value={name}>
+                        {name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                ))}
+              </SelectContent>
+            </Select>
+            {block.movements.length > 1 && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 shrink-0 text-muted-foreground"
+                onClick={() => onChange(removeMovementAt(block, mi))}
+                aria-label={`동작 ${mi + 1} 삭제`}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
         ))}
+        {canAddMovement && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={() =>
+              onChange(addMovement(block, { name: '', modifiers: [] }))
+            }
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            복합 동작 추가
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-3 gap-2">
@@ -134,7 +190,6 @@ export function BlockEditor({
               if (parsed) {
                 onChange(setReps(block, parsed));
               } else {
-                // 잘못된 입력이면 마지막 유효 값으로 되돌린다.
                 setRepsDraft(repsToString(block.reps));
               }
             }}
@@ -157,11 +212,27 @@ export function BlockEditor({
         </div>
       </div>
 
-      {block.modifiers.length > 0 && (
-        <div className="text-xs text-muted-foreground">
-          제약: {block.modifiers.join(', ')}
+      <div className="space-y-2">
+        <Label className="text-xs">수행 조건 (중복 선택)</Label>
+        <div className="flex flex-wrap gap-1.5">
+          {MOVEMENT_MODIFIERS.map((mod) => {
+            const active = block.modifiers.includes(mod);
+            return (
+              <Button
+                key={mod}
+                type="button"
+                variant={active ? 'default' : 'outline'}
+                size="sm"
+                className="h-7 px-2 text-xs"
+                onClick={() => onChange(toggleBlockModifier(block, mod))}
+                aria-pressed={active}
+              >
+                {mod}
+              </Button>
+            );
+          })}
         </div>
-      )}
+      </div>
     </div>
   );
 }

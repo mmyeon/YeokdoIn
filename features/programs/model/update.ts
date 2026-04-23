@@ -77,3 +77,26 @@ export function setSets(block: Block, sets: number): Block {
 export function setReps(block: Block, reps: RepScheme): Block {
   return { ...block, reps };
 }
+
+export function addMovement(block: Block, movement: Movement): Block {
+  return { ...block, movements: [...block.movements, movement] };
+}
+
+export function removeMovementAt(block: Block, index: number): Block {
+  if (index < 0 || index >= block.movements.length) return block;
+  if (block.movements.length <= 1) return block;
+  return {
+    ...block,
+    movements: block.movements.filter((_, i) => i !== index),
+  };
+}
+
+export function toggleBlockModifier(block: Block, modifier: string): Block {
+  const exists = block.modifiers.includes(modifier);
+  return {
+    ...block,
+    modifiers: exists
+      ? block.modifiers.filter((m) => m !== modifier)
+      : [...block.modifiers, modifier],
+  };
+}

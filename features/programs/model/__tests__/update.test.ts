@@ -1,11 +1,14 @@
 import {
   addBlock,
+  addMovement,
   createEmptyBlock,
   removeBlockAt,
+  removeMovementAt,
   setMovementName,
   setPercentage,
   setReps,
   setSets,
+  toggleBlockModifier,
   updateBlockAt,
 } from '../update';
 import type { Block, Program } from '@/features/notation/model/types';
@@ -85,5 +88,65 @@ describe('setReps/setSets/setPercentage', () => {
     expect(c.percentage).toBe(75);
     expect(block.sets).toBe(1);
     expect(block.percentage).toBeNull();
+  });
+});
+
+describe('addMovement', () => {
+  it('블록 끝에 movement 를 추가한다', () => {
+    const block = makeBlock('a');
+    const next = addMovement(block, { name: 'b', modifiers: [] });
+    expect(next.movements).toHaveLength(2);
+    expect(next.movements[1].name).toBe('b');
+    expect(block.movements).toHaveLength(1);
+  });
+});
+
+describe('removeMovementAt', () => {
+  it('해당 movement 만 제거한다', () => {
+    const block = {
+      ...makeBlock('a'),
+      movements: [
+        { name: 'a', modifiers: [] },
+        { name: 'b', modifiers: [] },
+      ],
+    };
+    const next = removeMovementAt(block, 0);
+    expect(next.movements).toHaveLength(1);
+    expect(next.movements[0].name).toBe('b');
+  });
+
+  it('movement 가 1개뿐이면 원본을 반환한다', () => {
+    const block = makeBlock('a');
+    expect(removeMovementAt(block, 0)).toBe(block);
+  });
+
+  it('범위 밖 인덱스는 원본을 반환한다', () => {
+    const block = makeBlock('a');
+    expect(removeMovementAt(block, 99)).toBe(block);
+  });
+});
+
+describe('toggleBlockModifier', () => {
+  it('없으면 추가하고 있으면 제거한다', () => {
+    const block = makeBlock('a');
+    const added = toggleBlockModifier(block, 'slow');
+    expect(added.modifiers).toEqual(['slow']);
+    const removed = toggleBlockModifier(added, 'slow');
+    expect(removed.modifiers).toEqual([]);
+  });
+});
+
+describe('updateBlockAt 범위 내 인덱스 체크', () => {
+  it('음수 인덱스는 원본을 반환한다', () => {
+    const p = { blocks: [makeBlock('a')] };
+    expect(updateBlockAt(p, -1, (b) => b)).toBe(p);
+  });
+});
+
+describe('removeBlockAt 범위 체크', () => {
+  it('범위 밖 인덱스는 원본을 반환한다', () => {
+    const p = { blocks: [makeBlock('a')] };
+    expect(removeBlockAt(p, 99)).toBe(p);
+    expect(removeBlockAt(p, -1)).toBe(p);
   });
 });
