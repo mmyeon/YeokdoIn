@@ -8,7 +8,6 @@ const program: Program = {
       percentage: 70,
       reps: { type: 'simple', reps: 5 },
       sets: 3,
-      modifiers: [],
     },
   ],
 };

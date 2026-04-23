@@ -44,7 +44,29 @@ describe('blockSchema', () => {
         percentage: null,
         reps: { type: 'simple', reps: 1 },
         sets: 1,
-        modifiers: [],
+      }).success,
+    ).toBe(false);
+  });
+});
+
+describe('movementSchema modifiers', () => {
+  it('position 을 가진 modifier 객체 배열을 허용한다', () => {
+    expect(
+      movementSchema.safeParse({
+        name: 'snatch',
+        modifiers: [
+          { name: 'pause', position: 'before' },
+          { name: 'hold', position: 'after' },
+        ],
+      }).success,
+    ).toBe(true);
+  });
+
+  it('position 이 before/after 외면 거부한다', () => {
+    expect(
+      movementSchema.safeParse({
+        name: 'snatch',
+        modifiers: [{ name: 'pause', position: 'middle' }],
       }).success,
     ).toBe(false);
   });
@@ -60,11 +82,15 @@ describe('programSchema', () => {
       programSchema.safeParse({
         blocks: [
           {
-            movements: [{ name: 'snatch', modifiers: [] }],
+            movements: [
+              {
+                name: 'snatch',
+                modifiers: [{ name: 'pause', position: 'before' }],
+              },
+            ],
             percentage: 70,
             reps: { type: 'simple', reps: 3 },
             sets: 4,
-            modifiers: ['slow'],
           },
         ],
       }).success,

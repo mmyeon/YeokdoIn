@@ -8,7 +8,6 @@ import { toast } from 'sonner';
 import { ROUTES } from '@/routes';
 import { useDeleteProgram, usePrograms } from '@/hooks/usePrograms';
 import type { ProgramRow } from '@/features/programs/api/programs';
-import { programSchema } from '@/features/notation/model/schemas';
 
 function formatDate(iso: string): string {
   const date = new Date(iso);
@@ -19,15 +18,11 @@ function formatDate(iso: string): string {
   }).format(date);
 }
 
-function summarize(row: ProgramRow): string {
-  const parseResult = programSchema.safeParse(row.parsed_data);
-  const parsed = parseResult.success ? parseResult.data : null;
-  if (!parsed) return row.raw_notation;
-  const blockCount = parsed.blocks.length;
-  const first = parsed.blocks[0];
-  const firstName = first?.movements?.[0]?.name ?? '';
-  const suffix = blockCount > 1 ? ` 외 ${blockCount - 1}개 블록` : '';
-  return firstName ? `${firstName}${suffix}` : row.raw_notation;
+function toBullets(row: ProgramRow): string[] {
+  return row.raw_notation
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
 }
 
 export function ProgramList() {
@@ -62,10 +57,13 @@ export function ProgramList() {
               <p className="text-xs text-muted-foreground">
                 {formatDate(row.created_at)}
               </p>
-              <p className="font-medium truncate">{summarize(row)}</p>
-              <p className="text-xs text-muted-foreground truncate">
-                {row.raw_notation}
-              </p>
+              <ul className="mt-1 list-disc space-y-0.5 pl-5 text-sm">
+                {toBullets(row).map((line, i) => (
+                  <li key={i} className="break-words">
+                    {line}
+                  </li>
+                ))}
+              </ul>
             </div>
             <div className="flex items-center gap-1">
               <Button

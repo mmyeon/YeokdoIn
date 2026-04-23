@@ -4,15 +4,6 @@ import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Plus, Trash2, X } from 'lucide-react';
 import type { Block, RepScheme } from '@/features/notation/model/types';
 import {
@@ -22,12 +13,10 @@ import {
   setPercentage,
   setReps,
   setSets,
-  toggleBlockModifier,
+  toggleMovementModifier,
 } from '@/features/programs/model/update';
-import {
-  MOVEMENT_GROUPS,
-  MOVEMENT_MODIFIERS,
-} from '@/features/programs/model/movements';
+import { MOVEMENT_MODIFIERS } from '@/features/programs/model/movements';
+import { MovementCombobox } from './MovementCombobox';
 
 interface BlockEditorProps {
   block: Block;
@@ -100,44 +89,97 @@ export function BlockEditor({
 
       <div className="space-y-2">
         <Label className="text-xs">동작</Label>
-        {block.movements.map((m, mi) => (
-          <div key={mi} className="flex gap-2">
-            <Select
-              value={m.name || undefined}
-              onValueChange={(value) =>
-                onChange(setMovementName(block, mi, value))
-              }
-            >
-              <SelectTrigger className="w-full" aria-label={`동작 ${mi + 1}`}>
-                <SelectValue placeholder="동작 선택" />
-              </SelectTrigger>
-              <SelectContent>
-                {MOVEMENT_GROUPS.map((group) => (
-                  <SelectGroup key={group.category}>
-                    <SelectLabel>{group.category}</SelectLabel>
-                    {group.items.map((name) => (
-                      <SelectItem key={name} value={name}>
-                        {name}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                ))}
-              </SelectContent>
-            </Select>
-            {block.movements.length > 1 && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 shrink-0 text-muted-foreground"
-                onClick={() => onChange(removeMovementAt(block, mi))}
-                aria-label={`동작 ${mi + 1} 삭제`}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        ))}
+        {block.movements.map((m, mi) => {
+          const isActive = (name: string, position: 'before' | 'after') =>
+            m.modifiers.some(
+              (x) => x.name === name && x.position === position,
+            );
+          return (
+            <div key={mi} className="space-y-2 rounded-md border p-2">
+              <div className="space-y-1">
+                <Label className="text-[10px] text-muted-foreground">
+                  앞 modifier
+                </Label>
+                <div className="flex flex-wrap gap-1">
+                  {MOVEMENT_MODIFIERS.map((mod) => {
+                    const active = isActive(mod, 'before');
+                    return (
+                      <Button
+                        key={`before-${mod}`}
+                        type="button"
+                        variant={active ? 'default' : 'outline'}
+                        size="sm"
+                        className="h-6 px-2 text-[11px]"
+                        onClick={() =>
+                          onChange(
+                            toggleMovementModifier(block, mi, {
+                              name: mod,
+                              position: 'before',
+                            }),
+                          )
+                        }
+                        aria-pressed={active}
+                      >
+                        {mod}
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <MovementCombobox
+                  value={m.name}
+                  onChange={(value) =>
+                    onChange(setMovementName(block, mi, value))
+                  }
+                  ariaLabel={`동작 ${mi + 1}`}
+                />
+                {block.movements.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 shrink-0 text-muted-foreground"
+                    onClick={() => onChange(removeMovementAt(block, mi))}
+                    aria-label={`동작 ${mi + 1} 삭제`}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+              <div className="space-y-1">
+                <Label className="text-[10px] text-muted-foreground">
+                  뒤 modifier
+                </Label>
+                <div className="flex flex-wrap gap-1">
+                  {MOVEMENT_MODIFIERS.map((mod) => {
+                    const active = isActive(mod, 'after');
+                    return (
+                      <Button
+                        key={`after-${mod}`}
+                        type="button"
+                        variant={active ? 'default' : 'outline'}
+                        size="sm"
+                        className="h-6 px-2 text-[11px]"
+                        onClick={() =>
+                          onChange(
+                            toggleMovementModifier(block, mi, {
+                              name: mod,
+                              position: 'after',
+                            }),
+                          )
+                        }
+                        aria-pressed={active}
+                      >
+                        {mod}
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          );
+        })}
         {canAddMovement && (
           <Button
             type="button"
@@ -212,27 +254,6 @@ export function BlockEditor({
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label className="text-xs">수행 조건 (중복 선택)</Label>
-        <div className="flex flex-wrap gap-1.5">
-          {MOVEMENT_MODIFIERS.map((mod) => {
-            const active = block.modifiers.includes(mod);
-            return (
-              <Button
-                key={mod}
-                type="button"
-                variant={active ? 'default' : 'outline'}
-                size="sm"
-                className="h-7 px-2 text-xs"
-                onClick={() => onChange(toggleBlockModifier(block, mod))}
-                aria-pressed={active}
-              >
-                {mod}
-              </Button>
-            );
-          })}
-        </div>
-      </div>
     </div>
   );
 }

@@ -8,7 +8,7 @@ import {
   setPercentage,
   setReps,
   setSets,
-  toggleBlockModifier,
+  toggleMovementModifier,
   updateBlockAt,
 } from '../update';
 import type { Block, Program } from '@/features/notation/model/types';
@@ -19,7 +19,6 @@ function makeBlock(name: string): Block {
     percentage: null,
     reps: { type: 'simple', reps: 1 },
     sets: 1,
-    modifiers: [],
   };
 }
 
@@ -126,13 +125,71 @@ describe('removeMovementAt', () => {
   });
 });
 
-describe('toggleBlockModifier', () => {
-  it('없으면 추가하고 있으면 제거한다', () => {
-    const block = makeBlock('a');
-    const added = toggleBlockModifier(block, 'slow');
-    expect(added.modifiers).toEqual(['slow']);
-    const removed = toggleBlockModifier(added, 'slow');
-    expect(removed.modifiers).toEqual([]);
+describe('toggleMovementModifier', () => {
+  it('같은 name+position 이 없으면 추가한다', () => {
+    const block = makeBlock('snatch');
+    const next = toggleMovementModifier(block, 0, {
+      name: 'pause',
+      position: 'before',
+    });
+    expect(next.movements[0].modifiers).toEqual([
+      { name: 'pause', position: 'before' },
+    ]);
+  });
+
+  it('같은 name+position 조합이 있으면 제거한다', () => {
+    const block = makeBlock('snatch');
+    const added = toggleMovementModifier(block, 0, {
+      name: 'pause',
+      position: 'before',
+    });
+    const removed = toggleMovementModifier(added, 0, {
+      name: 'pause',
+      position: 'before',
+    });
+    expect(removed.movements[0].modifiers).toEqual([]);
+  });
+
+  it('같은 name 이어도 position 이 다르면 둘 다 공존한다', () => {
+    const block = makeBlock('snatch');
+    const a = toggleMovementModifier(block, 0, {
+      name: 'pause',
+      position: 'before',
+    });
+    const b = toggleMovementModifier(a, 0, {
+      name: 'pause',
+      position: 'after',
+    });
+    expect(b.movements[0].modifiers).toEqual([
+      { name: 'pause', position: 'before' },
+      { name: 'pause', position: 'after' },
+    ]);
+  });
+
+  it('추가 순서가 보존된다', () => {
+    const block = makeBlock('snatch');
+    const a = toggleMovementModifier(block, 0, {
+      name: 'no foot',
+      position: 'before',
+    });
+    const b = toggleMovementModifier(a, 0, {
+      name: 'pause',
+      position: 'before',
+    });
+    expect(b.movements[0].modifiers.map((m) => m.name)).toEqual([
+      'no foot',
+      'pause',
+    ]);
+  });
+
+  it('범위 밖 movementIndex 는 원본을 반환한다', () => {
+    const block = makeBlock('snatch');
+    expect(
+      toggleMovementModifier(block, 99, {
+        name: 'pause',
+        position: 'before',
+      }),
+    ).toBe(block);
   });
 });
 

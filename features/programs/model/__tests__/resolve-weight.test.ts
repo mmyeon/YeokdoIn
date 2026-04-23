@@ -11,7 +11,6 @@ const makeBlock = (
   percentage,
   reps: { type: "simple", reps: 3 },
   sets: 3,
-  modifiers: [],
 });
 
 describe("resolveWeight", () => {

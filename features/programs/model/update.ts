@@ -1,5 +1,6 @@
 import type {
   Block,
+  ModifierPosition,
   Movement,
   Program,
   RepScheme,
@@ -39,7 +40,6 @@ export function createEmptyBlock(): Block {
     percentage: null,
     reps: { type: 'simple', reps: 1 },
     sets: 1,
-    modifiers: [],
   };
 }
 
@@ -91,12 +91,27 @@ export function removeMovementAt(block: Block, index: number): Block {
   };
 }
 
-export function toggleBlockModifier(block: Block, modifier: string): Block {
-  const exists = block.modifiers.includes(modifier);
-  return {
-    ...block,
-    modifiers: exists
-      ? block.modifiers.filter((m) => m !== modifier)
-      : [...block.modifiers, modifier],
-  };
+/**
+ * 특정 movement 의 특정 position 에서 modifier 를 토글한다.
+ * 같은 name + position 조합이 이미 있으면 제거, 없으면 배열 끝에 추가한다.
+ * position 은 직렬화 순서에 영향을 주므로 보존된다.
+ */
+export function toggleMovementModifier(
+  block: Block,
+  movementIndex: number,
+  modifier: { name: string; position: ModifierPosition },
+): Block {
+  return updateMovementAt(block, movementIndex, (m) => {
+    const exists = m.modifiers.some(
+      (x) => x.name === modifier.name && x.position === modifier.position,
+    );
+    return {
+      ...m,
+      modifiers: exists
+        ? m.modifiers.filter(
+            (x) => !(x.name === modifier.name && x.position === modifier.position),
+          )
+        : [...m.modifiers, modifier],
+    };
+  });
 }

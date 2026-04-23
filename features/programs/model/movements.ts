@@ -152,6 +152,7 @@ export const MOVEMENT_MODIFIERS: readonly string[] = [
   'box2',
   'high hang',
   'low hang',
+  'no foot',
 ] as const;
 
 export function isCanonicalMovement(name: string): boolean {

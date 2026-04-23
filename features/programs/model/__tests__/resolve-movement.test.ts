@@ -8,7 +8,6 @@ const blockOf = (movements: Movement[]): Block => ({
   percentage: 60,
   reps: { type: "simple", reps: 3 },
   sets: 3,
-  modifiers: [],
 });
 
 describe("resolveRefMovement", () => {
