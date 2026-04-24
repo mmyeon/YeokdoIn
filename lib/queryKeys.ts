@@ -5,4 +5,5 @@ export const QUERY_KEYS = {
   USER_SETTINGS: "userSettings",
   BARBELL_WEIGHT: "barbellWeight",
   GOALS: "goals",
+  PROGRAMS: "programs",
 };
