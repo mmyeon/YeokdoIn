@@ -57,6 +57,7 @@ export async function getUserPersonalRecords(): Promise<PersonalRecordInfo[]> {
       `   id,
           exercise_id,
           weight,
+          pr_date,
           updated_at,
           created_at,
           exercises (
@@ -65,16 +66,18 @@ export async function getUserPersonalRecords(): Promise<PersonalRecordInfo[]> {
         `
     )
     .eq("user_id", userId)
-    .order("updated_at", { ascending: false, nullsFirst: false })
-    .order("created_at", { ascending: false });
+    .order("pr_date", { ascending: false })
+    .order("updated_at", { ascending: false, nullsFirst: false });
 
   if (error) handleDatabaseError(error);
 
   const processedData =
-    data?.map(({ id, weight, exercises, exercise_id }) => ({
+    data?.map(({ id, weight, pr_date, updated_at, exercises, exercise_id }) => ({
       id,
       exerciseId: exercise_id,
       weight,
+      prDate: pr_date,
+      updatedAt: updated_at,
       exerciseName: exercises.name,
     })) ?? [];
 
