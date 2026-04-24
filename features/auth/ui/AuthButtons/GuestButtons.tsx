@@ -1,14 +1,14 @@
-import { Button } from "@/components/ui/button";
 import { ROUTES } from "@/routes";
 import Link from "next/link";
 
 const GuestButtons = () => {
   return (
-    <>
-      <Button className="text-sm font-medium rounded-2xl" asChild>
-        <Link href={ROUTES.AUTH.LOGIN}>로그인</Link>
-      </Button>
-    </>
+    <Link
+      href={ROUTES.AUTH.LOGIN}
+      className="flex h-9 items-center rounded-full border border-[var(--yd-line)] bg-[var(--yd-surface)] px-3 text-[12px] font-semibold text-[var(--yd-text)]"
+    >
+      로그인
+    </Link>
   );
 };
 

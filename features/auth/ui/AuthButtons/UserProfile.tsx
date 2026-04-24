@@ -1,16 +1,18 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import useAuth from "../../model/useAuth";
 
 const UserProfile = () => {
   const { signOut } = useAuth();
 
   return (
-    /* TODO: 프로필 드랍다운 추가 - 로그아웃, 설정 (아이콘 - 텍스트)  */
-    <Button className="ml-2 text-sm font-medium rounded-2xl" onClick={signOut}>
+    <button
+      type="button"
+      onClick={signOut}
+      className="flex h-9 items-center rounded-full border border-[var(--yd-line)] bg-[var(--yd-surface)] px-3 text-[12px] font-semibold text-[var(--yd-text)]"
+    >
       로그아웃
-    </Button>
+    </button>
   );
 };
 
