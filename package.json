@@ -17,8 +17,8 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "size-limit": "size-limit",
     "lighthouse": "lhci autorun",
-    "generate-types": "npx supabase gen types typescript --local --schema public > types_db.ts",
-    "generate-types:remote": "npx supabase gen types typescript --project-id fltnzhmuvfkrgbjgvchd --schema public > types_db.ts"
+    "generate-types": "npx supabase gen types typescript --project-id fltnzhmuvfkrgbjgvchd --schema public > types_db.ts",
+    "generate-types:local": "npx supabase gen types typescript --local --schema public > types_db.ts"
   },
   "dependencies": {
     "@mediapipe/tasks-vision": "^0.10.22-rc.20250304",
