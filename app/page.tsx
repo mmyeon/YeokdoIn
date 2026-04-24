@@ -108,6 +108,7 @@ export default function Home() {
         greeting={isFirstTime ? "시작해볼까요" : greeting}
         initial={initial}
         streak={!isFirstTime ? undefined : undefined}
+        isAuthenticated={!!user}
       />
 
       {isLoading ? (
