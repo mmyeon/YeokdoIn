@@ -11,6 +11,7 @@ import {
   removeSetEntryAt,
   setEntryPercentage,
   setEntryReps,
+  setEntryRepsAt,
   setEntrySets,
   setMovementName,
   toggleMovementModifier,
@@ -45,6 +46,16 @@ function modifiersFor(m: Movement, position: 'before' | 'after'): string[] {
 
 function simpleReps(r: RepScheme): number {
   return r.type === 'simple' ? r.reps : r.reps[0];
+}
+
+function gridTemplate(movementCount: number): string {
+  const repsCols = Math.max(movementCount, 1);
+  return `88px repeat(${repsCols}, 1fr) 1fr 28px`;
+}
+
+function repsForMovement(r: RepScheme, movementIndex: number): number {
+  if (r.type === 'simple') return r.reps;
+  return r.reps[movementIndex] ?? r.reps[r.reps.length - 1] ?? 1;
 }
 
 interface BlockEditorProps {
@@ -249,13 +260,28 @@ export function BlockEditor({
           <div>
             <StepLabel n="②" label="부하 · 세트" />
             <div className="mt-2 flex flex-col gap-2">
-              <div className="grid grid-cols-[88px_1fr_1fr_28px] gap-2.5 px-1">
+              <div
+                className="grid gap-2.5 px-1"
+                style={{ gridTemplateColumns: gridTemplate(block.movements.length) }}
+              >
                 <span className="text-[10px] uppercase tracking-[0.8px] text-yd-text-muted">
                   % (선택)
                 </span>
-                <span className="text-center text-[10px] uppercase tracking-[0.8px] text-yd-text-muted">
-                  Reps
-                </span>
+                {block.movements.length <= 1 ? (
+                  <span className="text-center text-[10px] uppercase tracking-[0.8px] text-yd-text-muted">
+                    Reps
+                  </span>
+                ) : (
+                  block.movements.map((m, mi) => (
+                    <span
+                      key={mi}
+                      className="truncate text-center text-[10px] uppercase tracking-[0.8px] text-yd-text-muted"
+                      title={movementLabel(m)}
+                    >
+                      {movementLabel(m) || `운동 ${mi + 1}`}
+                    </span>
+                  ))
+                )}
                 <span className="text-center text-[10px] uppercase tracking-[0.8px] text-yd-text-muted">
                   Sets
                 </span>
@@ -315,6 +341,8 @@ function SetEntryRow({
   onChange: (next: Block) => void;
 }) {
   const entry = block.setEntries[entryIndex];
+  const movementCount = block.movements.length;
+  const isMulti = movementCount > 1;
   const [repsDraft, setRepsDraft] = useState(() =>
     entry.reps.type === 'simple' ? String(entry.reps.reps) : entry.reps.reps.join('+'),
   );
@@ -329,13 +357,29 @@ function SetEntryRow({
   }, [entry.reps]);
 
   return (
-    <div className="grid grid-cols-[88px_1fr_1fr_28px] items-center gap-2.5">
+    <div
+      className="grid items-center gap-2.5"
+      style={{ gridTemplateColumns: gridTemplate(movementCount) }}
+    >
       <PctChip
         value={entry.percentage}
         onChange={(v) => onChange(setEntryPercentage(block, entryIndex, v))}
         ariaLabel={`세트 ${entryIndex + 1} %`}
       />
-      {isComplex ? (
+      {isMulti ? (
+        block.movements.map((_, mi) => (
+          <BigStepper
+            key={mi}
+            value={repsForMovement(entry.reps, mi)}
+            onChange={(n) =>
+              onChange(setEntryRepsAt(block, entryIndex, mi, n))
+            }
+            min={REPS_MIN}
+            max={REPS_MAX}
+            ariaLabel={`세트 ${entryIndex + 1} 운동 ${mi + 1} reps`}
+          />
+        ))
+      ) : isComplex ? (
         <Input
           value={repsDraft}
           onChange={(e) => {
