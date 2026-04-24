@@ -1,22 +1,13 @@
 import { resolveWeight } from "../resolve-weight";
-import type { Block, Movement } from "@/features/notation/model/types";
+import type { Movement } from "@/features/notation/model/types";
 
 const mv = (name: string): Movement => ({ name, modifiers: [] });
-
-const makeBlock = (
-  movements: Movement[],
-  percentage: number | null = 60
-): Block => ({
-  movements,
-  percentage,
-  reps: { type: "simple", reps: 3 },
-  sets: 3,
-});
 
 describe("resolveWeight", () => {
   it("퍼센트와 PR이 모두 있으면 kg을 계산해 반환한다", () => {
     const result = resolveWeight({
-      block: makeBlock([mv("back squat")], 70),
+      movements: [mv("back squat")],
+      percentage: 70,
       aliasMap: { "back squat": 1 },
       prMap: { 1: 100 },
     });
@@ -31,7 +22,8 @@ describe("resolveWeight", () => {
 
   it("퍼센트가 없으면 no-percentage를 반환한다", () => {
     const result = resolveWeight({
-      block: makeBlock([mv("sots press")], null),
+      movements: [mv("sots press")],
+      percentage: null,
       aliasMap: { "sots press": 2 },
       prMap: { 2: 50 },
     });
@@ -40,7 +32,8 @@ describe("resolveWeight", () => {
 
   it("별칭 매핑이 없으면 unresolved-alias와 동작명을 반환한다", () => {
     const result = resolveWeight({
-      block: makeBlock([mv("P.Sn")]),
+      movements: [mv("P.Sn")],
+      percentage: 60,
       aliasMap: {},
       prMap: {},
     });
@@ -49,7 +42,8 @@ describe("resolveWeight", () => {
 
   it("별칭은 있지만 PR이 없으면 no-pr을 반환한다", () => {
     const result = resolveWeight({
-      block: makeBlock([mv("clean & jerk")]),
+      movements: [mv("clean & jerk")],
+      percentage: 60,
       aliasMap: { "clean & jerk": 3 },
       prMap: {},
     });
@@ -59,7 +53,8 @@ describe("resolveWeight", () => {
 
   it("복합 블록에서는 두 번째 동작의 PR을 사용한다", () => {
     const result = resolveWeight({
-      block: makeBlock([mv("snatch pull"), mv("power snatch")], 60),
+      movements: [mv("snatch pull"), mv("power snatch")],
+      percentage: 60,
       aliasMap: { "snatch pull": 10, "power snatch": 20 },
       prMap: { 10: 200, 20: 85 },
     });
@@ -67,13 +62,14 @@ describe("resolveWeight", () => {
     if (result.kind === "computed") {
       expect(result.exerciseId).toBe(20);
       expect(result.pr).toBe(85);
-      expect(result.kg).toBe(51); // 85 * 0.6 = 51
+      expect(result.kg).toBe(51);
     }
   });
 
   it("별칭 매핑은 대소문자 구분 없이 동작한다", () => {
     const result = resolveWeight({
-      block: makeBlock([mv("BACK SQUAT")], 70),
+      movements: [mv("BACK SQUAT")],
+      percentage: 70,
       aliasMap: { "back squat": 1 },
       prMap: { 1: 100 },
     });
@@ -81,9 +77,9 @@ describe("resolveWeight", () => {
   });
 
   it("결과 kg은 0.5kg 단위로 반올림된다", () => {
-    // 87 * 0.6 = 52.2 → 52
     const result = resolveWeight({
-      block: makeBlock([mv("back squat")], 60),
+      movements: [mv("back squat")],
+      percentage: 60,
       aliasMap: { "back squat": 1 },
       prMap: { 1: 87 },
     });

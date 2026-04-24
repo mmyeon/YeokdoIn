@@ -4,6 +4,7 @@ import type {
   Movement,
   Program,
   RepScheme,
+  SetEntry,
 } from '@/features/notation/model/types';
 
 /**
@@ -34,12 +35,18 @@ export function addBlock(program: Program, block: Block): Program {
   return { ...program, blocks: [...program.blocks, block] };
 }
 
+export function createEmptySetEntry(): SetEntry {
+  return {
+    percentage: null,
+    reps: { type: 'simple', reps: 3 },
+    sets: 3,
+  };
+}
+
 export function createEmptyBlock(): Block {
   return {
     movements: [{ name: '', modifiers: [] }],
-    percentage: null,
-    reps: { type: 'simple', reps: 1 },
-    sets: 1,
+    setEntries: [createEmptySetEntry()],
   };
 }
 
@@ -63,19 +70,52 @@ export function setMovementName(
   return updateMovementAt(block, index, (m) => ({ ...m, name }));
 }
 
-export function setPercentage(
+export function updateSetEntryAt(
   block: Block,
+  index: number,
+  updater: (entry: SetEntry) => SetEntry,
+): Block {
+  if (index < 0 || index >= block.setEntries.length) return block;
+  return {
+    ...block,
+    setEntries: block.setEntries.map((e, i) => (i === index ? updater(e) : e)),
+  };
+}
+
+export function addSetEntry(block: Block, entry?: SetEntry): Block {
+  return {
+    ...block,
+    setEntries: [...block.setEntries, entry ?? createEmptySetEntry()],
+  };
+}
+
+export function removeSetEntryAt(block: Block, index: number): Block {
+  if (index < 0 || index >= block.setEntries.length) return block;
+  if (block.setEntries.length <= 1) return block;
+  return {
+    ...block,
+    setEntries: block.setEntries.filter((_, i) => i !== index),
+  };
+}
+
+export function setEntryPercentage(
+  block: Block,
+  index: number,
   percentage: number | null,
 ): Block {
-  return { ...block, percentage };
+  return updateSetEntryAt(block, index, (e) => ({ ...e, percentage }));
 }
 
-export function setSets(block: Block, sets: number): Block {
-  return { ...block, sets };
+export function setEntryReps(
+  block: Block,
+  index: number,
+  reps: RepScheme,
+): Block {
+  return updateSetEntryAt(block, index, (e) => ({ ...e, reps }));
 }
 
-export function setReps(block: Block, reps: RepScheme): Block {
-  return { ...block, reps };
+export function setEntrySets(block: Block, index: number, sets: number): Block {
+  return updateSetEntryAt(block, index, (e) => ({ ...e, sets }));
 }
 
 export function addMovement(block: Block, movement: Movement): Block {

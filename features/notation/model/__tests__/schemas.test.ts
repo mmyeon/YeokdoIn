@@ -41,9 +41,18 @@ describe('blockSchema', () => {
     expect(
       blockSchema.safeParse({
         movements: [],
-        percentage: null,
-        reps: { type: 'simple', reps: 1 },
-        sets: 1,
+        setEntries: [
+          { percentage: null, reps: { type: 'simple', reps: 1 }, sets: 1 },
+        ],
+      }).success,
+    ).toBe(false);
+  });
+
+  it('최소 1개 이상의 setEntry 를 요구한다', () => {
+    expect(
+      blockSchema.safeParse({
+        movements: [{ name: 'snatch', modifiers: [] }],
+        setEntries: [],
       }).success,
     ).toBe(false);
   });
@@ -88,9 +97,9 @@ describe('programSchema', () => {
                 modifiers: [{ name: 'pause', position: 'before' }],
               },
             ],
-            percentage: 70,
-            reps: { type: 'simple', reps: 3 },
-            sets: 4,
+            setEntries: [
+              { percentage: 70, reps: { type: 'simple', reps: 3 }, sets: 4 },
+            ],
           },
         ],
       }).success,

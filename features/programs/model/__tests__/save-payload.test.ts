@@ -5,9 +5,9 @@ const program: Program = {
   blocks: [
     {
       movements: [{ name: 'back squat', modifiers: [] }],
-      percentage: 70,
-      reps: { type: 'simple', reps: 5 },
-      sets: 3,
+      setEntries: [
+        { percentage: 70, reps: { type: 'simple', reps: 5 }, sets: 3 },
+      ],
     },
   ],
 };

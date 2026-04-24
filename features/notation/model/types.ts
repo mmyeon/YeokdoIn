@@ -4,6 +4,10 @@ export interface Program {
 
 export interface Block {
   movements: Movement[];
+  setEntries: SetEntry[];
+}
+
+export interface SetEntry {
   percentage: number | null;
   reps: RepScheme;
   sets: number;

@@ -7,9 +7,9 @@ describe('serializeProgram', () => {
       blocks: [
         {
           movements: [{ name: 'back squat', modifiers: [] }],
-          percentage: 70,
-          reps: { type: 'simple', reps: 5 },
-          sets: 3,
+          setEntries: [
+            { percentage: 70, reps: { type: 'simple', reps: 5 }, sets: 3 },
+          ],
         },
       ],
     };
@@ -24,9 +24,9 @@ describe('serializeProgram', () => {
             { name: 'snatch pull', modifiers: [] },
             { name: 'power snatch', modifiers: [] },
           ],
-          percentage: 60,
-          reps: { type: 'complex', reps: [3, 1] },
-          sets: 3,
+          setEntries: [
+            { percentage: 60, reps: { type: 'complex', reps: [3, 1] }, sets: 3 },
+          ],
         },
       ],
     };
@@ -45,9 +45,9 @@ describe('serializeProgram', () => {
               modifiers: [{ name: 'pause', position: 'before' }],
             },
           ],
-          percentage: null,
-          reps: { type: 'simple', reps: 5 },
-          sets: 3,
+          setEntries: [
+            { percentage: null, reps: { type: 'simple', reps: 5 }, sets: 3 },
+          ],
         },
       ],
     };
@@ -64,9 +64,9 @@ describe('serializeProgram', () => {
               modifiers: [{ name: 'pause', position: 'after' }],
             },
           ],
-          percentage: null,
-          reps: { type: 'simple', reps: 5 },
-          sets: 3,
+          setEntries: [
+            { percentage: null, reps: { type: 'simple', reps: 5 }, sets: 3 },
+          ],
         },
       ],
     };
@@ -87,9 +87,9 @@ describe('serializeProgram', () => {
               ],
             },
           ],
-          percentage: 70,
-          reps: { type: 'simple', reps: 3 },
-          sets: 3,
+          setEntries: [
+            { percentage: 70, reps: { type: 'simple', reps: 3 }, sets: 3 },
+          ],
         },
       ],
     };
@@ -112,9 +112,9 @@ describe('serializeProgram', () => {
               modifiers: [{ name: 'no foot', position: 'before' }],
             },
           ],
-          percentage: 60,
-          reps: { type: 'complex', reps: [3, 1] },
-          sets: 3,
+          setEntries: [
+            { percentage: 60, reps: { type: 'complex', reps: [3, 1] }, sets: 3 },
+          ],
         },
       ],
     };
@@ -128,20 +128,37 @@ describe('serializeProgram', () => {
       blocks: [
         {
           movements: [{ name: 'snatch', modifiers: [] }],
-          percentage: 70,
-          reps: { type: 'simple', reps: 3 },
-          sets: 4,
+          setEntries: [
+            { percentage: 70, reps: { type: 'simple', reps: 3 }, sets: 4 },
+          ],
         },
         {
           movements: [{ name: 'front squat', modifiers: [] }],
-          percentage: 80,
-          reps: { type: 'simple', reps: 3 },
-          sets: 3,
+          setEntries: [
+            { percentage: 80, reps: { type: 'simple', reps: 3 }, sets: 3 },
+          ],
         },
       ],
     };
     expect(serializeProgram(program)).toBe(
       'snatch 70% 3x4\nfront squat 80% 3x3',
+    );
+  });
+
+  it('하나의 블록에 여러 set-entry 가 있으면 쉼표로 묶는다', () => {
+    const program: Program = {
+      blocks: [
+        {
+          movements: [{ name: 'back squat', modifiers: [] }],
+          setEntries: [
+            { percentage: 50, reps: { type: 'simple', reps: 3 }, sets: 3 },
+            { percentage: 60, reps: { type: 'simple', reps: 3 }, sets: 3 },
+          ],
+        },
+      ],
+    };
+    expect(serializeProgram(program)).toBe(
+      'back squat 50% 3x3, 60% 3x3',
     );
   });
 });

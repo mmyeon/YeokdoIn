@@ -1,13 +1,16 @@
 import {
   addBlock,
   addMovement,
+  addSetEntry,
   createEmptyBlock,
+  createEmptySetEntry,
   removeBlockAt,
   removeMovementAt,
+  removeSetEntryAt,
+  setEntryPercentage,
+  setEntryReps,
+  setEntrySets,
   setMovementName,
-  setPercentage,
-  setReps,
-  setSets,
   toggleMovementModifier,
   updateBlockAt,
 } from '../update';
@@ -16,9 +19,7 @@ import type { Block, Program } from '@/features/notation/model/types';
 function makeBlock(name: string): Block {
   return {
     movements: [{ name, modifiers: [] }],
-    percentage: null,
-    reps: { type: 'simple', reps: 1 },
-    sets: 1,
+    setEntries: [createEmptySetEntry()],
   };
 }
 
@@ -29,11 +30,11 @@ function makeProgram(): Program {
 describe('updateBlockAt', () => {
   it('해당 인덱스 블록만 교체한 새 Program 을 반환한다', () => {
     const p = makeProgram();
-    const next = updateBlockAt(p, 0, (b) => setPercentage(b, 80));
+    const next = updateBlockAt(p, 0, (b) => setEntryPercentage(b, 0, 80));
     expect(next).not.toBe(p);
-    expect(next.blocks[0].percentage).toBe(80);
+    expect(next.blocks[0].setEntries[0].percentage).toBe(80);
     expect(next.blocks[1]).toBe(p.blocks[1]);
-    expect(p.blocks[0].percentage).toBeNull();
+    expect(p.blocks[0].setEntries[0].percentage).toBeNull();
   });
 
   it('범위 밖 인덱스는 원본을 그대로 반환한다', () => {
@@ -76,17 +77,44 @@ describe('setMovementName', () => {
   });
 });
 
-describe('setReps/setSets/setPercentage', () => {
-  it('각각 해당 필드만 수정하고 원본은 보존한다', () => {
+describe('setEntryReps/setEntrySets/setEntryPercentage', () => {
+  it('해당 set-entry 필드만 수정하고 원본은 보존한다', () => {
     const block = makeBlock('a');
-    const a = setSets(block, 5);
-    const b = setReps(block, { type: 'complex', reps: [3, 1] });
-    const c = setPercentage(block, 75);
-    expect(a.sets).toBe(5);
-    expect(b.reps).toEqual({ type: 'complex', reps: [3, 1] });
-    expect(c.percentage).toBe(75);
-    expect(block.sets).toBe(1);
-    expect(block.percentage).toBeNull();
+    const a = setEntrySets(block, 0, 5);
+    const b = setEntryReps(block, 0, { type: 'complex', reps: [3, 1] });
+    const c = setEntryPercentage(block, 0, 75);
+    expect(a.setEntries[0].sets).toBe(5);
+    expect(b.setEntries[0].reps).toEqual({ type: 'complex', reps: [3, 1] });
+    expect(c.setEntries[0].percentage).toBe(75);
+    expect(block.setEntries[0].sets).toBe(3);
+    expect(block.setEntries[0].percentage).toBeNull();
+  });
+});
+
+describe('addSetEntry', () => {
+  it('기존 setEntries 끝에 새 entry 를 추가한다', () => {
+    const block = makeBlock('a');
+    const next = addSetEntry(block);
+    expect(next.setEntries).toHaveLength(2);
+    expect(block.setEntries).toHaveLength(1);
+  });
+});
+
+describe('removeSetEntryAt', () => {
+  it('해당 entry 만 제거한다', () => {
+    const block = addSetEntry(makeBlock('a'));
+    const next = removeSetEntryAt(block, 0);
+    expect(next.setEntries).toHaveLength(1);
+  });
+
+  it('entry 가 1개뿐이면 원본을 반환한다', () => {
+    const block = makeBlock('a');
+    expect(removeSetEntryAt(block, 0)).toBe(block);
+  });
+
+  it('범위 밖 인덱스는 원본을 반환한다', () => {
+    const block = addSetEntry(makeBlock('a'));
+    expect(removeSetEntryAt(block, 99)).toBe(block);
   });
 });
 

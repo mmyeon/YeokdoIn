@@ -23,11 +23,15 @@ export const movementSchema = z.object({
   modifiers: z.array(movementModifierSchema),
 });
 
-export const blockSchema = z.object({
-  movements: z.array(movementSchema).min(1),
+export const setEntrySchema = z.object({
   percentage: z.number().nullable(),
   reps: repSchemeSchema,
   sets: z.number().int().positive(),
+});
+
+export const blockSchema = z.object({
+  movements: z.array(movementSchema).min(1),
+  setEntries: z.array(setEntrySchema).min(1),
 });
 
 export const programSchema = z.object({

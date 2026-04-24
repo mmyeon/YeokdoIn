@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -9,7 +8,6 @@ import BackButton from '@/components/BackButton';
 import { ProgramForm } from '@/features/programs/ui/ProgramForm';
 import { ProgramList } from '@/features/programs/ui/ProgramList';
 import { useSaveProgram } from '@/hooks/usePrograms';
-import { ROUTES } from '@/routes';
 import type { Program } from '@/features/notation/model/types';
 import { createEmptyBlock } from '@/features/programs/model/update';
 import { serializeProgram } from '@/features/programs/model/serialize';
@@ -20,13 +18,12 @@ function createInitialProgram(): Program {
 }
 
 export default function ProgramInputPage() {
-  const router = useRouter();
   const [program, setProgram] = useState<Program>(createInitialProgram);
 
   const { mutate: save, isPending } = useSaveProgram({
-    onSuccess: (row) => {
+    onSuccess: () => {
       toast.success('프로그램이 저장되었습니다.');
-      router.push(ROUTES.TRAINING.PROGRAM_RUNNER(row.id));
+      setProgram(createInitialProgram());
     },
     onError: (e) => toast.error(e.message ?? '저장에 실패했습니다.'),
   });
