@@ -23,7 +23,7 @@ type SettingsSection = {
 };
 
 const Settings = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { data: barbellWeight } = useBarbellWeight();
 
   const sections: ReadonlyArray<SettingsSection> = [
@@ -40,8 +40,14 @@ const Settings = () => {
         // { label: "단위", detail: "kg" },
       ],
     },
-    // TODO: "계정" 섹션 복원 — 데이터 내보내기 등 실제 액션이 추가되면.
-    // 로그아웃은 전역 상단 pill이 담당.
+    {
+      title: "계정",
+      rows: [
+        // TODO: 데이터 내보내기 기능 구현 후 복원 (wireframe #13)
+        // { label: "데이터 내보내기" },
+        { label: "로그아웃", onSelect: signOut, danger: true, chevron: false },
+      ],
+    },
   ];
 
   return (
