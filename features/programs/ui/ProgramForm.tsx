@@ -1,7 +1,5 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
 import type { Program } from '@/features/notation/model/types';
 import {
   addBlock,
@@ -18,28 +16,27 @@ interface ProgramFormProps {
 
 export function ProgramForm({ program, onChange }: ProgramFormProps) {
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-3">
       {program.blocks.map((block, i) => (
         <BlockEditor
           key={i}
           block={block}
           index={i}
-          canRemove={program.blocks.length > 1}
-          onChange={(next) =>
-            onChange(updateBlockAt(program, i, () => next))
-          }
+          totalBlocks={program.blocks.length}
+          onChange={(next) => onChange(updateBlockAt(program, i, () => next))}
           onRemove={() => onChange(removeBlockAt(program, i))}
         />
       ))}
-      <Button
+      <button
         type="button"
-        variant="outline"
-        className="w-full"
         onClick={() => onChange(addBlock(program, createEmptyBlock()))}
+        className="flex h-[46px] items-center justify-center gap-1.5 rounded-xl border-[1.5px] border-dashed border-yd-line"
       >
-        <Plus className="h-4 w-4 mr-1" />
-        블록 추가
-      </Button>
+        <span className="text-[15px] font-bold text-yd-primary">+</span>
+        <span className="text-[13px] font-semibold text-yd-text-muted">
+          블록 추가
+        </span>
+      </button>
     </div>
   );
 }
