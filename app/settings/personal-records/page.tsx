@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 
 import { Pill } from "@/components/ui/pill";
@@ -25,18 +26,29 @@ function formatShortDate(prDate: string | null): string {
 }
 
 function PersonalRecordsPage() {
+  const router = useRouter();
   const { data: records = [], isLoading } = usePersonalRecords();
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push(ROUTES.SETTINGS.ROOT);
+    }
+  };
 
   return (
     <main className="flex flex-col gap-4 max-w-md mx-auto pb-24 pt-2 px-0">
       <div className="flex items-center justify-between px-4 pt-2 pb-1">
-        <Link
-          href={ROUTES.SETTINGS.ROOT}
-          className="flex items-center gap-1 text-yd-text-muted text-[14px] font-medium"
+        <button
+          type="button"
+          onClick={handleBack}
+          aria-label="뒤로가기"
+          className="-ml-1 flex items-center gap-1 rounded-md px-2 py-1.5 text-yd-text-muted text-[14px] font-medium hover:bg-yd-elevated"
         >
           <ChevronLeft className="size-4" aria-hidden />
           설정
-        </Link>
+        </button>
         <RecordAddDialog />
       </div>
 

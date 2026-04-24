@@ -3,6 +3,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Pill } from "@/components/ui/pill";
 import useAuth from "@/features/auth/model/useAuth";
+import { useBarbellWeight } from "@/hooks/useBarbellWeight";
 import { ROUTES } from "@/routes";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
@@ -23,13 +24,18 @@ type SettingsSection = {
 
 const Settings = () => {
   const { user, signOut } = useAuth();
+  const { data: barbellWeight } = useBarbellWeight();
 
   const sections: ReadonlyArray<SettingsSection> = [
     {
       title: "훈련",
       rows: [
         { label: "PR 관리", href: ROUTES.SETTINGS.PERSONAL_RECORD },
-        { label: "바 무게 설정", href: ROUTES.SETTINGS.BARBELL_WEIGHT, detail: "20 kg" },
+        {
+          label: "바 무게 설정",
+          href: ROUTES.SETTINGS.BARBELL_WEIGHT,
+          detail: barbellWeight ? `${barbellWeight} kg` : undefined,
+        },
         // TODO: 단위 설정 페이지 구현 후 복원 (wireframe #13)
         // { label: "단위", detail: "kg" },
       ],

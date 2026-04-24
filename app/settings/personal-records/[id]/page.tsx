@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { notFound, useParams } from "next/navigation";
+import { notFound, useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { ChevronLeft, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -33,9 +32,18 @@ function formatHistoryDate(prDate: string): string {
 
 function PRDetailPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const recordId = parseRecordId(params?.id);
 
   if (recordId === null) notFound();
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push(ROUTES.SETTINGS.PERSONAL_RECORD);
+    }
+  };
 
   const { data: records = [], isLoading: isLoadingRecord } =
     usePersonalRecords();
@@ -77,7 +85,17 @@ function PRDetailPage() {
   if (!isLoadingRecord && !record) {
     return (
       <main className="flex flex-col gap-4 max-w-md mx-auto pb-24 pt-2 px-0">
-        <BackLink />
+        <div className="px-4 pt-2 pb-1">
+          <button
+            type="button"
+            onClick={handleBack}
+            aria-label="뒤로가기"
+            className="-ml-1 flex items-center gap-1 rounded-md px-2 py-1.5 text-yd-text-muted text-[14px] font-medium hover:bg-yd-elevated"
+          >
+            <ChevronLeft className="size-4" aria-hidden />
+            PR
+          </button>
+        </div>
         <div className="px-5 py-10 text-center text-[13px] text-yd-text-muted">
           기록을 찾을 수 없습니다.
         </div>
@@ -88,7 +106,15 @@ function PRDetailPage() {
   return (
     <main className="flex flex-col gap-4 max-w-md mx-auto pb-24 pt-2 px-0">
       <div className="flex items-center justify-between px-4 pt-2 pb-1">
-        <BackLink />
+        <button
+          type="button"
+          onClick={handleBack}
+          aria-label="뒤로가기"
+          className="-ml-1 flex items-center gap-1 rounded-md px-2 py-1.5 text-yd-text-muted text-[14px] font-medium hover:bg-yd-elevated"
+        >
+          <ChevronLeft className="size-4" aria-hidden />
+          PR
+        </button>
         {!isAdding && exerciseId !== null && (
           <button
             type="button"
@@ -206,18 +232,6 @@ function PRDetailPage() {
         )}
       </section>
     </main>
-  );
-}
-
-function BackLink() {
-  return (
-    <Link
-      href={ROUTES.SETTINGS.PERSONAL_RECORD}
-      className="flex items-center gap-1 text-yd-text-muted text-[14px] font-medium"
-    >
-      <ChevronLeft className="size-4" aria-hidden />
-      PR
-    </Link>
   );
 }
 

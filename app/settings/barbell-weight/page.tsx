@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
 
@@ -23,8 +23,17 @@ const OPTIONS: ReadonlyArray<BarbellOption> = [
 ];
 
 function BarbellWeightPage() {
+  const router = useRouter();
   const { data: currentWeight, isLoading } = useBarbellWeight();
   const { mutate: saveWeight, isPending: isSaving } = useSaveBarbellWeight();
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push(ROUTES.SETTINGS.ROOT);
+    }
+  };
 
   const handleSelect = (kg: number) => {
     if (kg === currentWeight || isSaving) return;
@@ -37,13 +46,15 @@ function BarbellWeightPage() {
   return (
     <main className="flex flex-col gap-4 max-w-md mx-auto pb-24 pt-2 px-0">
       <div className="flex items-center justify-between px-4 pt-2 pb-1">
-        <Link
-          href={ROUTES.SETTINGS.ROOT}
-          className="flex items-center gap-1 text-yd-text-muted text-[14px] font-medium"
+        <button
+          type="button"
+          onClick={handleBack}
+          aria-label="뒤로가기"
+          className="-ml-1 flex items-center gap-1 rounded-md px-2 py-1.5 text-yd-text-muted text-[14px] font-medium hover:bg-yd-elevated"
         >
           <ChevronLeft className="size-4" aria-hidden />
           설정
-        </Link>
+        </button>
       </div>
 
       <header className="px-5">
