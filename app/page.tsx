@@ -116,7 +116,7 @@ export default function Home() {
         <>
           <FirstTimeHero />
           <SectionLabel>자기 기록</SectionLabel>
-          <PRBoard items={[]} variant="empty" />
+          <PRBoard items={[]} />
         </>
       ) : (
         <>
@@ -128,11 +128,7 @@ export default function Home() {
           >
             자기 기록
           </SectionLabel>
-          {prItems.length > 0 ? (
-            <PRBoard items={prItems} />
-          ) : (
-            <PRBoard items={[]} variant="empty" />
-          )}
+          <PRBoard items={prItems} />
 
           {libraryItems.length > 0 && (
             <>

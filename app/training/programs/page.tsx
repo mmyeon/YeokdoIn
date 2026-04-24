@@ -9,14 +9,12 @@ import { ROUTES } from '@/routes';
 import { cn } from '@/lib/utils';
 import { useDeleteProgram, usePrograms } from '@/hooks/usePrograms';
 import {
-  isToday,
   matchesFilter,
   matchesQuery,
   toLibraryItem,
   type LibraryFilter,
   type LibraryItem,
 } from '@/features/programs/model/library';
-import { TodayCard } from '@/features/programs/ui/TodayCard';
 import { ProgramCard } from '@/features/programs/ui/ProgramCard';
 
 interface FilterSpec {
@@ -48,17 +46,6 @@ export default function ProgramsLibraryPage() {
     [rows],
   );
 
-  const todayItem = useMemo(() => {
-    if (items.length === 0) return null;
-    const [latest] = items;
-    return latest && isToday(latest.createdAt) ? latest : null;
-  }, [items]);
-
-  const rest = useMemo(
-    () => (todayItem ? items.filter((i) => i.id !== todayItem.id) : items),
-    [items, todayItem],
-  );
-
   const counts = useMemo(() => {
     const byFilter: Record<LibraryFilter, number> = {
       all: items.length,
@@ -67,23 +54,21 @@ export default function ProgramsLibraryPage() {
       cj: 0,
       squat: 0,
     };
-    for (const item of rest) {
+    for (const item of items) {
       for (const f of FILTERS) {
         if (f.key !== 'all' && matchesFilter(item, f.key)) byFilter[f.key] += 1;
       }
     }
     return byFilter;
-  }, [rest, items.length]);
+  }, [items]);
 
   const filtered = useMemo(
     () =>
-      rest.filter(
+      items.filter(
         (i) => matchesFilter(i, filter) && matchesQuery(i, query),
       ),
-    [rest, filter, query],
+    [items, filter, query],
   );
-
-  const showTodayCard = todayItem && filter === 'all' && !query;
 
   const handleBack = () => {
     if (window.history.length > 1) router.back();
@@ -124,7 +109,7 @@ export default function ProgramsLibraryPage() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="이름 · 동작으로 검색"
+            placeholder="동작으로 검색"
             aria-label="프로그램 검색"
             className="flex-1 bg-transparent text-[13px] text-yd-text outline-none placeholder:text-yd-text-dim"
           />
@@ -182,47 +167,30 @@ export default function ProgramsLibraryPage() {
           <p className="py-10 text-center text-[13px] text-yd-text-muted">
             프로그램을 불러오는 중입니다...
           </p>
+        ) : items.length === 0 ? (
+          <EmptyState
+            icon="📋"
+            title="저장된 프로그램이 없습니다"
+            sub="첫 프로그램을 추가해 보세요"
+            ctaHref={ROUTES.TRAINING.PROGRAM_INPUT}
+            ctaLabel="프로그램 추가"
+          />
+        ) : filtered.length === 0 ? (
+          <EmptyState
+            icon="∅"
+            title="일치하는 프로그램이 없습니다"
+            sub="다른 필터나 검색어를 시도해보세요"
+          />
         ) : (
-          <>
-            {showTodayCard && <TodayCard item={todayItem} />}
-
-            {filter === 'all' && !query && rest.length > 0 && (
-              <div className="flex items-baseline justify-between pb-1 pt-3">
-                <span className="text-[11px] uppercase tracking-[1.2px] text-yd-text-muted">
-                  라이브러리
-                </span>
-                <span className="text-[11px] text-yd-text-muted">
-                  {rest.length}개
-                </span>
-              </div>
-            )}
-
-            {items.length === 0 ? (
-              <EmptyState
-                icon="📋"
-                title="저장된 프로그램이 없습니다"
-                sub="첫 프로그램을 추가해 보세요"
-                ctaHref={ROUTES.TRAINING.PROGRAM_INPUT}
-                ctaLabel="프로그램 추가"
+          <div className="flex flex-col gap-2">
+            {filtered.map((item) => (
+              <ProgramCard
+                key={item.id}
+                item={item}
+                onDelete={() => remove(item.id)}
               />
-            ) : filtered.length === 0 ? (
-              <EmptyState
-                icon="∅"
-                title="일치하는 프로그램이 없습니다"
-                sub="다른 필터나 검색어를 시도해보세요"
-              />
-            ) : (
-              <div className="flex flex-col gap-1.5">
-                {filtered.map((item) => (
-                  <ProgramCard
-                    key={item.id}
-                    item={item}
-                    onDelete={() => remove(item.id)}
-                  />
-                ))}
-              </div>
-            )}
-          </>
+            ))}
+          </div>
         )}
       </section>
     </main>

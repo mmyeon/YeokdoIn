@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { MoreHorizontal, Play } from 'lucide-react';
 import { ROUTES } from '@/routes';
 import type { LibraryItem } from '@/features/programs/model/library';
-import { formatRelativeDate } from '@/features/programs/model/library';
+import { formatAbsoluteDate } from '@/features/programs/model/library';
 
 interface ProgramCardProps {
   item: LibraryItem;
@@ -25,41 +25,48 @@ export function ProgramCard({ item, onDelete }: ProgramCardProps) {
     return () => document.removeEventListener('mousedown', handler);
   }, [menuOpen]);
 
+  const dateLabel = formatAbsoluteDate(item.createdAt);
+
   return (
     <div ref={ref} className="relative">
-      <div className="flex items-center gap-2.5 rounded-xl border border-yd-line bg-yd-surface px-3 py-3">
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-[14px] font-semibold text-yd-text">
-            {item.title}
-          </p>
-          <div className="mt-0.5 flex items-center gap-1.5">
-            <span className="font-mono text-[11px] text-yd-text-muted">
-              {formatRelativeDate(item.createdAt)}
-            </span>
-            <span className="text-[9px] text-yd-text-dim">•</span>
-            <span className="min-w-0 flex-1 truncate text-[11px] text-yd-text-muted">
-              {item.lines[0] ?? ''}
-            </span>
-          </div>
+      <div className="flex flex-col gap-2.5 rounded-xl border border-yd-line bg-yd-surface px-3.5 py-3">
+        <div className="flex items-center justify-between">
+          <span className="font-mono text-[12px] text-yd-text-muted">
+            {dateLabel}
+          </span>
+          <button
+            type="button"
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-label="더 보기"
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            className="-mr-1 flex size-8 shrink-0 items-center justify-center rounded-lg text-yd-text-dim hover:bg-yd-elevated"
+          >
+            <MoreHorizontal className="size-4" />
+          </button>
         </div>
+
+        {item.lines.length > 0 && (
+          <ul className="flex flex-col gap-1">
+            {item.lines.map((line, i) => (
+              <li key={i} className="flex items-baseline gap-1.5">
+                <span className="text-[10px] text-yd-primary">▸</span>
+                <span className="min-w-0 flex-1 truncate text-[13px] font-medium text-yd-text/95">
+                  {line}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+
         <Link
           href={ROUTES.TRAINING.PROGRAM_RUNNER(item.id)}
-          aria-label={`${item.title} 실행`}
-          className="flex h-[38px] shrink-0 items-center gap-1 rounded-[10px] bg-yd-primary px-3 text-[13px] font-bold text-yd-on-primary"
+          aria-label={`${dateLabel} 프로그램 실행`}
+          className="mt-1 flex h-11 items-center justify-center gap-2 rounded-[10px] bg-yd-primary text-yd-on-primary"
         >
-          <Play className="size-3 fill-current" />
-          실행
+          <Play className="size-3.5 fill-current" />
+          <span className="text-[14px] font-bold -tracking-[0.2px]">실행</span>
         </Link>
-        <button
-          type="button"
-          onClick={() => setMenuOpen((v) => !v)}
-          aria-label="더 보기"
-          aria-haspopup="menu"
-          aria-expanded={menuOpen}
-          className="flex size-8 shrink-0 items-center justify-center rounded-lg text-yd-text-dim hover:bg-yd-elevated"
-        >
-          <MoreHorizontal className="size-4" />
-        </button>
       </div>
       {menuOpen && (
         <div
