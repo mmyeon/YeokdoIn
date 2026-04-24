@@ -16,7 +16,6 @@ async function requireUserId(): Promise<string> {
 }
 
 export interface SaveProgramInput {
-  rawNotation: string;
   parsed: Program;
 }
 
@@ -34,7 +33,6 @@ export async function saveProgram(input: SaveProgramInput): Promise<ProgramRow> 
     .insert({
       user_id: userId,
       title: null,
-      raw_notation: input.rawNotation.trim(),
       // Supabase Json type is recursive; Zod-derived Program is structurally compatible but TS can't prove it.
       parsed_data: parseResult.data as unknown as Json,
     })

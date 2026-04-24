@@ -10,7 +10,6 @@ import { ProgramList } from '@/features/programs/ui/ProgramList';
 import { useSaveProgram } from '@/hooks/usePrograms';
 import type { Program } from '@/features/notation/model/types';
 import { createEmptyBlock } from '@/features/programs/model/update';
-import { serializeProgram } from '@/features/programs/model/serialize';
 import { programSchema } from '@/features/notation/model/schemas';
 
 function createInitialProgram(): Program {
@@ -33,10 +32,7 @@ export default function ProgramInputPage() {
 
   const handleSave = () => {
     if (!validation.success) return;
-    save({
-      rawNotation: serializeProgram(program),
-      parsed: program,
-    });
+    save({ parsed: program });
   };
 
   return (
