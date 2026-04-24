@@ -8,6 +8,8 @@ import { toast } from 'sonner';
 import { ROUTES } from '@/routes';
 import { useDeleteProgram, usePrograms } from '@/hooks/usePrograms';
 import type { ProgramRow } from '@/features/programs/api/programs';
+import type { Program } from '@/features/notation/model/types';
+import { serializeProgram } from '@/features/programs/model/serialize';
 
 function formatDate(iso: string): string {
   const date = new Date(iso);
@@ -19,7 +21,7 @@ function formatDate(iso: string): string {
 }
 
 function toBullets(row: ProgramRow): string[] {
-  return row.raw_notation
+  return serializeProgram(row.parsed_data as unknown as Program)
     .split('\n')
     .map((l) => l.trim())
     .filter((l) => l.length > 0);

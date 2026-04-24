@@ -42,7 +42,7 @@ function serializeBlock(block: Block): string {
  * Program 블록 배열을 사람이 읽을 수 있는 노테이션 문자열로 역직렬화한다.
  * 한 블록은 `동작 %rep×sets, %rep×sets` 형태로 set-entry 들을 쉼표로 묶는다.
  * Modifier 는 각 movement 에 속하며, position 에 따라 name 앞/뒤에 배치된다.
- * DB `programs.raw_notation` 컬럼 저장용. 표시/백업 목적이며 파싱되지 않는다.
+ * ProgramList 등 표시용으로만 사용되며, DB 에 저장되지 않는다.
  */
 export function serializeProgram(program: Program): string {
   return program.blocks.map(serializeBlock).join('\n');

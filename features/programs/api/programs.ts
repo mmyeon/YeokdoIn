@@ -3,7 +3,6 @@
 import { supabaseServerClient } from '@/features/auth/supabase/ServerClient';
 import { programSchema } from '@/features/notation/model/schemas';
 import type { Program } from '@/features/notation/model/types';
-import { buildProgramSavePayload } from '@/features/programs/model/save-payload';
 import { handleDatabaseError } from '@/utils/database';
 import type { Json, Tables } from '@/types_db';
 
@@ -17,7 +16,6 @@ async function requireUserId(): Promise<string> {
 }
 
 export interface SaveProgramInput {
-  rawNotation: string;
   parsed: Program;
 }
 
@@ -30,20 +28,13 @@ export async function saveProgram(input: SaveProgramInput): Promise<ProgramRow> 
     throw new Error('프로그램 데이터가 올바르지 않습니다.');
   }
 
-  const payload = buildProgramSavePayload({
-    userId,
-    rawNotation: input.rawNotation,
-    parsed: parseResult.data as Program,
-  });
-
   const { data, error } = await supabase
     .from('programs')
     .insert({
-      user_id: payload.user_id,
-      title: payload.title,
-      raw_notation: payload.raw_notation,
+      user_id: userId,
+      title: null,
       // Supabase Json type is recursive; Zod-derived Program is structurally compatible but TS can't prove it.
-      parsed_data: payload.parsed_data as unknown as Json,
+      parsed_data: parseResult.data as unknown as Json,
     })
     .select('*')
     .single();
