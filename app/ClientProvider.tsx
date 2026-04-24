@@ -13,12 +13,16 @@ import Providers from "./Providers";
 //  TODO: 인증을 auth provider가 아니라 서버에서 처리하도록 개선
 const ClientProvider = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
-  const isVisible = !pathname.includes("login");
+  const isVisible = !pathname.includes("login") && pathname !== "/";
 
   return (
     <Providers>
       <AuthProvider>
-        {isVisible && <AuthButtons />}
+        {isVisible && (
+          <div className="mx-auto w-full max-w-md">
+            <AuthButtons />
+          </div>
+        )}
 
         {children}
         <Toaster />
