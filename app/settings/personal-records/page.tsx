@@ -22,7 +22,7 @@ function formatShortDate(prDate: string | null): string {
   if (!prDate) return "";
   const d = new Date(prDate);
   if (Number.isNaN(d.getTime())) return "";
-  return `${d.getMonth() + 1}월 ${d.getDate()}일`;
+  return `${d.getFullYear()}. ${d.getMonth() + 1}. ${d.getDate()}`;
 }
 
 function PersonalRecordsPage() {

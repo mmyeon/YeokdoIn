@@ -27,7 +27,7 @@ function parseRecordId(raw: string | string[] | undefined): number | null {
 function formatHistoryDate(prDate: string): string {
   const d = new Date(prDate);
   if (Number.isNaN(d.getTime())) return prDate;
-  return `${d.getMonth() + 1}월 ${d.getDate()}일`;
+  return `${d.getFullYear()}. ${d.getMonth() + 1}. ${d.getDate()}`;
 }
 
 function PRDetailPage() {
