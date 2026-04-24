@@ -19,8 +19,7 @@ interface BarbellOption {
 const OPTIONS: ReadonlyArray<BarbellOption> = [
   { kg: 20, label: "남자 기준", barWidth: 60 },
   { kg: 15, label: "여자 기준", barWidth: 52 },
-  { kg: 10, label: "기술 바", barWidth: 44 },
-  { kg: 7, label: "유소년 바", barWidth: 36 },
+  { kg: 7, label: "기술 바", barWidth: 40 },
 ];
 
 function BarbellWeightPage() {
