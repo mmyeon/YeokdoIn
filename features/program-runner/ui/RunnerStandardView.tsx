@@ -61,14 +61,6 @@ export function RunnerStandardView({
       ? displayKg - prevRecord.kg
       : null;
 
-  const commitKg = (raw: string) => {
-    const parsed = parseFloat(raw);
-    if (!Number.isNaN(parsed) && parsed >= 0) {
-      onSetKg(currentSetIdx, parsed);
-    }
-    setIsEditingKg(false);
-  };
-
   return (
     <div className="flex flex-1 flex-col">
       <div className="px-5 pb-1 pt-2">
@@ -99,9 +91,15 @@ export function RunnerStandardView({
             step={0.5}
             defaultValue={displayKg ?? ""}
             autoFocus
-            onBlur={(e) => commitKg(e.target.value)}
+            onChange={(e) => {
+              const parsed = parseFloat(e.target.value);
+              if (!Number.isNaN(parsed) && parsed >= 0) {
+                onSetKg(currentSetIdx, parsed);
+              }
+            }}
+            onBlur={() => setIsEditingKg(false)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") commitKg(e.currentTarget.value);
+              if (e.key === "Enter") setIsEditingKg(false);
               if (e.key === "Escape") setIsEditingKg(false);
             }}
             className="w-36 border-b-2 border-yd-primary bg-transparent text-[64px] font-extrabold leading-none tracking-[-2px] text-yd-text outline-none"
@@ -116,6 +114,11 @@ export function RunnerStandardView({
           </button>
         )}
         <span className="text-[22px] font-semibold text-yd-text-muted">kg</span>
+        {current?.percentage != null && (
+          <span className="text-[18px] font-semibold text-yd-primary">
+            {current.percentage}%
+          </span>
+        )}
         <div className="flex-1" />
         <div className="flex flex-col items-end gap-1">
           <span className="text-[10px] uppercase tracking-widest text-yd-text-muted">
@@ -172,6 +175,11 @@ export function RunnerStandardView({
                   #{plan.setNumber}
                 </span>
                 <span className="text-[15px] font-bold text-yd-text">{kg ?? "—"} kg</span>
+                {plan.percentage != null && (
+                  <span className="text-[11px] font-semibold text-yd-primary">
+                    {plan.percentage}%
+                  </span>
+                )}
                 <span className="text-[11px] text-yd-text-muted">
                   × {formatReps(plan.reps)}
                 </span>

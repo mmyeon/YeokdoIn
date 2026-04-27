@@ -64,10 +64,15 @@ export function RunnerFocusView({
           <div className="text-[96px] font-extrabold leading-[0.9] tracking-[-3px] text-yd-text">
             {displayKg ?? "—"}
           </div>
-          <div className="mt-1">
+          <div className="mt-1 flex items-baseline justify-center gap-2">
             <span className="text-[18px] font-semibold text-yd-text-muted">
               kg {current ? `· ${formatReps(current.reps)} reps` : ""}
             </span>
+            {current?.percentage != null && (
+              <span className="text-[16px] font-semibold text-yd-primary">
+                {current.percentage}%
+              </span>
+            )}
           </div>
         </div>
 

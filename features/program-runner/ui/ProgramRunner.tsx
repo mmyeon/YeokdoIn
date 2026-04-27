@@ -9,6 +9,7 @@ import type { Program } from "@/features/notation/model/types";
 import { useBarbellWeight } from "@/hooks/useBarbellWeight";
 
 import { flattenProgram } from "../model/flatten";
+import { propagateManualWeight } from "../model/propagate-weight";
 import type { SetRecord } from "../model/types";
 import { RunnerHeader } from "./RunnerHeader";
 import { RunnerStandardView } from "./RunnerStandardView";
@@ -104,10 +105,9 @@ export function ProgramRunner({ program, aliasMap, prMap }: ProgramRunnerProps) 
   };
 
   const handleSetKg = (targetSetIdx: number, kg: number) => {
+    const plans = positions[posIdx].sets;
     setRecords((prev) => {
-      const nextPosRecords = prev[posIdx].map((r, i) =>
-        i === targetSetIdx ? { ...r, kg } : r,
-      );
+      const nextPosRecords = propagateManualWeight(prev[posIdx], plans, targetSetIdx, kg);
       return prev.map((posRecs, i) => (i === posIdx ? nextPosRecords : posRecs));
     });
   };
