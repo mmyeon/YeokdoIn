@@ -35,24 +35,23 @@ const MovementAnalysisPage = () => {
   }, [uploadedFile]);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">동작 분석</h1>
-
-        <div className="bg-card rounded-lg p-6 shadow-sm">
-          {!videoUrl ? (
+    <div className="max-w-md mx-auto min-h-dvh flex flex-col">
+      {!videoUrl ? (
+        <div className="px-4 py-8">
+          <h1 className="text-3xl font-bold mb-8">동작 분석</h1>
+          <div className="bg-card rounded-lg p-6 shadow-sm">
             <VideoUpload
               handleFileSelect={handleFileSelect}
               fileInputRef={fileInputRef}
             />
-          ) : (
-            <VideoDisplay
-              videoUrl={videoUrl}
-              handleRemoveFile={handleRemoveFile}
-            />
-          )}
+          </div>
         </div>
-      </div>
+      ) : (
+        <VideoDisplay
+          videoUrl={videoUrl}
+          handleRemoveFile={handleRemoveFile}
+        />
+      )}
     </div>
   );
 };

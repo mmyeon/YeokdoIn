@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef, useState, ReactNode } from "react";
 import PoseAnalyzer from "../PoseAnalyzer";
 import VideoController from "./VideoController";
@@ -56,7 +58,7 @@ const VideoPlayer = ({
   }, []);
 
   return (
-    <div className=" bg-black relative rounded-lg overflow-hidden w-full pb-[177.78%] md:pb-[56.25%] h-0 md:w-1/2 mx-auto">
+    <div className="bg-black relative w-full h-[calc(100dvh-var(--tab-bar-height))] overflow-hidden">
       <video
         playsInline
         ref={videoRef}

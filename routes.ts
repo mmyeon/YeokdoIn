@@ -1,6 +1,5 @@
 export const ROUTES = {
   TRAINING: {
-    PERSONAL_RECORD: "/training/personal-record",
     PROGRAM_INPUT: "/training/program-input",
     PROGRAM_RUNNER: (id: number | string) => `/training/program-runner/${id}`,
     MOVEMENT_ANALYSIS: "/training/movement-analysis",
@@ -13,7 +12,6 @@ export const ROUTES = {
   HOME: "/",
   SETTINGS: {
     ROOT: "/settings",
-    GOALS: "/settings/goals",
     PERSONAL_RECORD: "/settings/personal-records",
     PERSONAL_RECORD_DETAIL: (id: number | string) =>
       `/settings/personal-records/${id}`,

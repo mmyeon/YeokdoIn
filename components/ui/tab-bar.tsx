@@ -22,7 +22,7 @@ function TabBar({ items, activeKey, className, ...props }: TabBarProps) {
       data-slot="tab-bar"
       aria-label="Primary"
       className={cn(
-        "fixed inset-x-0 bottom-0 z-30 flex h-16 items-center justify-around border-t border-yd-line bg-yd-surface pb-1",
+        "fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-30 flex h-[var(--tab-bar-height)] items-center justify-around border-t border-yd-line bg-yd-surface pb-1",
         className
       )}
       {...props}
