@@ -28,7 +28,11 @@ const resolveActiveKey = (pathname: string | null): string | undefined => {
 const Menu = () => {
   const pathname = usePathname();
 
-  if (pathname === "/login" || pathname?.startsWith(`${ROUTES.SETTINGS.ROOT}/`)) {
+  if (
+    pathname === "/login" ||
+    pathname?.startsWith(`${ROUTES.SETTINGS.ROOT}/`) ||
+    pathname?.startsWith("/training/program-runner/")
+  ) {
     return null;
   }
 

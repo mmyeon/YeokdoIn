@@ -92,7 +92,7 @@ export function RunnerFocusView({
         <Barbell totalKg={displayKg ?? 0} barWeight={barWeight} width={320} />
       </div>
 
-      <div className="flex gap-2.5 px-4 pb-4">
+      <div className="flex gap-2.5 px-4 pb-[var(--tab-bar-height)]">
         <button
           type="button"
           onClick={onPrev}

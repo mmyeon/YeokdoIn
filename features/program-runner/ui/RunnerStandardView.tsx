@@ -198,7 +198,7 @@ export function RunnerStandardView({
       </div>
 
       {/* Nav + primary CTA */}
-      <div className="mt-auto flex gap-2.5 px-4 pb-3">
+      <div className="mt-auto flex gap-2.5 px-4 pb-[var(--tab-bar-height)]">
         <button
           type="button"
           onClick={onPrev}
