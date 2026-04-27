@@ -10,7 +10,7 @@ const LoginPage = () => {
   const { signInWithOAuth } = useAuth();
 
   return (
-    <div className="min-h-dvh bg-yd-bg text-yd-text font-sans flex flex-col px-6 pt-5">
+    <div className="mx-auto max-w-md min-h-dvh bg-yd-bg text-yd-text font-sans flex flex-col px-6 pt-5">
       <TopBar />
 
       <Slogan />
@@ -34,7 +34,6 @@ const LoginPage = () => {
         />
       </div>
 
-      <LegalFooter />
     </div>
   );
 };
@@ -52,7 +51,7 @@ const BarbellMark = ({ size = 14 }: { size?: number }) => (
 );
 
 const TopBar = () => (
-  <div className="flex items-center justify-between">
+  <div className="flex items-center">
     <div className="flex items-center gap-2">
       <div className="w-6 h-6 rounded-md bg-yd-primary flex items-center justify-center">
         <BarbellMark size={14} />
@@ -61,16 +60,13 @@ const TopBar = () => (
         YeokdoIn
       </span>
     </div>
-    <span className="font-mono text-[10px] text-yd-text-muted tracking-[1.4px]">
-      v2.0 · BETA
-    </span>
   </div>
 );
 
 const Slogan = () => (
   <div className="mt-16">
     <div className="font-mono text-[11px] text-yd-text-muted tracking-[1.6px] uppercase mb-2">
-      리프터를 위해 · 리프터가 만든
+      Built by lifters · For lifters
     </div>
 
     <div
@@ -82,9 +78,9 @@ const Slogan = () => (
         textWrap: "balance",
       }}
     >
-      무겁게 들고,
+      Lift heavy,
       <br />
-      <span className="text-yd-primary">전부 기록하세요.</span>
+      <span className="text-yd-primary">track everything.</span>
     </div>
 
     <div className="mt-3.5 flex items-center gap-2 text-[12px] text-yd-text-muted font-sans">
@@ -98,7 +94,7 @@ const Slogan = () => (
         SNATCH · C&amp;J · SQUAT
       </span>
       <span>·</span>
-      <span>PR · 프로그램 · 영상</span>
+      <span>PR · Programs · Video</span>
     </div>
 
     <ClimbSparkline />
@@ -160,17 +156,17 @@ const CtaCopy = () => (
         lineHeight: 1.2,
       }}
     >
-      기록을 시작하려면 로그인하세요.
+      Sign in to start tracking.
     </div>
     <div className="mt-1.5 text-[12px] text-yd-text-muted font-sans leading-[1.5]">
-      PR · 프로그램 · 폼 영상 — 기기 간 동기화.
+      PR · Programs · Form video — synced across devices.
     </div>
   </div>
 );
 
 const PROVIDER_LABEL: Record<SocialAuthProvider, string> = {
-  kakao: "카카오로 계속하기",
-  google: "Google로 계속하기",
+  kakao: "Continue with Kakao",
+  google: "Continue with Google",
 };
 
 interface ProviderButtonProps {
@@ -212,13 +208,3 @@ const ProviderButton = ({ provider, onClick }: ProviderButtonProps) => {
   );
 };
 
-const LegalFooter = () => (
-  <div className="text-center text-[10px] text-yd-text-muted leading-[1.55] font-sans pb-5">
-    계속하면 이용약관 및 개인정보처리방침에 동의하게 됩니다.
-    <div className="mt-1.5 flex justify-center gap-3.5">
-      <span className="text-yd-text font-medium">이용약관</span>
-      <span className="text-yd-text-dim">·</span>
-      <span className="text-yd-text font-medium">개인정보</span>
-    </div>
-  </div>
-);
