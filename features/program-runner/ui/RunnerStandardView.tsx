@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Barbell } from "@/components/ui/barbell";
@@ -51,6 +51,10 @@ export function RunnerStandardView({
 
   const [isEditingKg, setIsEditingKg] = useState(false);
   const kgInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setIsEditingKg(false);
+  }, [currentSetIdx]);
 
   const prevRecord =
     currentSetIdx > 0 && records[currentSetIdx - 1]?.done
@@ -161,7 +165,11 @@ export function RunnerStandardView({
             <button
               type="button"
               key={i}
-              onClick={() => onSelectSet(i)}
+              onPointerDown={(e) => {
+                e.preventDefault();
+                setIsEditingKg(false);
+                onSelectSet(i);
+              }}
               className={cn(
                 "flex h-10 items-center justify-between rounded-[var(--yd-r-md)] border px-3 text-left transition-colors",
                 isCurrent
