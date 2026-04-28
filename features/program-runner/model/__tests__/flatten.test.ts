@@ -28,17 +28,18 @@ describe("flattenProgram", () => {
   };
   const prMap: Record<number, number> = { 1: 100, 2: 120 };
 
-  it("블록별 movement 하나당 ExercisePosition 하나를 만든다", () => {
+  it("블록별 ExercisePosition 하나를 만든다 (조합 운동은 하나로 통합)", () => {
     const positions = flattenProgram({
       program: snatchProgram,
       aliasMap,
       prMap,
     });
-    expect(positions).toHaveLength(3);
+    expect(positions).toHaveLength(2);
     expect(positions[0].blockIdx).toBe(0);
     expect(positions[1].blockIdx).toBe(1);
     expect(positions[1].exerciseIdx).toBe(0);
-    expect(positions[2].exerciseIdx).toBe(1);
+    expect(positions[1].totalExercises).toBe(1);
+    expect(positions[1].movement.name).toBe("Snatch Pull + Power Snatch");
   });
 
   it("setEntries 를 개별 세트로 펼치고 setNumber 를 1부터 매긴다", () => {
@@ -52,6 +53,26 @@ describe("flattenProgram", () => {
     expect(first.sets[0].totalSets).toBe(3);
   });
 
+  it("퍼센트가 바뀌면 setNumber 가 1부터 다시 시작한다", () => {
+    const multiEntryProgram: Program = {
+      blocks: [
+        {
+          movements: [{ name: "Power Snatch", modifiers: [] }],
+          setEntries: [
+            { percentage: 60, reps: { type: "simple", reps: 3 }, sets: 3 },
+            { percentage: 70, reps: { type: "simple", reps: 2 }, sets: 2 },
+          ],
+        },
+      ],
+    };
+    const [pos] = flattenProgram({ program: multiEntryProgram, aliasMap, prMap });
+    expect(pos.sets).toHaveLength(5);
+    expect(pos.sets.slice(0, 3).map((s) => s.setNumber)).toEqual([1, 2, 3]);
+    expect(pos.sets[0].totalSets).toBe(3);
+    expect(pos.sets.slice(3).map((s) => s.setNumber)).toEqual([1, 2]);
+    expect(pos.sets[3].totalSets).toBe(2);
+  });
+
   it("퍼센트와 PR 로부터 prescribedKg 를 계산한다", () => {
     const [first] = flattenProgram({
       program: snatchProgram,
@@ -63,13 +84,13 @@ describe("flattenProgram", () => {
   });
 
   it("복합 블록은 참조 동작(두 번째 movement) 기준으로 계산한다", () => {
-    const [, blockBEx0] = flattenProgram({
+    const [, blockB] = flattenProgram({
       program: snatchProgram,
       aliasMap,
       prMap,
     });
     // Power Snatch PR 100 × 70% = 70 (Snatch Pull PR 120 이 아님)
-    expect(blockBEx0.sets[0].prescribedKg).toBe(70);
+    expect(blockB.sets[0].prescribedKg).toBe(70);
   });
 
 });

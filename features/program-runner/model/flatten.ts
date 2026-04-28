@@ -1,4 +1,4 @@
-import type { Program } from "@/features/notation/model/types";
+import type { Movement, Program } from "@/features/notation/model/types";
 import { resolveWeight } from "@/features/programs/model/resolve-weight";
 import type { ExercisePosition, SetPlan } from "./types";
 
@@ -10,7 +10,8 @@ export interface FlattenProgramInput {
 
 /**
  * Program 을 러너가 순회하는 운동 위치 목록으로 평탄화한다.
- * 한 블록의 각 movement 가 독립된 ExercisePosition 이 된다.
+ * 한 블록이 하나의 ExercisePosition 이 된다.
+ * 복합 블록(movements 2개 이상)은 이름을 " + " 로 합쳐 하나의 운동으로 표시한다.
  * 각 위치의 세트는 블록 setEntries 를 펼쳐 1~N 으로 나열한다.
  */
 export function flattenProgram({
@@ -22,9 +23,7 @@ export function flattenProgram({
   const positions: ExercisePosition[] = [];
 
   program.blocks.forEach((block, blockIdx) => {
-    const totalSets = block.setEntries.reduce((acc, e) => acc + e.sets, 0);
     const setsForBlock: SetPlan[] = [];
-    let runningSet = 0;
     for (const entry of block.setEntries) {
       const resolved = resolveWeight({
         movements: block.movements,
@@ -34,10 +33,9 @@ export function flattenProgram({
       });
       const prescribedKg = resolved.kind === "computed" ? resolved.kg : null;
       for (let i = 0; i < entry.sets; i += 1) {
-        runningSet += 1;
         setsForBlock.push({
-          setNumber: runningSet,
-          totalSets,
+          setNumber: i + 1,
+          totalSets: entry.sets,
           percentage: entry.percentage,
           reps: entry.reps,
           prescribedKg,
@@ -45,16 +43,19 @@ export function flattenProgram({
       }
     }
 
-    block.movements.forEach((movement, exerciseIdx) => {
-      positions.push({
-        blockIdx,
-        exerciseIdx,
-        totalBlocks,
-        totalExercises: block.movements.length,
-        blockMovements: block.movements,
-        movement,
-        sets: setsForBlock,
-      });
+    const movement: Movement =
+      block.movements.length === 1
+        ? block.movements[0]
+        : { name: block.movements.map((m) => m.name).join(" + "), modifiers: [] };
+
+    positions.push({
+      blockIdx,
+      exerciseIdx: 0,
+      totalBlocks,
+      totalExercises: 1,
+      blockMovements: block.movements,
+      movement,
+      sets: setsForBlock,
     });
   });
 
