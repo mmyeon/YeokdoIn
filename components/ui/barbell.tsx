@@ -53,10 +53,10 @@ function Barbell({
   ...props
 }: BarbellProps) {
   const plates = plateBreakdown(totalKg, barWeight);
-  const centerY = 100;
+  const centerY = 80;
   const sides: ReadonlyArray<{ side: "left" | "right"; dir: "row" | "row-reverse" }> = [
-    { side: "right", dir: "row-reverse" },
-    { side: "left", dir: "row" },
+    { side: "right", dir: "row" },
+    { side: "left", dir: "row-reverse" },
   ];
 
   return (
