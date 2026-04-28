@@ -10,9 +10,9 @@ export interface FlattenProgramInput {
 
 /**
  * Program 을 러너가 순회하는 운동 위치 목록으로 평탄화한다.
- * 한 블록이 하나의 ExercisePosition 이 된다.
+ * 각 setEntry 가 하나의 ExercisePosition 이 된다.
  * 복합 블록(movements 2개 이상)은 이름을 " + " 로 합쳐 하나의 운동으로 표시한다.
- * 각 위치의 세트는 블록 setEntries 를 펼쳐 1~N 으로 나열한다.
+ * % 가 다른 setEntry 는 별도 위치로 분리되어 유저가 무게를 따로 설정할 수 있다.
  */
 export function flattenProgram({
   program,
@@ -23,8 +23,14 @@ export function flattenProgram({
   const positions: ExercisePosition[] = [];
 
   program.blocks.forEach((block, blockIdx) => {
-    const setsForBlock: SetPlan[] = [];
-    for (const entry of block.setEntries) {
+    const totalExercises = block.setEntries.length;
+
+    const movement: Movement =
+      block.movements.length === 1
+        ? block.movements[0]
+        : { name: block.movements.map((m) => m.name).join(" + "), modifiers: [] };
+
+    block.setEntries.forEach((entry, entryIdx) => {
       const resolved = resolveWeight({
         movements: block.movements,
         percentage: entry.percentage,
@@ -32,8 +38,10 @@ export function flattenProgram({
         prMap,
       });
       const prescribedKg = resolved.kind === "computed" ? resolved.kg : null;
+
+      const sets: SetPlan[] = [];
       for (let i = 0; i < entry.sets; i += 1) {
-        setsForBlock.push({
+        sets.push({
           setNumber: i + 1,
           totalSets: entry.sets,
           percentage: entry.percentage,
@@ -41,21 +49,16 @@ export function flattenProgram({
           prescribedKg,
         });
       }
-    }
 
-    const movement: Movement =
-      block.movements.length === 1
-        ? block.movements[0]
-        : { name: block.movements.map((m) => m.name).join(" + "), modifiers: [] };
-
-    positions.push({
-      blockIdx,
-      exerciseIdx: 0,
-      totalBlocks,
-      totalExercises: 1,
-      blockMovements: block.movements,
-      movement,
-      sets: setsForBlock,
+      positions.push({
+        blockIdx,
+        exerciseIdx: entryIdx,
+        totalBlocks,
+        totalExercises,
+        blockMovements: block.movements,
+        movement,
+        sets,
+      });
     });
   });
 

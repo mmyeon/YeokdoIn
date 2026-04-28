@@ -53,7 +53,7 @@ describe("flattenProgram", () => {
     expect(first.sets[0].totalSets).toBe(3);
   });
 
-  it("퍼센트가 바뀌면 setNumber 가 1부터 다시 시작한다", () => {
+  it("퍼센트가 다른 setEntry 는 별도 ExercisePosition 으로 분리된다", () => {
     const multiEntryProgram: Program = {
       blocks: [
         {
@@ -65,12 +65,21 @@ describe("flattenProgram", () => {
         },
       ],
     };
-    const [pos] = flattenProgram({ program: multiEntryProgram, aliasMap, prMap });
-    expect(pos.sets).toHaveLength(5);
-    expect(pos.sets.slice(0, 3).map((s) => s.setNumber)).toEqual([1, 2, 3]);
-    expect(pos.sets[0].totalSets).toBe(3);
-    expect(pos.sets.slice(3).map((s) => s.setNumber)).toEqual([1, 2]);
-    expect(pos.sets[3].totalSets).toBe(2);
+    const positions = flattenProgram({ program: multiEntryProgram, aliasMap, prMap });
+    expect(positions).toHaveLength(2);
+
+    const [first, second] = positions;
+    expect(first.sets).toHaveLength(3);
+    expect(first.sets.map((s) => s.setNumber)).toEqual([1, 2, 3]);
+    expect(first.sets[0].totalSets).toBe(3);
+    expect(first.exerciseIdx).toBe(0);
+    expect(first.totalExercises).toBe(2);
+
+    expect(second.sets).toHaveLength(2);
+    expect(second.sets.map((s) => s.setNumber)).toEqual([1, 2]);
+    expect(second.sets[0].totalSets).toBe(2);
+    expect(second.exerciseIdx).toBe(1);
+    expect(second.totalExercises).toBe(2);
   });
 
   it("퍼센트와 PR 로부터 prescribedKg 를 계산한다", () => {
