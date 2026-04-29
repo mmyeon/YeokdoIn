@@ -1,31 +1,36 @@
 "use client";
+
 import { ROUTES } from "@/routes";
 import { Dumbbell, Home, PersonStanding, Settings } from "lucide-react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const BUTTONS = [
+import { TabBar, type TabBarItem } from "@/components/ui/tab-bar";
+
+const ITEMS: ReadonlyArray<TabBarItem> = [
+  { key: "home", label: "홈", href: ROUTES.HOME, icon: Home },
   {
-    icon: <Home />,
-    text: "홈",
-    route: ROUTES.HOME,
+    key: "training",
+    label: "훈련",
+    href: ROUTES.TRAINING.WEIGHT_CALCULATOR,
+    icon: Dumbbell,
   },
   {
-    icon: <Dumbbell />,
-    text: "훈련",
-    route: ROUTES.TRAINING.WEIGHT_CALCULATOR,
+    key: "analysis",
+    label: "움직임 분석",
+    href: ROUTES.TRAINING.MOVEMENT_ANALYSIS,
+    icon: PersonStanding,
   },
-  {
-    icon: <PersonStanding />,
-    text: "움직임 분석",
-    route: ROUTES.TRAINING.MOVEMENT_ANALYSIS,
-  },
-  {
-    icon: <Settings />,
-    text: "설정",
-    route: ROUTES.SETTINGS.ROOT,
-  },
+  { key: "settings", label: "설정", href: ROUTES.SETTINGS.ROOT, icon: Settings },
 ];
+
+const resolveActiveKey = (pathname: string | null): string | undefined => {
+  if (!pathname) return undefined;
+  if (pathname === ROUTES.HOME) return "home";
+  if (pathname === ROUTES.TRAINING.MOVEMENT_ANALYSIS) return "analysis";
+  if (pathname.startsWith("/training")) return "training";
+  if (pathname.startsWith(ROUTES.SETTINGS.ROOT)) return "settings";
+  return undefined;
+};
 
 const Menu = () => {
   const pathname = usePathname();
@@ -34,24 +39,7 @@ const Menu = () => {
     return null;
   }
 
-  return (
-    <div className="fixed bottom-0 left-0 right-0 max-w-md w-full bg-white rounded-t-3xl border-2 border-gray-100 border-b-0 mx-auto">
-      <div className="flex items-center justify-between p-2 ml-10 mr-10">
-        {BUTTONS.map((button, index) => (
-          <Link
-            key={index}
-            prefetch={false}
-            className={`flex flex-col items-center justify-center gap-1 cursor-pointer ${pathname === button.route ? "text-black" : "text-gray-500"}`}
-            href={button.route}
-          >
-            {button.icon}
-
-            <span className="text-xs font-bold">{button.text}</span>
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
+  return <TabBar items={ITEMS} activeKey={resolveActiveKey(pathname)} />;
 };
 
 export default Menu;

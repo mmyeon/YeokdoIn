@@ -11,17 +11,27 @@ export const repSchemeSchema = z.union([
   }),
 ]);
 
+export const modifierPositionSchema = z.enum(['before', 'after']);
+
+export const movementModifierSchema = z.object({
+  name: z.string().min(1),
+  position: modifierPositionSchema,
+});
+
 export const movementSchema = z.object({
   name: z.string().min(1),
-  modifiers: z.array(z.string()),
+  modifiers: z.array(movementModifierSchema),
+});
+
+export const setEntrySchema = z.object({
+  percentage: z.number().nullable(),
+  reps: repSchemeSchema,
+  sets: z.number().int().positive(),
 });
 
 export const blockSchema = z.object({
   movements: z.array(movementSchema).min(1),
-  percentage: z.number().nullable(),
-  reps: repSchemeSchema,
-  sets: z.number().int().positive(),
-  modifiers: z.array(z.string()),
+  setEntries: z.array(setEntrySchema).min(1),
 });
 
 export const programSchema = z.object({

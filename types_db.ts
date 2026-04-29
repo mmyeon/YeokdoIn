@@ -138,7 +138,6 @@ export type Database = {
           created_at: string
           id: number
           parsed_data: Json
-          raw_notation: string
           title: string | null
           user_id: string
         }
@@ -146,7 +145,6 @@ export type Database = {
           created_at?: string
           id?: number
           parsed_data: Json
-          raw_notation: string
           title?: string | null
           user_id: string
         }
@@ -154,7 +152,6 @@ export type Database = {
           created_at?: string
           id?: number
           parsed_data?: Json
-          raw_notation?: string
           title?: string | null
           user_id?: string
         }

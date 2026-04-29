@@ -12,6 +12,8 @@ export type PersonalRecordInfo = {
   id: PersonalRecordRow["id"];
   exerciseId: PersonalRecordRow["exercise_id"];
   weight: PersonalRecordRow["weight"];
+  prDate: PersonalRecordRow["pr_date"];
+  updatedAt: PersonalRecordRow["updated_at"];
   exerciseName: ExercisesRow["name"];
 };
 

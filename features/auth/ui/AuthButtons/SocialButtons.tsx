@@ -13,7 +13,7 @@ const getProviderDetails = (provider: SocialAuthProvider) => {
         bgColor: "bg-white",
         textColor: "text-gray-700",
         borderColor: "border border-gray-300",
-        hoverColor: "hover:bg-gray-50",
+        hoverColor: "hover:bg-gray-50 hover:text-gray-700",
       };
     case "kakao":
       return {
@@ -22,7 +22,7 @@ const getProviderDetails = (provider: SocialAuthProvider) => {
         bgColor: "bg-[#FEE500]",
         textColor: "text-black",
         borderColor: "",
-        hoverColor: "hover:bg-[#F6DC00]",
+        hoverColor: "hover:bg-[#F6DC00] hover:text-black",
       };
   }
 };

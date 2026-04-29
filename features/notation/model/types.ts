@@ -4,15 +4,25 @@ export interface Program {
 
 export interface Block {
   movements: Movement[];
+  setEntries: SetEntry[];
+}
+
+export interface SetEntry {
   percentage: number | null;
   reps: RepScheme;
   sets: number;
-  modifiers: string[];
+}
+
+export type ModifierPosition = 'before' | 'after';
+
+export interface MovementModifier {
+  name: string;
+  position: ModifierPosition;
 }
 
 export interface Movement {
   name: string;
-  modifiers: string[];
+  modifiers: MovementModifier[];
 }
 
 export type RepScheme =

@@ -1,5 +1,6 @@
 "use client";
 
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -37,7 +38,14 @@ const RecordAddDialog = () => {
   return (
     <Dialog open={open} onOpenChange={handleToggleDialog}>
       <DialogTrigger asChild>
-        <Button className="w-fit">추가</Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="gap-1 px-2 text-yd-primary font-semibold"
+        >
+          <Plus className="size-3.5" aria-hidden />
+          추가
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
