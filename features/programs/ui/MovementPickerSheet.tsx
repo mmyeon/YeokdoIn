@@ -45,7 +45,7 @@ export function MovementPickerSheet({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col">
+    <div className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-50 flex flex-col">
       <button
         type="button"
         aria-label="닫기"
