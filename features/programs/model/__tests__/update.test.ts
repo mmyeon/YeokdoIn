@@ -9,6 +9,7 @@ import {
   removeSetEntryAt,
   setEntryPercentage,
   setEntryReps,
+  setEntryRepsAt,
   setEntrySets,
   setMovementName,
   toggleMovementModifier,
@@ -218,6 +219,98 @@ describe('toggleMovementModifier', () => {
         position: 'before',
       }),
     ).toBe(block);
+  });
+});
+
+describe('setEntryRepsAt (per-movement reps)', () => {
+  function twoMovementBlock(): Block {
+    return {
+      movements: [
+        { name: 'snatch pull', modifiers: [] },
+        { name: 'squat snatch', modifiers: [] },
+      ],
+      setEntries: [createEmptySetEntry()],
+    };
+  }
+
+  it('movement 1개 블록에서는 simple reps 로 저장한다', () => {
+    const block = makeBlock('back squat');
+    const next = setEntryRepsAt(block, 0, 0, 5);
+    expect(next.setEntries[0].reps).toEqual({ type: 'simple', reps: 5 });
+  });
+
+  it('movement 2개 블록에서 첫 운동 reps 를 바꾸면 complex 배열의 첫 값만 갱신된다', () => {
+    const block = twoMovementBlock();
+    const next = setEntryRepsAt(block, 0, 0, 1);
+    expect(next.setEntries[0].reps).toEqual({ type: 'complex', reps: [1, 3] });
+  });
+
+  it('simple 상태에서 두 번째 운동 reps 를 바꾸면 기존 값으로 broadcast 후 갱신한다', () => {
+    const block = twoMovementBlock();
+    const next = setEntryRepsAt(block, 0, 1, 2);
+    expect(next.setEntries[0].reps).toEqual({ type: 'complex', reps: [3, 2] });
+  });
+
+  it('범위 밖 movementIndex 는 원본을 반환한다', () => {
+    const block = twoMovementBlock();
+    expect(setEntryRepsAt(block, 0, 99, 5)).toBe(block);
+  });
+});
+
+describe('addMovement reps 동기화', () => {
+  it('simple reps 블록에 movement 를 추가하면 같은 값으로 broadcast 된 complex reps 가 된다', () => {
+    const block = makeBlock('snatch pull');
+    const next = addMovement(block, { name: 'squat snatch', modifiers: [] });
+    expect(next.setEntries[0].reps).toEqual({ type: 'complex', reps: [3, 3] });
+  });
+
+  it('complex reps 배열은 마지막 값으로 패딩된다', () => {
+    const block = setEntryReps(makeBlock('a'), 0, {
+      type: 'complex',
+      reps: [3, 1],
+    });
+    // movements 는 1 개이므로 먼저 2 개로 늘린다
+    const two = addMovement(block, { name: 'b', modifiers: [] });
+    // 위에서 simple(3) -> complex [3,3] 로 broadcast 되었을 것 (block 의 초기 reps 는 complex 였음)
+    // 그래서 complex([3,1]) -> [3,1] 그대로 유지 (길이 맞음)
+    expect(two.setEntries[0].reps).toEqual({ type: 'complex', reps: [3, 1] });
+    const three = addMovement(two, { name: 'c', modifiers: [] });
+    expect(three.setEntries[0].reps).toEqual({ type: 'complex', reps: [3, 1, 1] });
+  });
+});
+
+describe('removeMovementAt reps 동기화', () => {
+  it('complex reps 에서 해당 인덱스 값이 제거된다', () => {
+    const block = setEntryReps(
+      {
+        movements: [
+          { name: 'a', modifiers: [] },
+          { name: 'b', modifiers: [] },
+          { name: 'c', modifiers: [] },
+        ],
+        setEntries: [createEmptySetEntry()],
+      },
+      0,
+      { type: 'complex', reps: [1, 2, 3] },
+    );
+    const next = removeMovementAt(block, 1);
+    expect(next.setEntries[0].reps).toEqual({ type: 'complex', reps: [1, 3] });
+  });
+
+  it('제거 후 movement 가 1개가 되면 simple 로 축약된다', () => {
+    const block = setEntryReps(
+      {
+        movements: [
+          { name: 'a', modifiers: [] },
+          { name: 'b', modifiers: [] },
+        ],
+        setEntries: [createEmptySetEntry()],
+      },
+      0,
+      { type: 'complex', reps: [1, 2] },
+    );
+    const next = removeMovementAt(block, 1);
+    expect(next.setEntries[0].reps).toEqual({ type: 'simple', reps: 1 });
   });
 });
 

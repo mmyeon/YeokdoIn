@@ -351,6 +351,9 @@ button:disabled {
 ---break--- */
 
 @layer base {
+  :root {
+    --tab-bar-height: 4rem;
+  }
   * {
     @apply border-border outline-ring/50;
   }

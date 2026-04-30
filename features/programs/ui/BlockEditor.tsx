@@ -2,17 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Plus, Trash2, X } from 'lucide-react';
-import type { Block, RepScheme } from '@/features/notation/model/types';
+import { X } from 'lucide-react';
+import type { Block, Movement, RepScheme } from '@/features/notation/model/types';
 import {
   addMovement,
   addSetEntry,
@@ -20,53 +11,322 @@ import {
   removeSetEntryAt,
   setEntryPercentage,
   setEntryReps,
+  setEntryRepsAt,
   setEntrySets,
   setMovementName,
   toggleMovementModifier,
 } from '@/features/programs/model/update';
 import { MOVEMENT_MODIFIERS } from '@/features/programs/model/movements';
-import { MovementCombobox } from './MovementCombobox';
+import { cn } from '@/lib/utils';
+import { StepLabel } from './StepLabel';
+import { ChipGroup } from './ChipGroup';
+import { PctChip } from './PctChip';
+import { BigStepper } from './BigStepper';
+import { MovementPickerSheet } from './MovementPickerSheet';
+
+const MAX_MOVEMENTS_PER_BLOCK = 2;
+const REPS_MIN = 1;
+const REPS_MAX = 12;
+const SETS_MIN = 1;
+const SETS_MAX = 20;
+
+function movementLabel(m: Movement): string {
+  const before = m.modifiers
+    .filter((x) => x.position === 'before')
+    .map((x) => x.name);
+  const after = m.modifiers
+    .filter((x) => x.position === 'after')
+    .map((x) => x.name);
+  return [...before, m.name, ...after].filter(Boolean).join(' ');
+}
+
+function modifiersFor(m: Movement, position: 'before' | 'after'): string[] {
+  return m.modifiers.filter((x) => x.position === position).map((x) => x.name);
+}
+
+function simpleReps(r: RepScheme): number {
+  return r.type === 'simple' ? r.reps : r.reps[0];
+}
+
+function gridTemplate(movementCount: number): string {
+  const repsCols = Math.max(movementCount, 1);
+  return `88px repeat(${repsCols}, 1fr) 1fr 28px`;
+}
+
+function repsForMovement(r: RepScheme, movementIndex: number): number {
+  if (r.type === 'simple') return r.reps;
+  return r.reps[movementIndex] ?? r.reps[r.reps.length - 1] ?? 1;
+}
 
 interface BlockEditorProps {
   block: Block;
   index: number;
+  totalBlocks: number;
   onChange: (next: Block) => void;
   onRemove: () => void;
-  canRemove: boolean;
 }
 
-function repsToString(scheme: RepScheme): string {
-  if (scheme.type === 'simple') return String(scheme.reps);
-  return scheme.reps.join('+');
-}
+export function BlockEditor({
+  block,
+  index,
+  totalBlocks,
+  onChange,
+  onRemove,
+}: BlockEditorProps) {
+  const primary = block.movements[0];
+  const compound = block.movements[1];
+  const hasPrimary = !!primary?.name;
 
-function parseRepsInput(value: string): RepScheme | null {
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-  if (trimmed.includes('+')) {
-    const parts = trimmed
-      .split('+')
-      .map((s) => s.trim())
-      .filter(Boolean);
-    const nums = parts.map((p) => Number(p));
-    if (nums.some((n) => !Number.isInteger(n) || n <= 0)) return null;
-    return { type: 'complex', reps: nums };
-  }
-  const n = Number(trimmed);
-  if (!Number.isInteger(n) || n <= 0) return null;
-  return { type: 'simple', reps: n };
-}
+  const [picker, setPicker] = useState<null | { side: 'primary' | 'compound' }>(
+    null,
+  );
+  const totalMods = primary
+    ? primary.modifiers.length + (compound?.modifiers.length ?? 0)
+    : 0;
+  const [modsOpen, setModsOpen] = useState(totalMods > 0);
 
-const MAX_MOVEMENTS_PER_BLOCK = 2;
+  useEffect(() => {
+    if (totalMods > 0) setModsOpen(true);
+  }, [totalMods]);
 
-const PERCENTAGE_OPTIONS = Array.from({ length: 11 }, (_, i) => 50 + i * 5);
-const PERCENTAGE_NONE_VALUE = 'none';
+  const canRemove = totalBlocks > 1;
+  const canRemoveSet = block.setEntries.length > 1;
 
-interface SetEntryRowProps {
-  block: Block;
-  entryIndex: number;
-  canRemove: boolean;
-  onChange: (next: Block) => void;
+  return (
+    <div className="overflow-hidden rounded-2xl border border-yd-line bg-yd-surface">
+      <div className="flex items-center justify-between border-b border-yd-line bg-yd-elevated px-3.5 py-2.5">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-6 w-6 items-center justify-center rounded-[7px] bg-yd-primary font-mono text-[12px] font-extrabold text-yd-on-primary">
+            {index + 1}
+          </div>
+          <span className="text-[12px] font-semibold uppercase tracking-[1px] text-yd-text-muted">
+            블록 {index + 1}
+            {totalBlocks > 1 ? ` / ${totalBlocks}` : ''}
+          </span>
+        </div>
+        {canRemove && (
+          <button
+            type="button"
+            onClick={onRemove}
+            aria-label={`블록 ${index + 1} 삭제`}
+            className="flex h-7 w-7 items-center justify-center rounded-lg text-yd-text-dim hover:text-yd-text"
+          >
+            ×
+          </button>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-3.5 p-3.5">
+        <div>
+          <StepLabel n="①" label="동작" />
+          <button
+            type="button"
+            onClick={() => setPicker({ side: 'primary' })}
+            className={cn(
+              'mt-2 flex w-full items-center gap-2.5 rounded-xl border-[1.5px] px-3.5 py-3.5',
+              hasPrimary
+                ? 'border-yd-primary bg-yd-primary-subtle'
+                : 'border-yd-line bg-yd-bg',
+            )}
+          >
+            <div className="min-w-0 flex-1 text-left">
+              {hasPrimary ? (
+                <span className="block truncate text-[16px] font-bold text-yd-primary">
+                  {movementLabel(primary)}
+                </span>
+              ) : (
+                <span className="text-[14px] text-yd-text-muted">
+                  동작을 선택하세요
+                </span>
+              )}
+            </div>
+            <span
+              className={cn(
+                'text-[16px]',
+                hasPrimary ? 'text-yd-primary' : 'text-yd-text-dim',
+              )}
+            >
+              ›
+            </span>
+          </button>
+
+          {hasPrimary && (
+            <div className="mt-2">
+              <button
+                type="button"
+                onClick={() => setModsOpen((v) => !v)}
+                className="inline-flex items-center gap-1.5 rounded-full border border-yd-line bg-transparent px-2.5 py-1.5"
+              >
+                <span className="text-[11px] font-semibold text-yd-text-muted">
+                  {modsOpen ? '−' : '+'}
+                </span>
+                <span className="text-[11px] font-medium text-yd-text-muted">
+                  수식어
+                  {totalMods > 0 && (
+                    <span className="ml-1 font-bold text-yd-primary">
+                      {totalMods}
+                    </span>
+                  )}
+                </span>
+              </button>
+
+              {modsOpen && (
+                <div className="mt-2 flex flex-col gap-2.5 rounded-[10px] border border-yd-line bg-yd-bg p-2.5">
+                  <ChipGroup
+                    label="앞에 붙이기"
+                    options={MOVEMENT_MODIFIERS}
+                    selected={modifiersFor(primary, 'before')}
+                    onToggle={(mod) =>
+                      onChange(
+                        toggleMovementModifier(block, 0, {
+                          name: mod,
+                          position: 'before',
+                        }),
+                      )
+                    }
+                  />
+                  <ChipGroup
+                    label="뒤에 붙이기"
+                    options={MOVEMENT_MODIFIERS}
+                    selected={modifiersFor(primary, 'after')}
+                    onToggle={(mod) =>
+                      onChange(
+                        toggleMovementModifier(block, 0, {
+                          name: mod,
+                          position: 'after',
+                        }),
+                      )
+                    }
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {hasPrimary && !compound && block.movements.length < MAX_MOVEMENTS_PER_BLOCK && (
+            <button
+              type="button"
+              onClick={() => {
+                onChange(addMovement(block, { name: '', modifiers: [] }));
+                setPicker({ side: 'compound' });
+              }}
+              className="mt-2 flex h-9 w-full items-center justify-center rounded-lg border border-dashed border-yd-line"
+            >
+              <span className="text-[12px] text-yd-text-muted">
+                + 복합 동작 추가
+              </span>
+            </button>
+          )}
+
+          {hasPrimary && compound && (
+            <div className="mt-2 border-l-2 border-yd-primary pl-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] uppercase tracking-[1px] text-yd-text-muted">
+                  + 복합
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onChange(removeMovementAt(block, 1))}
+                  className="text-[11px] text-yd-text-dim"
+                >
+                  × 제거
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPicker({ side: 'compound' })}
+                className={cn(
+                  'mt-1.5 flex w-full items-center gap-2 rounded-[10px] border px-3 py-2.5',
+                  compound.name
+                    ? 'border-yd-primary bg-yd-primary-subtle'
+                    : 'border-yd-line bg-yd-bg',
+                )}
+              >
+                <span
+                  className={cn(
+                    'flex-1 truncate text-left text-[13px] font-semibold',
+                    compound.name ? 'text-yd-primary' : 'text-yd-text-muted',
+                  )}
+                >
+                  {movementLabel(compound) || '동작 선택'}
+                </span>
+                <span className="text-[14px] text-yd-text-dim">›</span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {hasPrimary && (
+          <div>
+            <StepLabel n="②" label="부하 · 세트" />
+            <div className="mt-2 flex flex-col gap-2">
+              <div
+                className="grid gap-2.5 px-1"
+                style={{ gridTemplateColumns: gridTemplate(block.movements.length) }}
+              >
+                <span className="text-[10px] uppercase tracking-[0.8px] text-yd-text-muted">
+                  % (선택)
+                </span>
+                {block.movements.length <= 1 ? (
+                  <span className="text-center text-[10px] uppercase tracking-[0.8px] text-yd-text-muted">
+                    Reps
+                  </span>
+                ) : (
+                  block.movements.map((m, mi) => (
+                    <span
+                      key={mi}
+                      className="truncate text-center text-[10px] uppercase tracking-[0.8px] text-yd-text-muted"
+                      title={movementLabel(m)}
+                    >
+                      {movementLabel(m) || `운동 ${mi + 1}`}
+                    </span>
+                  ))
+                )}
+                <span className="text-center text-[10px] uppercase tracking-[0.8px] text-yd-text-muted">
+                  Sets
+                </span>
+                <span />
+              </div>
+              {block.setEntries.map((entry, ei) => (
+                <SetEntryRow
+                  key={ei}
+                  block={block}
+                  entryIndex={ei}
+                  canRemove={canRemoveSet}
+                  onChange={onChange}
+                />
+              ))}
+              <button
+                type="button"
+                onClick={() => onChange(addSetEntry(block))}
+                className="flex h-9 items-center justify-center rounded-lg border border-dashed border-yd-line"
+              >
+                <span className="text-[12px] text-yd-text-muted">
+                  + 세트 스킴 추가
+                </span>
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <MovementPickerSheet
+        open={picker !== null}
+        onClose={() => {
+          if (picker?.side === 'compound' && compound && !compound.name) {
+            onChange(removeMovementAt(block, 1));
+          }
+          setPicker(null);
+        }}
+        onPick={(name) => {
+          if (!picker) return;
+          const mi = picker.side === 'primary' ? 0 : 1;
+          onChange(setMovementName(block, mi, name));
+          setPicker(null);
+        }}
+      />
+    </div>
+  );
 }
 
 function SetEntryRow({
@@ -74,272 +334,94 @@ function SetEntryRow({
   entryIndex,
   canRemove,
   onChange,
-}: SetEntryRowProps) {
+}: {
+  block: Block;
+  entryIndex: number;
+  canRemove: boolean;
+  onChange: (next: Block) => void;
+}) {
   const entry = block.setEntries[entryIndex];
-  const [repsDraft, setRepsDraft] = useState(() => repsToString(entry.reps));
+  const movementCount = block.movements.length;
+  const isMulti = movementCount > 1;
+  const [repsDraft, setRepsDraft] = useState(() =>
+    entry.reps.type === 'simple' ? String(entry.reps.reps) : entry.reps.reps.join('+'),
+  );
+  const isComplex = entry.reps.type === 'complex';
 
   useEffect(() => {
-    const canonical = repsToString(entry.reps);
-    const parsedDraft = parseRepsInput(repsDraft);
-    if (!parsedDraft || repsToString(parsedDraft) !== canonical) {
-      setRepsDraft(canonical);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const canonical =
+      entry.reps.type === 'simple'
+        ? String(entry.reps.reps)
+        : entry.reps.reps.join('+');
+    setRepsDraft(canonical);
   }, [entry.reps]);
 
   return (
-    <div className="flex items-end gap-2">
-      <div className="flex-1 grid grid-cols-3 gap-2">
-        <div className="space-y-1">
-          {entryIndex === 0 && <Label className="text-xs">% (선택)</Label>}
-          <Select
-            value={
-              entry.percentage == null
-                ? PERCENTAGE_NONE_VALUE
-                : String(entry.percentage)
+    <div
+      className="grid items-center gap-2.5"
+      style={{ gridTemplateColumns: gridTemplate(movementCount) }}
+    >
+      <PctChip
+        value={entry.percentage}
+        onChange={(v) => onChange(setEntryPercentage(block, entryIndex, v))}
+        ariaLabel={`세트 ${entryIndex + 1} %`}
+      />
+      {isMulti ? (
+        block.movements.map((_, mi) => (
+          <BigStepper
+            key={mi}
+            value={repsForMovement(entry.reps, mi)}
+            onChange={(n) =>
+              onChange(setEntryRepsAt(block, entryIndex, mi, n))
             }
-            onValueChange={(v) => {
-              if (v === PERCENTAGE_NONE_VALUE) {
-                onChange(setEntryPercentage(block, entryIndex, null));
-                return;
-              }
-              const n = Number(v);
-              if (Number.isFinite(n)) {
-                onChange(setEntryPercentage(block, entryIndex, n));
-              }
-            }}
-          >
-            <SelectTrigger aria-label={`세트 ${entryIndex + 1} %`}>
-              <SelectValue placeholder="%" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={PERCENTAGE_NONE_VALUE}>—</SelectItem>
-              {PERCENTAGE_OPTIONS.map((p) => (
-                <SelectItem key={p} value={String(p)}>
-                  {p}%
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-1">
-          {entryIndex === 0 && <Label className="text-xs">Reps</Label>}
-          <Input
-            value={repsDraft}
-            onChange={(e) => {
-              const next = e.target.value;
-              setRepsDraft(next);
-              const parsed = parseRepsInput(next);
-              if (parsed) onChange(setEntryReps(block, entryIndex, parsed));
-            }}
-            onKeyDown={(e) => {
-              if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
-              if (entry.reps.type !== 'simple') return;
-              e.preventDefault();
-              const delta = e.key === 'ArrowUp' ? 1 : -1;
-              const nextReps = entry.reps.reps + delta;
-              if (nextReps <= 0) return;
-              const nextScheme: RepScheme = { type: 'simple', reps: nextReps };
-              setRepsDraft(repsToString(nextScheme));
-              onChange(setEntryReps(block, entryIndex, nextScheme));
-            }}
-            onBlur={() => {
-              const parsed = parseRepsInput(repsDraft);
-              if (parsed) {
-                onChange(setEntryReps(block, entryIndex, parsed));
-              } else {
-                setRepsDraft(repsToString(entry.reps));
-              }
-            }}
-            placeholder="5 또는 3+1"
-            aria-label={`세트 ${entryIndex + 1} reps`}
+            min={REPS_MIN}
+            max={REPS_MAX}
+            ariaLabel={`세트 ${entryIndex + 1} 운동 ${mi + 1} reps`}
           />
-        </div>
-        <div className="space-y-1">
-          {entryIndex === 0 && <Label className="text-xs">Sets</Label>}
-          <Input
-            type="number"
-            inputMode="numeric"
-            value={entry.sets}
-            onChange={(e) => {
-              const n = Number(e.target.value);
-              if (Number.isInteger(n) && n > 0) {
-                onChange(setEntrySets(block, entryIndex, n));
-              }
-            }}
-            aria-label={`세트 ${entryIndex + 1} sets`}
-          />
-        </div>
-      </div>
-      <Button
+        ))
+      ) : isComplex ? (
+        <Input
+          value={repsDraft}
+          onChange={(e) => {
+            const next = e.target.value;
+            setRepsDraft(next);
+            const parts = next.split('+').map((s) => Number(s.trim()));
+            if (parts.every((n) => Number.isInteger(n) && n > 0)) {
+              onChange(
+                setEntryReps(block, entryIndex, { type: 'complex', reps: parts }),
+              );
+            }
+          }}
+          className="h-11 rounded-[10px] border-yd-line bg-yd-bg text-center font-mono text-[17px] font-bold"
+          aria-label={`세트 ${entryIndex + 1} reps`}
+        />
+      ) : (
+        <BigStepper
+          value={simpleReps(entry.reps)}
+          onChange={(n) =>
+            onChange(setEntryReps(block, entryIndex, { type: 'simple', reps: n }))
+          }
+          min={REPS_MIN}
+          max={REPS_MAX}
+          ariaLabel={`세트 ${entryIndex + 1} reps`}
+        />
+      )}
+      <BigStepper
+        value={entry.sets}
+        onChange={(n) => onChange(setEntrySets(block, entryIndex, n))}
+        min={SETS_MIN}
+        max={SETS_MAX}
+        ariaLabel={`세트 ${entryIndex + 1} sets`}
+      />
+      <button
         type="button"
-        variant="ghost"
-        size="icon"
-        className="h-9 w-9 shrink-0 text-muted-foreground"
         onClick={() => onChange(removeSetEntryAt(block, entryIndex))}
         disabled={!canRemove}
         aria-label={`세트 ${entryIndex + 1} 삭제`}
+        className="flex h-7 w-7 items-center justify-center rounded-md text-yd-text-dim disabled:opacity-0"
       >
-        <X className="h-4 w-4" />
-      </Button>
-    </div>
-  );
-}
-
-export function BlockEditor({
-  block,
-  index,
-  onChange,
-  onRemove,
-  canRemove,
-}: BlockEditorProps) {
-  const canAddMovement = block.movements.length < MAX_MOVEMENTS_PER_BLOCK;
-  const canRemoveSetEntry = block.setEntries.length > 1;
-
-  return (
-    <div className="relative rounded-lg border p-4 space-y-3 bg-card">
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className="absolute top-2 right-2 h-8 w-8 text-destructive"
-        onClick={onRemove}
-        disabled={!canRemove}
-        aria-label={`블록 ${index + 1} 삭제`}
-      >
-        <Trash2 className="h-4 w-4" />
-      </Button>
-
-      <div className="space-y-2">
-        <Label className="text-xs">동작</Label>
-        {block.movements.map((m, mi) => {
-          const isActive = (name: string, position: 'before' | 'after') =>
-            m.modifiers.some(
-              (x) => x.name === name && x.position === position,
-            );
-          return (
-            <div key={mi} className="space-y-2 rounded-md border p-2">
-              <div className="space-y-1">
-                <Label className="text-[10px] text-muted-foreground">
-                  앞 modifier
-                </Label>
-                <div className="flex flex-wrap gap-1">
-                  {MOVEMENT_MODIFIERS.map((mod) => {
-                    const active = isActive(mod, 'before');
-                    return (
-                      <Button
-                        key={`before-${mod}`}
-                        type="button"
-                        variant={active ? 'default' : 'outline'}
-                        size="sm"
-                        className="h-6 px-2 text-[11px]"
-                        onClick={() =>
-                          onChange(
-                            toggleMovementModifier(block, mi, {
-                              name: mod,
-                              position: 'before',
-                            }),
-                          )
-                        }
-                        aria-pressed={active}
-                      >
-                        {mod}
-                      </Button>
-                    );
-                  })}
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <MovementCombobox
-                  value={m.name}
-                  onChange={(value) =>
-                    onChange(setMovementName(block, mi, value))
-                  }
-                  ariaLabel={`동작 ${mi + 1}`}
-                />
-                {block.movements.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9 shrink-0 text-muted-foreground"
-                    onClick={() => onChange(removeMovementAt(block, mi))}
-                    aria-label={`동작 ${mi + 1} 삭제`}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-              <div className="space-y-1">
-                <Label className="text-[10px] text-muted-foreground">
-                  뒤 modifier
-                </Label>
-                <div className="flex flex-wrap gap-1">
-                  {MOVEMENT_MODIFIERS.map((mod) => {
-                    const active = isActive(mod, 'after');
-                    return (
-                      <Button
-                        key={`after-${mod}`}
-                        type="button"
-                        variant={active ? 'default' : 'outline'}
-                        size="sm"
-                        className="h-6 px-2 text-[11px]"
-                        onClick={() =>
-                          onChange(
-                            toggleMovementModifier(block, mi, {
-                              name: mod,
-                              position: 'after',
-                            }),
-                          )
-                        }
-                        aria-pressed={active}
-                      >
-                        {mod}
-                      </Button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-        {canAddMovement && (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="w-full"
-            onClick={() =>
-              onChange(addMovement(block, { name: '', modifiers: [] }))
-            }
-          >
-            <Plus className="h-4 w-4 mr-1" />
-            복합 동작 추가
-          </Button>
-        )}
-      </div>
-
-      <div className="space-y-2">
-        {block.setEntries.map((_, ei) => (
-          <SetEntryRow
-            key={ei}
-            block={block}
-            entryIndex={ei}
-            canRemove={canRemoveSetEntry}
-            onChange={onChange}
-          />
-        ))}
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="w-full"
-          onClick={() => onChange(addSetEntry(block))}
-        >
-          <Plus className="h-4 w-4 mr-1" />
-          세트 추가
-        </Button>
-      </div>
+        <X className="h-3.5 w-3.5" />
+      </button>
     </div>
   );
 }

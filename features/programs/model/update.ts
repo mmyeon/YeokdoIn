@@ -114,21 +114,86 @@ export function setEntryReps(
   return updateSetEntryAt(block, index, (e) => ({ ...e, reps }));
 }
 
+/**
+ * 특정 set-entry 에서 특정 movement 하나의 reps 만 갱신한다.
+ * movements 가 1개면 simple 로, 2개 이상이면 complex 배열로 정규화한다.
+ */
+export function setEntryRepsAt(
+  block: Block,
+  entryIndex: number,
+  movementIndex: number,
+  reps: number,
+): Block {
+  const movementCount = block.movements.length;
+  if (movementIndex < 0 || movementIndex >= movementCount) return block;
+  return updateSetEntryAt(block, entryIndex, (e) => {
+    if (movementCount <= 1) {
+      return { ...e, reps: { type: 'simple', reps } };
+    }
+    const current = e.reps;
+    const base =
+      current.type === 'simple'
+        ? Array<number>(movementCount).fill(current.reps)
+        : normalizeRepsArray(current.reps, movementCount);
+    const nextArr = base.map((n, i) => (i === movementIndex ? reps : n));
+    return { ...e, reps: { type: 'complex', reps: nextArr } };
+  });
+}
+
+function normalizeRepsArray(arr: number[], length: number): number[] {
+  if (arr.length === length) return arr;
+  if (arr.length > length) return arr.slice(0, length);
+  const pad = arr[arr.length - 1] ?? 1;
+  return [...arr, ...Array<number>(length - arr.length).fill(pad)];
+}
+
+function syncRepsForMovementCount(block: Block, nextCount: number): Block {
+  return {
+    ...block,
+    setEntries: block.setEntries.map((e) => {
+      if (nextCount <= 1) {
+        if (e.reps.type === 'simple') return e;
+        const first = e.reps.reps[0] ?? 1;
+        return { ...e, reps: { type: 'simple', reps: first } };
+      }
+      if (e.reps.type === 'simple') {
+        return {
+          ...e,
+          reps: { type: 'complex', reps: Array<number>(nextCount).fill(e.reps.reps) },
+        };
+      }
+      return {
+        ...e,
+        reps: { type: 'complex', reps: normalizeRepsArray(e.reps.reps, nextCount) },
+      };
+    }),
+  };
+}
+
 export function setEntrySets(block: Block, index: number, sets: number): Block {
   return updateSetEntryAt(block, index, (e) => ({ ...e, sets }));
 }
 
 export function addMovement(block: Block, movement: Movement): Block {
-  return { ...block, movements: [...block.movements, movement] };
+  const nextMovements = [...block.movements, movement];
+  const withMovement: Block = { ...block, movements: nextMovements };
+  return syncRepsForMovementCount(withMovement, nextMovements.length);
 }
 
 export function removeMovementAt(block: Block, index: number): Block {
   if (index < 0 || index >= block.movements.length) return block;
   if (block.movements.length <= 1) return block;
-  return {
-    ...block,
-    movements: block.movements.filter((_, i) => i !== index),
+  const nextMovements = block.movements.filter((_, i) => i !== index);
+  const withMovement: Block = { ...block, movements: nextMovements };
+  const withRepsSynced: Block = {
+    ...withMovement,
+    setEntries: withMovement.setEntries.map((e) => {
+      if (e.reps.type === 'simple') return e;
+      const nextReps = e.reps.reps.filter((_, i) => i !== index);
+      return { ...e, reps: { type: 'complex', reps: nextReps } };
+    }),
   };
+  return syncRepsForMovementCount(withRepsSynced, nextMovements.length);
 }
 
 /**

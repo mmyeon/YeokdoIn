@@ -2,12 +2,20 @@
 -- Run automatically by `npx supabase db reset`.
 
 INSERT INTO public.exercises (name, updated_at) VALUES
-    ('스내치', now()),
-    ('클린', now()),
-    ('저크', now()),
-    ('클린앤저크', now()),
-    ('프론트 스쿼트', now()),
-    ('백 스쿼트', now()),
-    ('데드리프트', now()),
-    ('푸시 프레스', now())
+    ('Snatch', now()),
+    ('Clean', now()),
+    ('Jerk', now()),
+    ('Clean and Jerk', now()),
+    ('Front Squat', now()),
+    ('Back Squat', now()),
+    ('Deadlift', now()),
+    ('Push Press', now()),
+    ('Power Snatch', now()),
+    ('Power Clean', now()),
+    ('Split Jerk', now()),
+    ('Push Jerk', now()),
+    ('Snatch Pull', now()),
+    ('Clean Pull', now()),
+    ('Snatch Balance', now()),
+    ('Overhead Squat', now())
 ON CONFLICT DO NOTHING;
