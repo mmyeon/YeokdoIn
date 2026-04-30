@@ -6,10 +6,12 @@ import { SocialAuthProvider } from "@/types/auth";
 import { ROUTES } from "@/routes";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const handleUserChange = (user: User | null) => {
     setUser(user);
@@ -52,6 +54,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     try {
       await authService.SignOut();
+      queryClient.clear();
       router.push(ROUTES.HOME);
     } catch (error) {
       console.error("Error signing out:", error);

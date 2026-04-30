@@ -14,12 +14,15 @@ import {
 } from "@/actions/personalRecords";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import { PersonalRecordInfo } from "@/types/personalRecords";
+import useAuth from "@/features/auth/model/useAuth";
 
 // 개인 기록 조회
 export const usePersonalRecords = () => {
+  const { user } = useAuth();
   return useQuery({
     queryKey: [QUERY_KEYS.PERSONAL_RECORDS],
     queryFn: getUserPersonalRecords,
+    enabled: !!user,
   });
 };
 

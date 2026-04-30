@@ -13,14 +13,17 @@ import {
   type SaveProgramInput,
 } from '@/features/programs/api/programs';
 import { QUERY_KEYS } from '@/lib/queryKeys';
+import useAuth from '@/features/auth/model/useAuth';
 
 export function usePrograms() {
+  const { user } = useAuth();
   return useQuery({
     queryKey: [QUERY_KEYS.PROGRAMS],
     queryFn: async (): Promise<ProgramRow[]> => {
       const rows = await listPrograms();
       return rows ?? [];
     },
+    enabled: !!user,
   });
 }
 
