@@ -9,26 +9,67 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      exercises: {
+      exercise_sections: {
         Row: {
-          created_at: string
+          display_order: number
           id: number
           name: string
-          updated_at: string
         }
         Insert: {
-          created_at?: string
+          display_order: number
           id?: number
           name: string
-          updated_at: string
         }
         Update: {
-          created_at?: string
+          display_order?: number
           id?: number
           name?: string
-          updated_at?: string
         }
         Relationships: []
+      }
+      exercises: {
+        Row: {
+          aka: string[]
+          created_at: string
+          description: string | null
+          id: number
+          name: string
+          page_url: string | null
+          section_id: number | null
+          updated_at: string
+          youtube_url: string | null
+        }
+        Insert: {
+          aka?: string[]
+          created_at?: string
+          description?: string | null
+          id?: number
+          name: string
+          page_url?: string | null
+          section_id?: number | null
+          updated_at: string
+          youtube_url?: string | null
+        }
+        Update: {
+          aka?: string[]
+          created_at?: string
+          description?: string | null
+          id?: number
+          name?: string
+          page_url?: string | null
+          section_id?: number | null
+          updated_at?: string
+          youtube_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercises_section_id_fkey"
+            columns: ["section_id"]
+            isOneToOne: false
+            referencedRelation: "exercise_sections"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       goals: {
         Row: {
