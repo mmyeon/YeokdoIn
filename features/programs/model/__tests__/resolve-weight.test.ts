@@ -9,6 +9,7 @@ describe("resolveWeight", () => {
       movements: [mv("back squat")],
       percentage: 70,
       aliasMap: { "back squat": 1 },
+      prRefMap: { 1: 1 },
       prMap: { 1: 100 },
     });
     expect(result.kind).toBe("computed");
@@ -25,6 +26,7 @@ describe("resolveWeight", () => {
       movements: [mv("sots press")],
       percentage: null,
       aliasMap: { "sots press": 2 },
+      prRefMap: { 2: 2 },
       prMap: { 2: 50 },
     });
     expect(result.kind).toBe("no-percentage");
@@ -35,6 +37,7 @@ describe("resolveWeight", () => {
       movements: [mv("P.Sn")],
       percentage: 60,
       aliasMap: {},
+      prRefMap: {},
       prMap: {},
     });
     expect(result).toEqual({ kind: "unresolved-alias", missingName: "P.Sn" });
@@ -45,6 +48,7 @@ describe("resolveWeight", () => {
       movements: [mv("clean & jerk")],
       percentage: 60,
       aliasMap: { "clean & jerk": 3 },
+      prRefMap: {},
       prMap: {},
     });
     expect(result.kind).toBe("no-pr");
@@ -56,6 +60,7 @@ describe("resolveWeight", () => {
       movements: [mv("snatch pull"), mv("power snatch")],
       percentage: 60,
       aliasMap: { "snatch pull": 10, "power snatch": 20 },
+      prRefMap: { 10: 10, 20: 20 },
       prMap: { 10: 200, 20: 85 },
     });
     expect(result.kind).toBe("computed");
@@ -71,6 +76,7 @@ describe("resolveWeight", () => {
       movements: [mv("BACK SQUAT")],
       percentage: 70,
       aliasMap: { "back squat": 1 },
+      prRefMap: { 1: 1 },
       prMap: { 1: 100 },
     });
     expect(result.kind).toBe("computed");
@@ -81,9 +87,51 @@ describe("resolveWeight", () => {
       movements: [mv("back squat")],
       percentage: 60,
       aliasMap: { "back squat": 1 },
+      prRefMap: { 1: 1 },
       prMap: { 1: 87 },
     });
     expect(result.kind).toBe("computed");
     if (result.kind === "computed") expect(result.kg).toBe(52);
+  });
+
+  it("pr_reference_id가 다른 운동을 가리키면 참조 운동의 PR로 계산한다", () => {
+    const result = resolveWeight({
+      movements: [{ name: "hang power snatch", modifiers: [] }],
+      percentage: 70,
+      aliasMap: { "hang power snatch": 66 },
+      prRefMap: { 66: 58 },   // 66 → Snatch (58)
+      prMap: { 58: 100 },
+    });
+    expect(result.kind).toBe("computed");
+    if (result.kind === "computed") {
+      expect(result.pr).toBe(100);
+      expect(result.exerciseId).toBe(58);
+    }
+  });
+
+  it("prRefMap에 없는 운동은 exerciseId를 직접 prMap에서 조회한다", () => {
+    const result = resolveWeight({
+      movements: [{ name: "back squat", modifiers: [] }],
+      percentage: 90,
+      aliasMap: { "back squat": 77 },
+      prRefMap: { 77: 77 },
+      prMap: { 77: 200 },
+    });
+    expect(result.kind).toBe("computed");
+    if (result.kind === "computed") {
+      expect(result.pr).toBe(200);
+      expect(result.exerciseId).toBe(77);
+    }
+  });
+
+  it("prRefMap에 없고 prMap에도 없으면 no-pr를 반환한다", () => {
+    const result = resolveWeight({
+      movements: [{ name: "farmer carry", modifiers: [] }],
+      percentage: 80,
+      aliasMap: { "farmer carry": 999 },
+      prRefMap: {},
+      prMap: {},
+    });
+    expect(result.kind).toBe("no-pr");
   });
 });

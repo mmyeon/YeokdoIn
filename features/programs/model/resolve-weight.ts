@@ -22,6 +22,8 @@ export interface ResolveWeightInput {
   percentage: number | null;
   /** lowercase alias/movement-name → exerciseId */
   aliasMap: Readonly<Record<string, number>>;
+  /** exerciseId → prReferenceId (allows redirecting to another exercise's PR) */
+  prRefMap: Readonly<Record<number, number>>;
   /** exerciseId → current PR in kg */
   prMap: Readonly<Record<number, number>>;
 }
@@ -35,6 +37,7 @@ export function resolveWeight({
   movements,
   percentage,
   aliasMap,
+  prRefMap,
   prMap,
 }: ResolveWeightInput): WeightResolution {
   const ref = resolveRefMovement({ movements });
@@ -50,9 +53,10 @@ export function resolveWeight({
     return { kind: "unresolved-alias", missingName: refName };
   }
 
-  const pr = prMap[exerciseId];
+  const prExerciseId = prRefMap[exerciseId] ?? exerciseId;
+  const pr = prMap[prExerciseId];
   if (pr === undefined) {
-    return { kind: "no-pr", exerciseId, refName };
+    return { kind: "no-pr", exerciseId: prExerciseId, refName };
   }
 
   return {
@@ -60,7 +64,7 @@ export function resolveWeight({
     kg: computePrescribedWeight(pr, percentage),
     pr,
     percentage,
-    exerciseId,
+    exerciseId: prExerciseId,
     refName,
   };
 }

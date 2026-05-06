@@ -26,12 +26,14 @@ describe("flattenProgram", () => {
     "power snatch": 1,
     "snatch pull": 2,
   };
+  const prRefMap: Record<number, number> = { 1: 1, 2: 2 };
   const prMap: Record<number, number> = { 1: 100, 2: 120 };
 
   it("블록별 ExercisePosition 하나를 만든다 (조합 운동은 하나로 통합)", () => {
     const positions = flattenProgram({
       program: snatchProgram,
       aliasMap,
+      prRefMap,
       prMap,
     });
     expect(positions).toHaveLength(2);
@@ -46,6 +48,7 @@ describe("flattenProgram", () => {
     const [first] = flattenProgram({
       program: snatchProgram,
       aliasMap,
+      prRefMap,
       prMap,
     });
     expect(first.sets).toHaveLength(3);
@@ -65,7 +68,7 @@ describe("flattenProgram", () => {
         },
       ],
     };
-    const positions = flattenProgram({ program: multiEntryProgram, aliasMap, prMap });
+    const positions = flattenProgram({ program: multiEntryProgram, aliasMap, prRefMap, prMap });
     expect(positions).toHaveLength(2);
 
     const [first, second] = positions;
@@ -86,6 +89,7 @@ describe("flattenProgram", () => {
     const [first] = flattenProgram({
       program: snatchProgram,
       aliasMap,
+      prRefMap,
       prMap,
     });
     // Power Snatch PR 100 × 60% = 60
@@ -96,6 +100,7 @@ describe("flattenProgram", () => {
     const [, blockB] = flattenProgram({
       program: snatchProgram,
       aliasMap,
+      prRefMap,
       prMap,
     });
     // Power Snatch PR 100 × 70% = 70 (Snatch Pull PR 120 이 아님)

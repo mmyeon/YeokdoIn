@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 
 import { listExercises } from "@/features/exercises/api/exercises";
 import { buildAliasMap } from "@/features/exercises/model/build-alias-map";
+import { buildPrRefMap } from "@/features/exercises/model/build-pr-ref-map";
 import { getProgram } from "@/features/programs/api/programs";
 import { ProgramRunner } from "@/features/program-runner/ui/ProgramRunner";
 import { programSchema } from "@/features/notation/model/schemas";
@@ -30,12 +31,13 @@ export default async function ProgramRunnerPage({
   ]);
 
   const aliasMap = buildAliasMap(exercises);
+  const prRefMap = buildPrRefMap(exercises);
   const prMap: Record<number, number> = {};
   for (const r of records) {
     prMap[r.exerciseId] = r.weight;
   }
 
   return (
-    <ProgramRunner program={parsed.data} aliasMap={aliasMap} prMap={prMap} />
+    <ProgramRunner program={parsed.data} aliasMap={aliasMap} prRefMap={prRefMap} prMap={prMap} />
   );
 }

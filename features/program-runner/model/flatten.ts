@@ -5,6 +5,7 @@ import type { ExercisePosition, SetPlan } from "./types";
 export interface FlattenProgramInput {
   program: Program;
   aliasMap: Readonly<Record<string, number>>;
+  prRefMap: Readonly<Record<number, number>>;
   prMap: Readonly<Record<number, number>>;
 }
 
@@ -17,6 +18,7 @@ export interface FlattenProgramInput {
 export function flattenProgram({
   program,
   aliasMap,
+  prRefMap,
   prMap,
 }: FlattenProgramInput): ExercisePosition[] {
   const totalBlocks = program.blocks.length;
@@ -35,6 +37,7 @@ export function flattenProgram({
         movements: block.movements,
         percentage: entry.percentage,
         aliasMap,
+        prRefMap,
         prMap,
       });
       const prescribedKg = resolved.kind === "computed" ? resolved.kg : null;

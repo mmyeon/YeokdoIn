@@ -18,6 +18,7 @@ import { RunnerFocusView } from "./RunnerFocusView";
 interface ProgramRunnerProps {
   program: Program;
   aliasMap: Readonly<Record<string, number>>;
+  prRefMap: Readonly<Record<number, number>>;
   prMap: Readonly<Record<number, number>>;
 }
 
@@ -37,14 +38,14 @@ function buildInitialRecords(
 
 const DEFAULT_BAR_WEIGHT = 20;
 
-export function ProgramRunner({ program, aliasMap, prMap }: ProgramRunnerProps) {
+export function ProgramRunner({ program, aliasMap, prRefMap, prMap }: ProgramRunnerProps) {
   const router = useRouter();
   const { data: savedBarWeight } = useBarbellWeight();
   const barWeight = savedBarWeight ?? DEFAULT_BAR_WEIGHT;
 
   const positions = useMemo(
-    () => flattenProgram({ program, aliasMap, prMap }),
-    [program, aliasMap, prMap],
+    () => flattenProgram({ program, aliasMap, prRefMap, prMap }),
+    [program, aliasMap, prRefMap, prMap],
   );
 
   const [records, setRecords] = useState<SetRecord[][]>(() =>
@@ -167,13 +168,13 @@ interface ViewToggleProps {
 
 function ViewToggle({ view, onChange }: ViewToggleProps) {
   const options: Array<{ id: ViewMode; label: string }> = [
-    { id: "standard", label: "상세" },
-    { id: "focus", label: "집중" },
+    { id: "standard", label: "Standard" },
+    { id: "focus", label: "Focus" },
   ];
   return (
     <div
       role="tablist"
-      aria-label="러너 보기 모드"
+      aria-label="Runner view mode"
       className="mx-4 mb-1 inline-flex self-center rounded-[var(--yd-r-full)] border border-yd-line bg-yd-surface p-[3px]"
     >
       {options.map((opt) => {
@@ -203,16 +204,16 @@ function ViewToggle({ view, onChange }: ViewToggleProps) {
 function EmptyState({ onClose }: { onClose: () => void }) {
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[480px] flex-col items-center justify-center gap-3 bg-yd-bg p-6 text-center text-yd-text">
-      <p className="text-[16px] font-semibold">실행할 블록이 없습니다.</p>
+      <p className="text-[16px] font-semibold">No blocks to run.</p>
       <p className="text-[13px] text-yd-text-muted">
-        프로그램에 블록을 추가한 뒤 다시 시작해 주세요.
+        Add blocks to the program and try again.
       </p>
       <button
         type="button"
         onClick={onClose}
         className="mt-2 rounded-[var(--yd-r-md)] bg-yd-primary px-4 py-2 text-[13px] font-bold text-yd-on-primary"
       >
-        홈으로
+        Go Home
       </button>
     </div>
   );
