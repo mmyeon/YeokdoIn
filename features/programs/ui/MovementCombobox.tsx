@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input/input';
-import { MOVEMENT_GROUPS } from '@/features/programs/model/movements';
+import { useExerciseGroups } from '@/features/exercises/ui/useExerciseGroups';
 
 interface MovementComboboxProps {
   value: string;
@@ -15,7 +15,7 @@ export function MovementCombobox({
   value,
   onChange,
   ariaLabel,
-  placeholder = '동작 검색/선택',
+  placeholder = 'Search/select movement',
 }: MovementComboboxProps) {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
@@ -36,14 +36,18 @@ export function MovementCombobox({
     return () => document.removeEventListener('mousedown', onDocClick);
   }, []);
 
+  const { data: exerciseGroups = [] } = useExerciseGroups();
+
   const filteredGroups = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return MOVEMENT_GROUPS;
-    return MOVEMENT_GROUPS.map((g) => ({
-      category: g.category,
-      items: g.items.filter((name) => name.toLowerCase().includes(q)),
-    })).filter((g) => g.items.length > 0);
-  }, [query]);
+    if (!q) return exerciseGroups;
+    return exerciseGroups
+      .map((g) => ({
+        category: g.category,
+        items: g.items.filter((name) => name.toLowerCase().includes(q)),
+      }))
+      .filter((g) => g.items.length > 0);
+  }, [query, exerciseGroups]);
 
   const flatItems = useMemo(
     () => filteredGroups.flatMap((g) => g.items),
@@ -155,7 +159,7 @@ export function MovementCombobox({
         >
           {flatItems.length === 0 ? (
             <div className="px-2 py-1.5 text-sm text-muted-foreground">
-              일치하는 동작이 없어요
+              No matching movements
             </div>
           ) : (
             filteredGroups.map((g) => (

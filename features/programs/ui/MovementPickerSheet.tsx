@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Input } from '@/components/ui/input/input';
-import { MOVEMENT_GROUPS } from '@/features/programs/model/movements';
+import { useExerciseGroups } from '@/features/exercises/ui/useExerciseGroups';
 
 interface MovementPickerSheetProps {
   open: boolean;
@@ -16,6 +16,7 @@ export function MovementPickerSheet({
   onPick,
 }: MovementPickerSheetProps) {
   const [q, setQ] = useState('');
+  const { data: exerciseGroups = [] } = useExerciseGroups();
 
   useEffect(() => {
     if (!open) setQ('');
@@ -38,9 +39,9 @@ export function MovementPickerSheet({
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
     if (!query) return null;
-    const all = MOVEMENT_GROUPS.flatMap((g) => g.items);
+    const all = exerciseGroups.flatMap((g) => g.items);
     return all.filter((m) => m.toLowerCase().includes(query));
-  }, [q]);
+  }, [q, exerciseGroups]);
 
   if (!open) return null;
 
@@ -48,7 +49,7 @@ export function MovementPickerSheet({
     <div className="fixed top-0 bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-50 flex flex-col">
       <button
         type="button"
-        aria-label="닫기"
+        aria-label="Close"
         onClick={onClose}
         className="absolute inset-0 bg-black/55"
       />
@@ -62,16 +63,16 @@ export function MovementPickerSheet({
             onClick={onClose}
             className="text-[14px] text-yd-text-muted"
           >
-            취소
+            Cancel
           </button>
-          <h2 className="text-[15px] font-bold text-yd-text">동작 선택</h2>
+          <h2 className="text-[15px] font-bold text-yd-text">Select Movement</h2>
           <div className="w-9" />
         </div>
         <div className="px-4 pb-2.5">
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="동작 검색…"
+            placeholder="Search movements…"
             className="h-11 rounded-xl border-yd-line bg-yd-surface"
             autoFocus
           />
@@ -84,12 +85,12 @@ export function MovementPickerSheet({
               ))}
               {filtered.length === 0 && (
                 <p className="p-5 text-center text-[13px] text-yd-text-muted">
-                  일치하는 동작이 없어요
+                  No matching movements
                 </p>
               )}
             </div>
           ) : (
-            MOVEMENT_GROUPS.map((g) => (
+            exerciseGroups.map((g) => (
               <div key={g.category} className="mb-3.5">
                 <span className="mb-1.5 block px-0.5 text-[10px] uppercase tracking-[1px] text-yd-text-muted">
                   {g.category}
