@@ -35,6 +35,7 @@ export type Database = {
           id: number
           name: string
           page_url: string | null
+          pr_reference_id: number | null
           section_id: number | null
           updated_at: string
           youtube_url: string | null
@@ -46,6 +47,7 @@ export type Database = {
           id?: number
           name: string
           page_url?: string | null
+          pr_reference_id?: number | null
           section_id?: number | null
           updated_at: string
           youtube_url?: string | null
@@ -57,11 +59,19 @@ export type Database = {
           id?: number
           name?: string
           page_url?: string | null
+          pr_reference_id?: number | null
           section_id?: number | null
           updated_at?: string
           youtube_url?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "exercises_pr_reference_id_fkey"
+            columns: ["pr_reference_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "exercises_section_id_fkey"
             columns: ["section_id"]
