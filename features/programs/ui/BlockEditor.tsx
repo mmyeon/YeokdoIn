@@ -14,12 +14,9 @@ import {
   setEntryRepsAt,
   setEntrySets,
   setMovementName,
-  toggleMovementModifier,
 } from '@/features/programs/model/update';
-import { MOVEMENT_MODIFIERS } from '@/features/programs/model/movements';
 import { cn } from '@/lib/utils';
 import { StepLabel } from './StepLabel';
-import { ChipGroup } from './ChipGroup';
 import { PctChip } from './PctChip';
 import { BigStepper } from './BigStepper';
 import { MovementPickerSheet } from './MovementPickerSheet';
@@ -38,10 +35,6 @@ function movementLabel(m: Movement): string {
     .filter((x) => x.position === 'after')
     .map((x) => x.name);
   return [...before, m.name, ...after].filter(Boolean).join(' ');
-}
-
-function modifiersFor(m: Movement, position: 'before' | 'after'): string[] {
-  return m.modifiers.filter((x) => x.position === position).map((x) => x.name);
 }
 
 function simpleReps(r: RepScheme): number {
@@ -80,14 +73,6 @@ export function BlockEditor({
   const [picker, setPicker] = useState<null | { side: 'primary' | 'compound' }>(
     null,
   );
-  const totalMods = primary
-    ? primary.modifiers.length + (compound?.modifiers.length ?? 0)
-    : 0;
-  const [modsOpen, setModsOpen] = useState(totalMods > 0);
-
-  useEffect(() => {
-    if (totalMods > 0) setModsOpen(true);
-  }, [totalMods]);
 
   const canRemove = totalBlocks > 1;
   const canRemoveSet = block.setEntries.length > 1;
@@ -100,7 +85,7 @@ export function BlockEditor({
             {index + 1}
           </div>
           <span className="text-[12px] font-semibold uppercase tracking-[1px] text-yd-text-muted">
-            블록 {index + 1}
+            Block {index + 1}
             {totalBlocks > 1 ? ` / ${totalBlocks}` : ''}
           </span>
         </div>
@@ -108,7 +93,7 @@ export function BlockEditor({
           <button
             type="button"
             onClick={onRemove}
-            aria-label={`블록 ${index + 1} 삭제`}
+            aria-label={`Remove block ${index + 1}`}
             className="flex h-7 w-7 items-center justify-center rounded-lg text-yd-text-dim hover:text-yd-text"
           >
             ×
@@ -118,7 +103,7 @@ export function BlockEditor({
 
       <div className="flex flex-col gap-3.5 p-3.5">
         <div>
-          <StepLabel n="①" label="동작" />
+          <StepLabel n="①" label="Movement" />
           <button
             type="button"
             onClick={() => setPicker({ side: 'primary' })}
@@ -136,7 +121,7 @@ export function BlockEditor({
                 </span>
               ) : (
                 <span className="text-[14px] text-yd-text-muted">
-                  동작을 선택하세요
+                  Select a movement
                 </span>
               )}
             </div>
@@ -150,59 +135,6 @@ export function BlockEditor({
             </span>
           </button>
 
-          {hasPrimary && (
-            <div className="mt-2">
-              <button
-                type="button"
-                onClick={() => setModsOpen((v) => !v)}
-                className="inline-flex items-center gap-1.5 rounded-full border border-yd-line bg-transparent px-2.5 py-1.5"
-              >
-                <span className="text-[11px] font-semibold text-yd-text-muted">
-                  {modsOpen ? '−' : '+'}
-                </span>
-                <span className="text-[11px] font-medium text-yd-text-muted">
-                  수식어
-                  {totalMods > 0 && (
-                    <span className="ml-1 font-bold text-yd-primary">
-                      {totalMods}
-                    </span>
-                  )}
-                </span>
-              </button>
-
-              {modsOpen && (
-                <div className="mt-2 flex flex-col gap-2.5 rounded-[10px] border border-yd-line bg-yd-bg p-2.5">
-                  <ChipGroup
-                    label="앞에 붙이기"
-                    options={MOVEMENT_MODIFIERS}
-                    selected={modifiersFor(primary, 'before')}
-                    onToggle={(mod) =>
-                      onChange(
-                        toggleMovementModifier(block, 0, {
-                          name: mod,
-                          position: 'before',
-                        }),
-                      )
-                    }
-                  />
-                  <ChipGroup
-                    label="뒤에 붙이기"
-                    options={MOVEMENT_MODIFIERS}
-                    selected={modifiersFor(primary, 'after')}
-                    onToggle={(mod) =>
-                      onChange(
-                        toggleMovementModifier(block, 0, {
-                          name: mod,
-                          position: 'after',
-                        }),
-                      )
-                    }
-                  />
-                </div>
-              )}
-            </div>
-          )}
-
           {hasPrimary && !compound && block.movements.length < MAX_MOVEMENTS_PER_BLOCK && (
             <button
               type="button"
@@ -213,7 +145,7 @@ export function BlockEditor({
               className="mt-2 flex h-9 w-full items-center justify-center rounded-lg border border-dashed border-yd-line"
             >
               <span className="text-[12px] text-yd-text-muted">
-                + 복합 동작 추가
+                + Add compound movement
               </span>
             </button>
           )}
@@ -222,14 +154,14 @@ export function BlockEditor({
             <div className="mt-2 border-l-2 border-yd-primary pl-2.5">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] uppercase tracking-[1px] text-yd-text-muted">
-                  + 복합
+                  + Compound
                 </span>
                 <button
                   type="button"
                   onClick={() => onChange(removeMovementAt(block, 1))}
                   className="text-[11px] text-yd-text-dim"
                 >
-                  × 제거
+                  × Remove
                 </button>
               </div>
               <button
@@ -248,7 +180,7 @@ export function BlockEditor({
                     compound.name ? 'text-yd-primary' : 'text-yd-text-muted',
                   )}
                 >
-                  {movementLabel(compound) || '동작 선택'}
+                  {movementLabel(compound) || 'Select movement'}
                 </span>
                 <span className="text-[14px] text-yd-text-dim">›</span>
               </button>
@@ -258,14 +190,14 @@ export function BlockEditor({
 
         {hasPrimary && (
           <div>
-            <StepLabel n="②" label="부하 · 세트" />
+            <StepLabel n="②" label="Load · Sets" />
             <div className="mt-2 flex flex-col gap-2">
               <div
                 className="grid gap-2.5 px-1"
                 style={{ gridTemplateColumns: gridTemplate(block.movements.length) }}
               >
                 <span className="text-[10px] uppercase tracking-[0.8px] text-yd-text-muted">
-                  % (선택)
+                  % (opt.)
                 </span>
                 {block.movements.length <= 1 ? (
                   <span className="text-center text-[10px] uppercase tracking-[0.8px] text-yd-text-muted">
@@ -278,7 +210,7 @@ export function BlockEditor({
                       className="truncate text-center text-[10px] uppercase tracking-[0.8px] text-yd-text-muted"
                       title={movementLabel(m)}
                     >
-                      {movementLabel(m) || `운동 ${mi + 1}`}
+                      {movementLabel(m) || `Ex. ${mi + 1}`}
                     </span>
                   ))
                 )}
@@ -302,7 +234,7 @@ export function BlockEditor({
                 className="flex h-9 items-center justify-center rounded-lg border border-dashed border-yd-line"
               >
                 <span className="text-[12px] text-yd-text-muted">
-                  + 세트 스킴 추가
+                  + Add set scheme
                 </span>
               </button>
             </div>
@@ -364,7 +296,7 @@ function SetEntryRow({
       <PctChip
         value={entry.percentage}
         onChange={(v) => onChange(setEntryPercentage(block, entryIndex, v))}
-        ariaLabel={`세트 ${entryIndex + 1} %`}
+        ariaLabel={`Set ${entryIndex + 1} %`}
       />
       {isMulti ? (
         block.movements.map((_, mi) => (
@@ -376,7 +308,7 @@ function SetEntryRow({
             }
             min={REPS_MIN}
             max={REPS_MAX}
-            ariaLabel={`세트 ${entryIndex + 1} 운동 ${mi + 1} reps`}
+            ariaLabel={`Set ${entryIndex + 1} exercise ${mi + 1} reps`}
           />
         ))
       ) : isComplex ? (
@@ -393,7 +325,7 @@ function SetEntryRow({
             }
           }}
           className="h-11 rounded-[10px] border-yd-line bg-yd-bg text-center font-mono text-[17px] font-bold"
-          aria-label={`세트 ${entryIndex + 1} reps`}
+          aria-label={`Set ${entryIndex + 1} reps`}
         />
       ) : (
         <BigStepper
@@ -403,7 +335,7 @@ function SetEntryRow({
           }
           min={REPS_MIN}
           max={REPS_MAX}
-          ariaLabel={`세트 ${entryIndex + 1} reps`}
+          ariaLabel={`Set ${entryIndex + 1} reps`}
         />
       )}
       <BigStepper
@@ -411,13 +343,13 @@ function SetEntryRow({
         onChange={(n) => onChange(setEntrySets(block, entryIndex, n))}
         min={SETS_MIN}
         max={SETS_MAX}
-        ariaLabel={`세트 ${entryIndex + 1} sets`}
+        ariaLabel={`Set ${entryIndex + 1} sets`}
       />
       <button
         type="button"
         onClick={() => onChange(removeSetEntryAt(block, entryIndex))}
         disabled={!canRemove}
-        aria-label={`세트 ${entryIndex + 1} 삭제`}
+        aria-label={`Remove set ${entryIndex + 1}`}
         className="flex h-7 w-7 items-center justify-center rounded-md text-yd-text-dim disabled:opacity-0"
       >
         <X className="h-3.5 w-3.5" />
