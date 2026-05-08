@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -21,6 +21,8 @@ export default function ProgramInputPage() {
   const router = useRouter();
   const [program, setProgram] = useState<Program>(createInitialProgram);
   const [savedId, setSavedId] = useState<number | null>(null);
+
+  const handleSheetDismiss = useCallback(() => setSavedId(null), []);
 
   const { mutate: save, isPending } = useSaveProgram({
     onSuccess: (row) => {
@@ -104,7 +106,7 @@ export default function ProgramInputPage() {
       {savedId !== null && (
         <ProgramSavedSheet
           savedId={savedId}
-          onDismiss={() => setSavedId(null)}
+          onDismiss={handleSheetDismiss}
         />
       )}
     </main>
