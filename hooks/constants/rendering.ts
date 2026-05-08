@@ -14,9 +14,3 @@ export const CONNECTION_LINE_STYLE = {
   WIDTH: 4,
   COLOR: "rgba(255, 255, 255, 1)",
 };
-
-/** 세그멘테이션 마스크 색상 (RGBA) - 파란색 반투명 */
-export const SEGMENTATION_MASK_COLOR = [88, 125, 205, 179];
-
-/** 세그멘테이션 마스크 배경 색상 (RGBA) - 투명 */
-export const SEGMENTATION_MASK_BACKGROUND_COLOR = [0, 0, 0, 0];

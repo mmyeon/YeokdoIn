@@ -3,7 +3,6 @@ import {
   Landmark,
   PoseLandmarker,
   ObjectDetector,
-  DrawingUtils,
 } from "@mediapipe/tasks-vision";
 import { RefObject, useCallback, useEffect, useRef } from "react";
 import {
@@ -12,8 +11,6 @@ import {
   MEDIAPIPE_WASM_URL,
   POSE_MODEL_URL,
   OBJECT_MODEL_URL,
-  SEGMENTATION_MASK_BACKGROUND_COLOR,
-  SEGMENTATION_MASK_COLOR,
 } from "./constants";
 import {} from // smoothLandmarks,
 // stabilizeLandmarks,
@@ -28,12 +25,10 @@ const useMediaPipe = ({
   videoRef,
   canvasRef,
   trajectoryCanvasRef,
-  maskCanvasRef,
 }: {
   videoRef: RefObject<HTMLVideoElement | null>;
   canvasRef: RefObject<HTMLCanvasElement | null>;
   trajectoryCanvasRef: RefObject<HTMLCanvasElement | null>;
-  maskCanvasRef?: RefObject<HTMLCanvasElement | null>;
 }) => {
   // MediaPipe Pose Landmarker 인스턴스 참조
   const poseLandmarkerRef = useRef<PoseLandmarker | null>(null);
@@ -48,9 +43,6 @@ const useMediaPipe = ({
   const previousBarbellPos = useRef<{ x: number; y: number } | null>(null);
   // 기준 바벨 원판 정보 (크기 및 위치 추적용)
   const referencePlate = useRef<ReferencePlate | null>(null);
-
-  // WebGL2 기반 세그멘테이션 마스크 렌더링 유틸리티
-  const drawingUtils = useRef<DrawingUtils | null>(null);
 
   // MediaPipe 모델 초기화
   useEffect(() => {
@@ -74,8 +66,6 @@ const useMediaPipe = ({
           },
           runningMode: "VIDEO",
           numPoses: 1,
-          outputSegmentationMasks: true,
-          canvas: maskCanvasRef?.current || undefined,
         });
 
         if (!isMounted) {
@@ -104,16 +94,6 @@ const useMediaPipe = ({
         }
 
         objectDetectorRef.current = objectDetector;
-
-        // DrawingUtils 초기화
-        if (maskCanvasRef?.current && isMounted) {
-          const glContext = maskCanvasRef.current.getContext("webgl2");
-          if (glContext) {
-            drawingUtils.current = new DrawingUtils(glContext);
-          } else {
-            console.warn("WebGL2 not supported, fallback may be needed");
-          }
-        }
       } catch (error) {
         console.error("Failed to load MediaPipe models:", error);
       }
@@ -151,18 +131,8 @@ const useMediaPipe = ({
         animationFrameId.current = null;
       }
 
-      // DrawingUtils 정리
-      if (drawingUtils.current) {
-        try {
-          drawingUtils.current.close();
-          drawingUtils.current = null;
-        } catch (error) {
-          console.error("Error closing DrawingUtils:", error);
-        }
-      }
-
       // Canvas context 정리
-      [canvasRef, trajectoryCanvasRef, maskCanvasRef].forEach((ref) => {
+      [canvasRef, trajectoryCanvasRef].forEach((ref) => {
         if (ref?.current) {
           const canvas = ref.current;
 
@@ -231,21 +201,6 @@ const useMediaPipe = ({
       }
 
       if (poseResults) {
-        // Segmentation mask 렌더링
-        if (poseResults.segmentationMasks) {
-          const mask = poseResults.segmentationMasks[0];
-
-          if (mask) {
-            if (drawingUtils.current)
-              drawingUtils.current.drawConfidenceMask(
-                mask,
-                SEGMENTATION_MASK_BACKGROUND_COLOR,
-                SEGMENTATION_MASK_COLOR
-              );
-            mask.close();
-          }
-        }
-
         for (const poseLandmarks of poseResults.landmarks) {
           // 관절 위치 스무딩 및 안정화 적용
           // const smoothingResult = smoothLandmarks(

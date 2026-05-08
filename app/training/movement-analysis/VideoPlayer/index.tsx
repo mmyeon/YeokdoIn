@@ -16,7 +16,6 @@ const VideoPlayer = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const trajectoryCanvasRef = useRef<HTMLCanvasElement>(null);
-  const maskCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleVideoPause = () => {
     setIsPlaying(false);
@@ -36,17 +35,11 @@ const VideoPlayer = ({
     if (!video) return;
 
     const handleMetadataLoad = () => {
-      if (
-        canvasRef.current &&
-        trajectoryCanvasRef.current &&
-        maskCanvasRef.current
-      ) {
+      if (canvasRef.current && trajectoryCanvasRef.current) {
         canvasRef.current.width = video.videoWidth;
         canvasRef.current.height = video.videoHeight;
         trajectoryCanvasRef.current.width = video.videoWidth;
         trajectoryCanvasRef.current.height = video.videoHeight;
-        maskCanvasRef.current.width = video.videoWidth;
-        maskCanvasRef.current.height = video.videoHeight;
       }
     };
 
@@ -73,7 +66,6 @@ const VideoPlayer = ({
         videoRef={videoRef}
         canvasRef={canvasRef}
         trajectoryCanvasRef={trajectoryCanvasRef}
-        maskCanvasRef={maskCanvasRef}
         isPlaying={isPlaying}
       />
 
