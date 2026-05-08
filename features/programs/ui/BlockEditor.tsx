@@ -232,6 +232,7 @@ export function BlockEditor({
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
+                  aria-label="Add default set scheme"
                   onClick={() => onChange(addSetEntry(block))}
                   className="flex h-9 items-center justify-center rounded-lg border border-dashed border-yd-line"
                 >
@@ -239,6 +240,7 @@ export function BlockEditor({
                 </button>
                 <button
                   type="button"
+                  aria-label="Copy previous set scheme"
                   onClick={() => onChange(addSetEntryFromPrevious(block))}
                   disabled={block.setEntries.length === 0}
                   className="flex h-9 items-center justify-center rounded-lg border border-dashed border-yd-primary disabled:opacity-40"
