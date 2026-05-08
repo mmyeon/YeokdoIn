@@ -1,19 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { Pill } from '@/components/ui/pill';
 import { cn } from '@/lib/utils';
 import { ProgramForm } from '@/features/programs/ui/ProgramForm';
+import { ProgramSavedSheet } from '@/features/programs/ui/ProgramSavedSheet';
 import { useSaveProgram } from '@/hooks/usePrograms';
 import type { Program } from '@/features/notation/model/types';
 import { createEmptyBlock } from '@/features/programs/model/update';
 import { serializeProgram } from '@/features/programs/model/serialize';
 import { programSchema } from '@/features/notation/model/schemas';
-
-const SAVED_PILL_MS = 1800;
 
 function createInitialProgram(): Program {
   return { blocks: [createEmptyBlock()] };
@@ -22,22 +20,15 @@ function createInitialProgram(): Program {
 export default function ProgramInputPage() {
   const router = useRouter();
   const [program, setProgram] = useState<Program>(createInitialProgram);
-  const [justSaved, setJustSaved] = useState(false);
+  const [savedId, setSavedId] = useState<number | null>(null);
 
   const { mutate: save, isPending } = useSaveProgram({
-    onSuccess: () => {
-      toast.success('프로그램이 저장되었습니다.');
+    onSuccess: (row) => {
       setProgram(createInitialProgram());
-      setJustSaved(true);
+      setSavedId(row.id);
     },
-    onError: (e) => toast.error(e.message ?? '저장에 실패했습니다.'),
+    onError: (e) => toast.error(e.message ?? 'Failed to save.'),
   });
-
-  useEffect(() => {
-    if (!justSaved) return;
-    const id = window.setTimeout(() => setJustSaved(false), SAVED_PILL_MS);
-    return () => window.clearTimeout(id);
-  }, [justSaved]);
 
   const hasMovement = program.blocks.some((b) =>
     b.movements.some((m) => m.name.trim().length > 0),
@@ -63,31 +54,21 @@ export default function ProgramInputPage() {
         <button
           type="button"
           onClick={handleBack}
-          aria-label="뒤로가기"
+          aria-label="Back"
           className="-ml-1 flex h-8 w-8 items-center justify-center rounded-md text-yd-text-muted hover:bg-yd-elevated"
         >
           <ChevronLeft className="size-5" />
         </button>
-        <h1 className="text-[18px] font-bold">프로그램 입력</h1>
+        <h1 className="text-[18px] font-bold">New Program</h1>
       </header>
 
       <section className="px-3.5 pb-44 pt-2">
         <div className="flex items-baseline justify-between px-0.5 pb-2.5 pt-1">
           <div>
-            <h2 className="text-[20px] font-bold -tracking-[0.3px]">
-              새 프로그램
-            </h2>
-            <p className="mt-0.5 text-[11px] text-yd-text-muted">
-              블록 단위로 만드세요
-            </p>
+            <h2 className="text-[20px] font-bold -tracking-[0.3px]">New Program</h2>
+            <p className="mt-0.5 text-[11px] text-yd-text-muted">Build it block by block</p>
           </div>
-          {justSaved && (
-            <Pill tone="success" variant="solid" size="sm">
-              ✓ 저장됨
-            </Pill>
-          )}
         </div>
-
         <ProgramForm program={program} onChange={setProgram} />
       </section>
 
@@ -115,14 +96,17 @@ export default function ProgramInputPage() {
                 : 'border border-yd-line bg-yd-elevated text-yd-text-dim',
             )}
           >
-            {isPending
-              ? '저장 중...'
-              : canSave
-                ? '프로그램 저장'
-                : '동작을 선택하세요'}
+            {isPending ? 'Saving...' : canSave ? 'Save Program' : 'Select a movement'}
           </button>
         </div>
       </div>
+
+      {savedId !== null && (
+        <ProgramSavedSheet
+          savedId={savedId}
+          onDismiss={() => setSavedId(null)}
+        />
+      )}
     </main>
   );
 }
