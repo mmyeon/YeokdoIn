@@ -13,15 +13,15 @@ export function IdleHero({ savedProgramsCount }: IdleHeroProps) {
       <div className="flex flex-col gap-2.5 rounded-[18px] border border-[var(--yd-line)] bg-[var(--yd-surface)] p-[18px]">
         <div className="flex items-center justify-between">
           <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--yd-text-muted)]">
-            오늘 프로그램 없음
+            No program today
           </span>
           <span className="text-[11px] text-[var(--yd-text-muted)]">
-            자율 세션
+            Open session
           </span>
         </div>
 
         <div className="text-[22px] font-bold leading-[1.15] -tracking-[0.027em] text-[var(--yd-text)]">
-          오늘 무엇을 하시겠어요?
+          What are you doing today?
         </div>
 
         <div className="mt-1 flex gap-2">
@@ -29,9 +29,9 @@ export function IdleHero({ savedProgramsCount }: IdleHeroProps) {
             href={ROUTES.TRAINING.PROGRAM_INPUT}
             className="flex flex-[2] flex-col gap-0.5 rounded-xl bg-[var(--yd-primary)] px-3.5 py-[13px] text-[var(--yd-on-primary)]"
           >
-            <span className="text-sm font-bold">▶ 라이브러리에서 시작</span>
+            <span className="text-sm font-bold">▶ Start from library</span>
             <span className="text-[10px] opacity-75">
-              저장된 프로그램 {savedProgramsCount}개
+              {savedProgramsCount} saved programs
             </span>
           </Link>
           <Link
@@ -39,10 +39,10 @@ export function IdleHero({ savedProgramsCount }: IdleHeroProps) {
             className="flex flex-1 flex-col justify-center gap-0.5 rounded-xl border border-[var(--yd-line)] bg-[var(--yd-elevated)] px-3.5 py-[13px]"
           >
             <span className="text-[13px] font-semibold text-[var(--yd-text)]">
-              ✎ 자유
+              ✎ Free
             </span>
             <span className="text-[10px] text-[var(--yd-text-muted)]">
-              빈 기록
+              Blank session
             </span>
           </Link>
         </div>

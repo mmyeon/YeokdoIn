@@ -43,24 +43,24 @@ function PersonalRecordsPage() {
         <button
           type="button"
           onClick={handleBack}
-          aria-label="뒤로가기"
+          aria-label="Back"
           className="-ml-1 flex items-center gap-1 rounded-md px-2 py-1.5 text-yd-text-muted text-[14px] font-medium hover:bg-yd-elevated"
         >
           <ChevronLeft className="size-4" aria-hidden />
-          설정
+          Settings
         </button>
         <RecordAddDialog />
       </div>
 
       <header className="px-5">
         <h1 className="text-h1">PR</h1>
-        <p className="mt-1 text-caption text-yd-text-muted">최근순</p>
+        <p className="mt-1 text-caption text-yd-text-muted">Most recent</p>
       </header>
 
       <section className="px-4">
         {isLoading ? (
           <div className="flex justify-center py-10 text-[13px] text-yd-text-muted">
-            로딩 중...
+            Loading...
           </div>
         ) : records.length === 0 ? (
           <EmptyState />
@@ -82,9 +82,9 @@ function EmptyState() {
   return (
     <div className="flex flex-col items-center gap-3 rounded-md border border-dashed border-yd-line px-4 py-10 text-center">
       <p className="text-[13px] text-yd-text-muted leading-[1.6]">
-        저장된 개인 기록이 없습니다.
+        No personal records saved.
         <br />
-        우측 상단 + 버튼으로 추가해 주세요.
+        Use the + button to add one.
       </p>
       <Plus className="size-4 text-yd-text-muted" aria-hidden />
     </div>
@@ -112,7 +112,7 @@ function RecordRow({ record }: RecordRowProps) {
           {dateLabel && <span>{dateLabel}</span>}
           {recent && (
             <Pill size="sm" tone="primary" variant="outlined">
-              최근
+              Recent
             </Pill>
           )}
         </span>

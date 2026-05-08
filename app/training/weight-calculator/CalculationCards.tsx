@@ -28,7 +28,7 @@ const CalculationCards = ({
       <div className="flex gap-1 items-center justify-end">
         <Trophy className="w-4 h-4 mr-1 text-yellow-500" />
 
-        <h3 className="text-sm font-semibold">{`개인기록 : ${personalRecord[lift]}kg`}</h3>
+        <h3 className="text-sm font-semibold">{`PR: ${personalRecord[lift]}kg`}</h3>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-4">
@@ -66,7 +66,7 @@ const CalculationCards = ({
                       <div className="min-h-[24px] flex items-center">
                         {weightGap !== 0 && (
                           <>
-                            <span>이전 무게보다 {Math.abs(weightGap)}kg</span>
+                            <span>{Math.abs(weightGap)}kg vs prev</span>
                             {weightGap > 0 ? (
                               <ArrowUp className="w-4 h-4 ml-1" />
                             ) : (

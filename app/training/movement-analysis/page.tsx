@@ -38,7 +38,7 @@ const MovementAnalysisPage = () => {
     <div className="max-w-md mx-auto min-h-dvh flex flex-col">
       {!videoUrl ? (
         <div className="px-4 py-8">
-          <h1 className="text-3xl font-bold mb-8">동작 분석</h1>
+          <h1 className="text-3xl font-bold mb-8">Movement Analysis</h1>
           <div className="bg-card rounded-lg p-6 shadow-sm">
             <VideoUpload
               handleFileSelect={handleFileSelect}

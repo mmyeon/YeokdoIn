@@ -65,9 +65,9 @@ const WeightCalculator = () => {
     <main className="p-4 mt-6">
       <div className="w-full max-w-md mx-auto">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold mb-1">훈련 시작할 준비되셨나요?</h1>
+          <h1 className="text-2xl font-bold mb-1">Ready to train?</h1>
           <p className="text-muted-foreground">
-            개인 기록을 바탕으로 계산된 훈련 중량을 확인하세요.
+            Check your training weights calculated from your personal records.
           </p>
         </div>
 

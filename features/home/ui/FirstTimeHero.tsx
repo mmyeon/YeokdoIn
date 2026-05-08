@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { ROUTES } from "@/routes";
+import { useRouter } from "next/navigation";
+import { ROUTES, REDIRECT_TO_KEY } from "@/routes";
 
 interface Step {
   n: string;
@@ -14,26 +14,40 @@ interface Step {
 const STEPS: Step[] = [
   {
     n: "01",
-    title: "프로그램 추가",
-    sub: "붙여넣기 · 스캔 · 빈 프로그램",
+    title: "Add Program",
+    sub: "Paste · Scan · Blank",
     href: ROUTES.TRAINING.PROGRAM_INPUT,
     primary: true,
   },
   {
     n: "02",
-    title: "자기 기록 입력",
-    sub: "인상 · 용상 · 스쿼트",
+    title: "Enter Personal Records",
+    sub: "Snatch · Clean & Jerk · Squat",
     href: ROUTES.SETTINGS.PERSONAL_RECORD,
   },
   {
     n: "03",
-    title: "영상 촬영",
-    sub: "바 경로 · 템포 분석",
+    title: "Record Video",
+    sub: "Bar path · Tempo analysis",
     href: ROUTES.TRAINING.MOVEMENT_ANALYSIS,
   },
 ];
 
-export function FirstTimeHero() {
+interface FirstTimeHeroProps {
+  isAuthenticated: boolean;
+}
+
+export function FirstTimeHero({ isAuthenticated }: FirstTimeHeroProps) {
+  const router = useRouter();
+
+  function navigate(href: string) {
+    if (!isAuthenticated) {
+      router.push(`${ROUTES.AUTH.LOGIN}?${REDIRECT_TO_KEY}=${encodeURIComponent(href)}`);
+      return;
+    }
+    router.push(href);
+  }
+
   return (
     <div className="px-4 pt-[14px] pb-[6px]">
       <div className="flex flex-col gap-[14px] rounded-[18px] border border-[var(--yd-line)] bg-[var(--yd-surface)] p-[18px]">
@@ -43,25 +57,25 @@ export function FirstTimeHero() {
             style={{ boxShadow: "0 0 10px var(--yd-primary)" }}
           />
           <span className="text-[10px] font-bold tracking-[0.14em] text-[var(--yd-primary)]">
-            시작하기
+            Get Started
           </span>
         </div>
 
         <div>
           <div className="text-[22px] font-bold leading-[1.15] -tracking-[0.027em] text-[var(--yd-text)]">
-            세 가지 방법으로 시작하세요
+            Start with any of these
           </div>
           <div className="mt-1.5 text-xs leading-[1.5] text-[var(--yd-text-muted)]">
-            프로그램 추가, PR 기록, 영상 분석 — 하나부터 시작하세요
+            Add a program, log PRs, or analyze video — start with one
           </div>
         </div>
 
         <div className="mt-0.5 flex flex-col gap-2">
           {STEPS.map((s) => (
-            <Link
+            <button
               key={s.n}
-              href={s.href}
-              className="flex items-center gap-3 rounded-xl border px-3 py-2.5"
+              onClick={() => navigate(s.href)}
+              className="flex items-center gap-3 rounded-xl border px-3 py-2.5 text-left"
               style={{
                 background: s.primary
                   ? "var(--yd-primary-subtle)"
@@ -99,17 +113,17 @@ export function FirstTimeHero() {
               >
                 ›
               </span>
-            </Link>
+            </button>
           ))}
         </div>
 
-        <Link
-          href={ROUTES.TRAINING.PROGRAM_INPUT}
+        <button
+          onClick={() => navigate(ROUTES.TRAINING.PROGRAM_INPUT)}
           className="mt-0.5 flex items-center justify-between rounded-xl bg-[var(--yd-primary)] px-4 py-[13px] text-[var(--yd-on-primary)]"
         >
-          <span className="text-sm font-bold">+ 첫 프로그램 추가</span>
+          <span className="text-sm font-bold">+ Add First Program</span>
           <span className="text-sm">›</span>
-        </Link>
+        </button>
       </div>
     </div>
   );

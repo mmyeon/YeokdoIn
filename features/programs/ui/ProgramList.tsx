@@ -13,7 +13,7 @@ import { serializeProgram } from '@/features/programs/model/serialize';
 
 function formatDate(iso: string): string {
   const date = new Date(iso);
-  return new Intl.DateTimeFormat('ko-KR', {
+  return new Intl.DateTimeFormat('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -30,14 +30,14 @@ function toBullets(row: ProgramRow): string[] {
 export function ProgramList() {
   const { data: programs = [], isLoading } = usePrograms();
   const { mutate: remove } = useDeleteProgram({
-    onSuccess: () => toast.success('프로그램이 삭제되었습니다.'),
-    onError: (e) => toast.error(e.message ?? '삭제에 실패했습니다.'),
+    onSuccess: () => toast.success('Program deleted.'),
+    onError: (e) => toast.error(e.message ?? 'Failed to delete.'),
   });
 
   if (isLoading) {
     return (
       <div className="text-center py-6 text-muted-foreground text-sm">
-        프로그램을 불러오는 중입니다...
+        Loading programs...
       </div>
     );
   }
@@ -45,7 +45,7 @@ export function ProgramList() {
   if (programs.length === 0) {
     return (
       <p className="text-sm text-muted-foreground text-center py-6">
-        저장된 프로그램이 없습니다.
+        No saved programs.
       </p>
     );
   }
@@ -72,11 +72,11 @@ export function ProgramList() {
                 asChild
                 variant="secondary"
                 size="sm"
-                aria-label="프로그램 실행"
+                aria-label="Run program"
               >
                 <Link href={ROUTES.TRAINING.PROGRAM_RUNNER(row.id)}>
                   <Play className="h-4 w-4 mr-1" />
-                  실행
+                  Start
                 </Link>
               </Button>
               <Button
@@ -84,11 +84,11 @@ export function ProgramList() {
                 size="icon"
                 className="text-destructive"
                 onClick={() => {
-                  if (confirm('이 프로그램을 삭제하시겠습니까?')) {
+                  if (confirm('Delete this program?')) {
                     remove(row.id);
                   }
                 }}
-                aria-label="프로그램 삭제"
+                aria-label="Delete program"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>

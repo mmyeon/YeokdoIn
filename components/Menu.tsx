@@ -7,14 +7,14 @@ import { usePathname } from "next/navigation";
 import { TabBar, type TabBarItem } from "@/components/ui/tab-bar";
 
 const ITEMS: ReadonlyArray<TabBarItem> = [
-  { key: "workout", label: "운동", href: ROUTES.HOME, icon: Dumbbell },
+  { key: "workout", label: "Workout", href: ROUTES.HOME, icon: Dumbbell },
   {
     key: "video",
-    label: "영상 분석",
+    label: "Analysis",
     href: ROUTES.TRAINING.MOVEMENT_ANALYSIS,
     icon: Video,
   },
-  { key: "settings", label: "설정", href: ROUTES.SETTINGS.ROOT, icon: Settings },
+  { key: "settings", label: "Settings", href: ROUTES.SETTINGS.ROOT, icon: Settings },
 ];
 
 const resolveActiveKey = (pathname: string | null): string | undefined => {

@@ -28,11 +28,11 @@ const Settings = () => {
 
   const sections: ReadonlyArray<SettingsSection> = [
     {
-      title: "훈련",
+      title: "Training",
       rows: [
-        { label: "PR 관리", href: ROUTES.SETTINGS.PERSONAL_RECORD },
+        { label: "PR Management", href: ROUTES.SETTINGS.PERSONAL_RECORD },
         {
-          label: "바 무게 설정",
+          label: "Bar Weight",
           href: ROUTES.SETTINGS.BARBELL_WEIGHT,
           detail: barbellWeight ? `${barbellWeight} kg` : undefined,
         },
@@ -41,11 +41,11 @@ const Settings = () => {
       ],
     },
     {
-      title: "계정",
+      title: "Account",
       rows: [
         // TODO: 데이터 내보내기 기능 구현 후 복원 (wireframe #13)
         // { label: "데이터 내보내기" },
-        { label: "로그아웃", onSelect: signOut, danger: true, chevron: false },
+        { label: "Sign Out", onSelect: signOut, danger: true, chevron: false },
       ],
     },
   ];
@@ -53,7 +53,7 @@ const Settings = () => {
   return (
     <main className="flex flex-col gap-4 max-w-md mx-auto pb-24 pt-2 px-0">
       <div className="px-5 pt-2 pb-2.5">
-        <h1 className="text-h1">설정</h1>
+        <h1 className="text-h1">Settings</h1>
       </div>
 
       <section className="px-4">
@@ -75,7 +75,7 @@ const Settings = () => {
                 "yeokdoer@kr"}
             </span>
             <Pill size="sm" tone="primary" variant="outlined">
-              무료
+              Free
             </Pill>
           </div>
         </div>

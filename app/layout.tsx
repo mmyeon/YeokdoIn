@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "역도인 ",
-  description: "역도 훈련 도우미",
+  title: "YeokdoIn",
+  description: "Weightlifting training assistant",
 };
 
 export default function RootLayout({

@@ -37,7 +37,7 @@ export function ProgramCard({ item, onDelete }: ProgramCardProps) {
           <button
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
-            aria-label="더 보기"
+            aria-label="More"
             aria-haspopup="menu"
             aria-expanded={menuOpen}
             className="-mr-1 flex size-8 shrink-0 items-center justify-center rounded-lg text-yd-text-dim hover:bg-yd-elevated"
@@ -61,11 +61,11 @@ export function ProgramCard({ item, onDelete }: ProgramCardProps) {
 
         <Link
           href={ROUTES.TRAINING.PROGRAM_RUNNER(item.id)}
-          aria-label={`${dateLabel} 프로그램 실행`}
+          aria-label={`Run ${dateLabel} program`}
           className="mt-1 flex h-11 items-center justify-center gap-2 rounded-[10px] bg-yd-primary text-yd-on-primary"
         >
           <Play className="size-3.5 fill-current" />
-          <span className="text-[14px] font-bold -tracking-[0.2px]">실행</span>
+          <span className="text-[14px] font-bold -tracking-[0.2px]">Start</span>
         </Link>
       </div>
       {menuOpen && (
@@ -78,12 +78,12 @@ export function ProgramCard({ item, onDelete }: ProgramCardProps) {
             role="menuitem"
             onClick={() => {
               setMenuOpen(false);
-              if (confirm('이 프로그램을 삭제하시겠습니까?')) onDelete();
+              if (confirm('Delete this program?')) onDelete();
             }}
             className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-[13px] text-yd-error hover:bg-yd-error-soft"
           >
             <span className="w-4 text-center opacity-80">🗑</span>
-            삭제
+            Delete
           </button>
         </div>
       )}

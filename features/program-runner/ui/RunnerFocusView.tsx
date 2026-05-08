@@ -50,7 +50,7 @@ export function RunnerFocusView({
       <div className="flex flex-1 flex-col justify-center gap-[18px] px-5">
         <div className="text-center">
           <span className="text-[24px] font-semibold uppercase tracking-wide text-yd-text-muted">
-            세트 {current?.setNumber ?? 0}/{current?.totalSets ?? 0}
+            Set {current?.setNumber ?? 0}/{current?.totalSets ?? 0}
           </span>
         </div>
 
@@ -97,7 +97,7 @@ export function RunnerFocusView({
           type="button"
           onClick={onPrev}
           disabled={!canPrev}
-          aria-label="이전"
+          aria-label="Previous"
           className="flex h-[52px] w-[52px] items-center justify-center rounded-[var(--yd-r-md)] border border-yd-line text-yd-text disabled:opacity-40"
         >
           <ChevronLeft className="h-[18px] w-[18px]" />
@@ -109,13 +109,13 @@ export function RunnerFocusView({
           className="flex h-[52px] flex-1 items-center justify-center gap-1.5 rounded-[var(--yd-r-md)] bg-yd-primary text-[16px] font-bold text-yd-on-primary shadow-[0_8px_24px_var(--yd-primary-soft)] disabled:opacity-40"
         >
           <Check className="h-4 w-4" />
-          세트 완료
+          Complete Set
         </button>
         <button
           type="button"
           onClick={onNext}
           disabled={!canNext}
-          aria-label="다음"
+          aria-label="Next"
           className="flex h-[52px] w-[52px] items-center justify-center rounded-[var(--yd-r-md)] border border-yd-line text-yd-text disabled:opacity-40"
         >
           <ChevronRight className="h-[18px] w-[18px]" />

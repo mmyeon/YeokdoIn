@@ -23,11 +23,11 @@ interface FilterSpec {
 }
 
 const FILTERS: FilterSpec[] = [
-  { key: 'all', label: '전체' },
-  { key: 'week', label: '이번 주' },
-  { key: 'snatch', label: '스내치' },
+  { key: 'all', label: 'All' },
+  { key: 'week', label: 'This Week' },
+  { key: 'snatch', label: 'Snatch' },
   { key: 'cj', label: 'C&J' },
-  { key: 'squat', label: '스쿼트' },
+  { key: 'squat', label: 'Squat' },
 ];
 
 export default function ProgramsLibraryPage() {
@@ -37,8 +37,8 @@ export default function ProgramsLibraryPage() {
   const [filter, setFilter] = useState<LibraryFilter>('all');
 
   const { mutate: remove } = useDeleteProgram({
-    onSuccess: () => toast.success('프로그램이 삭제되었습니다.'),
-    onError: (e) => toast.error(e.message ?? '삭제에 실패했습니다.'),
+    onSuccess: () => toast.success('Program deleted.'),
+    onError: (e) => toast.error(e.message ?? 'Failed to delete.'),
   });
 
   const items: LibraryItem[] = useMemo(
@@ -81,7 +81,7 @@ export default function ProgramsLibraryPage() {
         <button
           type="button"
           onClick={handleBack}
-          aria-label="뒤로가기"
+          aria-label="Back"
           className="-ml-1 flex size-8 items-center justify-center rounded-md text-yd-text-muted hover:bg-yd-elevated"
         >
           <ChevronLeft className="size-5" />
@@ -90,16 +90,16 @@ export default function ProgramsLibraryPage() {
 
       <section className="flex items-center justify-between px-4 pb-2.5 pt-1">
         <div>
-          <h1 className="text-[24px] font-bold -tracking-[0.6px]">프로그램</h1>
+          <h1 className="text-[24px] font-bold -tracking-[0.6px]">Programs</h1>
           <p className="mt-0.5 text-[12px] text-yd-text-muted">
-            {items.length}개의 프로그램
+            {items.length} programs
           </p>
         </div>
         <Link
           href={ROUTES.TRAINING.PROGRAM_INPUT}
           className="flex h-[38px] items-center gap-1.5 rounded-[10px] bg-yd-primary px-3.5 text-[13px] font-bold text-yd-on-primary shadow-[0_4px_14px_var(--yd-primary-soft)]"
         >
-          <Plus className="size-4" /> 새로
+          <Plus className="size-4" /> New
         </Link>
       </section>
 
@@ -109,15 +109,15 @@ export default function ProgramsLibraryPage() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="동작으로 검색"
-            aria-label="프로그램 검색"
+            placeholder="Search by movement"
+            aria-label="Search programs"
             className="flex-1 bg-transparent text-[13px] text-yd-text outline-none placeholder:text-yd-text-dim"
           />
           {query && (
             <button
               type="button"
               onClick={() => setQuery('')}
-              aria-label="검색어 지우기"
+              aria-label="Clear search"
               className="text-yd-text-dim"
             >
               <X className="size-3.5" />
@@ -129,7 +129,7 @@ export default function ProgramsLibraryPage() {
       <section
         className="flex gap-1.5 overflow-x-auto px-4 pb-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         role="tablist"
-        aria-label="필터"
+        aria-label="Filter"
       >
         {FILTERS.map(({ key, label }) => {
           const on = filter === key;
@@ -165,21 +165,21 @@ export default function ProgramsLibraryPage() {
       <section className="flex flex-1 flex-col gap-1.5 px-4 pb-5">
         {isLoading ? (
           <p className="py-10 text-center text-[13px] text-yd-text-muted">
-            프로그램을 불러오는 중입니다...
+            Loading programs...
           </p>
         ) : items.length === 0 ? (
           <EmptyState
             icon="📋"
-            title="저장된 프로그램이 없습니다"
-            sub="첫 프로그램을 추가해 보세요"
+            title="No saved programs"
+            sub="Add your first program"
             ctaHref={ROUTES.TRAINING.PROGRAM_INPUT}
-            ctaLabel="프로그램 추가"
+            ctaLabel="Add Program"
           />
         ) : filtered.length === 0 ? (
           <EmptyState
             icon="∅"
-            title="일치하는 프로그램이 없습니다"
-            sub="다른 필터나 검색어를 시도해보세요"
+            title="No matching programs"
+            sub="Try a different filter or search term"
           />
         ) : (
           <div className="flex flex-col gap-2">

@@ -46,7 +46,7 @@ export function ProgramLibraryPreview({ items }: ProgramLibraryPreviewProps) {
           </div>
           {p.active && (
             <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-[var(--yd-primary)] px-2.5 py-[3px] text-[11px] font-medium text-[var(--yd-primary)]">
-              이어서 ›
+              Continue ›
             </span>
           )}
         </Link>
@@ -57,7 +57,7 @@ export function ProgramLibraryPreview({ items }: ProgramLibraryPreviewProps) {
         className="flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-[var(--yd-line)] px-3.5 py-2.5"
       >
         <span className="text-[13px] font-semibold text-[var(--yd-primary)]">
-          + 프로그램 추가
+          + Add Program
         </span>
       </Link>
     </div>

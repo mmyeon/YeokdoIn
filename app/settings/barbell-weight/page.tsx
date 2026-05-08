@@ -17,9 +17,9 @@ interface BarbellOption {
 }
 
 const OPTIONS: ReadonlyArray<BarbellOption> = [
-  { kg: 20, label: "남자 기준", barWidth: 60 },
-  { kg: 15, label: "여자 기준", barWidth: 52 },
-  { kg: 7, label: "기술 바", barWidth: 40 },
+  { kg: 20, label: "Men's standard", barWidth: 60 },
+  { kg: 15, label: "Women's standard", barWidth: 52 },
+  { kg: 7, label: "Training bar", barWidth: 40 },
 ];
 
 function BarbellWeightPage() {
@@ -38,8 +38,8 @@ function BarbellWeightPage() {
   const handleSelect = (kg: number) => {
     if (kg === currentWeight || isSaving) return;
     saveWeight(kg, {
-      onSuccess: () => toast.success(`${kg}kg로 저장했어요.`),
-      onError: () => toast.error("저장 중 오류가 발생했습니다."),
+      onSuccess: () => toast.success(`Saved ${kg}kg.`),
+      onError: () => toast.error("Failed to save."),
     });
   };
 
@@ -49,18 +49,18 @@ function BarbellWeightPage() {
         <button
           type="button"
           onClick={handleBack}
-          aria-label="뒤로가기"
+          aria-label="Back"
           className="-ml-1 flex items-center gap-1 rounded-md px-2 py-1.5 text-yd-text-muted text-[14px] font-medium hover:bg-yd-elevated"
         >
           <ChevronLeft className="size-4" aria-hidden />
-          설정
+          Settings
         </button>
       </div>
 
       <header className="px-5">
-        <h1 className="text-h1">바 무게</h1>
+        <h1 className="text-h1">Bar Weight</h1>
         <p className="mt-1.5 text-caption text-yd-text-muted">
-          원판 계산에 사용됩니다.
+          Used for plate calculation.
         </p>
       </header>
 
@@ -96,7 +96,7 @@ function BarbellWeightPage() {
       </section>
 
       <p className="px-5 pt-2 text-[11px] leading-[1.5] text-yd-text-muted">
-        프로그램 러너와 PR 데이의 원판 계산에 반영됩니다.
+        Reflected in plate calculations for the program runner and PR day.
       </p>
     </main>
   );

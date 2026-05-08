@@ -103,7 +103,7 @@ const PlateVisualizer = ({ oneSidePlates }: PlateVisualizerProps) => {
   if (!oneSidePlates || oneSidePlates.length === 0) {
     return (
       <div className="text-sm text-muted-foreground">
-        플레이트가 필요하지 않습니다
+        No plates needed
       </div>
     );
   }
@@ -141,7 +141,7 @@ const PlateVisualizer = ({ oneSidePlates }: PlateVisualizerProps) => {
       {/* 정면 뷰 - 플레이트 원형 */}
       <div className="flex flex-wrap gap-2 flex-col">
         <div className="text-sm font-semibold text-gray-700">
-          한쪽 플레이트 총무게: {totalOneSideWeight}kg
+          One side total: {totalOneSideWeight}kg
         </div>
 
         <div className="flex items-center gap-2">

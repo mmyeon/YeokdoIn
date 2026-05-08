@@ -14,7 +14,7 @@ interface PRBoardProps {
   items: PRItem[];
 }
 
-const DEFAULT_SLOTS = ["인상", "용상", "백스쿼트"] as const;
+const DEFAULT_SLOTS = ["Snatch", "Clean & Jerk", "Back Squat"] as const;
 
 export function PRBoard({ items }: PRBoardProps) {
   const byName = new Map(items.map((i) => [i.name, i]));
@@ -72,7 +72,7 @@ function EmptySlot({ name }: { name: string }) {
         <span className="text-[10px] text-[var(--yd-text-dim)]">kg</span>
       </div>
       <span className="text-[10px] font-semibold text-[var(--yd-primary)]">
-        + 기록
+        + Record
       </span>
     </Link>
   );

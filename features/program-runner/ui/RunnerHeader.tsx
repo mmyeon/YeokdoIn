@@ -29,7 +29,7 @@ export function RunnerHeader({
         <button
           type="button"
           onClick={onClose}
-          aria-label="운동 종료"
+          aria-label="End workout"
           className="flex h-8 w-8 items-center justify-center text-yd-text-muted"
         >
           <X className="h-5 w-5" />
@@ -37,7 +37,7 @@ export function RunnerHeader({
       ) : (
         <Link
           href={ROUTES.HOME}
-          aria-label="홈으로"
+          aria-label="Home"
           className="flex h-8 w-8 items-center justify-center text-yd-text-muted"
         >
           <X className="h-5 w-5" />
@@ -46,7 +46,7 @@ export function RunnerHeader({
 
       <div className="flex flex-col items-center gap-1">
         <span className="text-[11px] uppercase tracking-wider text-yd-text-muted">
-          블록 {blockIdx + 1}/{totalBlocks} · 운동 {currentEx}/{totalExercises}
+          Block {blockIdx + 1}/{totalBlocks} · Exercise {currentEx}/{totalExercises}
         </span>
         <div className="flex gap-[3px]">
           {Array.from({ length: totalExercises }).map((_, i) => (

@@ -21,7 +21,7 @@ function PRSparkline({
   if (points.length < 2) {
     return (
       <div className="flex h-[90px] items-center justify-center rounded-md border border-dashed border-yd-line text-[11px] text-yd-text-muted">
-        기록이 2개 이상이면 그래프가 표시됩니다.
+        Graph appears with 2 or more records.
       </div>
     );
   }
@@ -43,7 +43,7 @@ function PRSparkline({
 
   const fmt = (ms: number) => {
     const d = new Date(ms);
-    return `${d.getMonth() + 1}월`;
+    return d.toLocaleString('en-US', { month: 'short' });
   };
 
   return (

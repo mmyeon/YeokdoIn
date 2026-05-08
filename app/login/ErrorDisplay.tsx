@@ -9,14 +9,14 @@ const ErrorDisplay = () => {
   if (error) {
     const errorMessage =
       error === "missing_code"
-        ? "인증 코드가 없습니다."
-        : "OAuth 인증에 실패했습니다.";
+        ? "Authentication code is missing."
+        : "OAuth authentication failed.";
 
     return (
       <div className="mb-4 text-center">
-        <h1 className="text-xl font-semibold text-destructive">로그인 오류</h1>
+        <h1 className="text-xl font-semibold text-destructive">Login Error</h1>
         <p className="text-sm text-muted-foreground">
-          {`${errorMessage} 다시 시도해 주세요.`}
+          {`${errorMessage} Please try again.`}
         </p>
       </div>
     );

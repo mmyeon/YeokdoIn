@@ -21,10 +21,10 @@ export function VideoAnalysisCard({
         </div>
         <div className="flex flex-1 flex-col gap-0.5">
           <span className="text-[13px] font-semibold text-[var(--yd-text)]">
-            리프트 분석
+            Lift Analysis
           </span>
           <span className="text-[10px] text-[var(--yd-text-muted)]">
-            바 경로 · 템포 · 이달 {usedThisMonth}회 사용
+            Bar path · Tempo · {usedThisMonth} uses this month
           </span>
         </div>
         <span className="text-sm text-[var(--yd-text-muted)]">›</span>

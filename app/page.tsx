@@ -21,16 +21,14 @@ import { ROUTES } from "@/routes";
 import type { ProgramRow } from "@/features/programs/api/programs";
 import type { PersonalRecordInfo } from "@/types/personalRecords";
 
-const DATE_FORMATTER = new Intl.DateTimeFormat("ko-KR", {
+const DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
   weekday: "long",
   month: "long",
   day: "numeric",
 });
 
 function formatDate(now: Date): string {
-  return DATE_FORMATTER.format(now)
-    .replace(/요일/, "요일 ·")
-    .replace(/,/g, "");
+  return DATE_FORMATTER.format(now).replace(/,/g, " ·");
 }
 
 function resolveInitial(name?: string | null, email?: string | null): string {
@@ -39,9 +37,9 @@ function resolveInitial(name?: string | null, email?: string | null): string {
 }
 
 const PR_DISPLAY_ORDER: Array<{ keywords: string[]; label: string }> = [
-  { keywords: ["인상", "snatch", "스내치"], label: "인상" },
-  { keywords: ["용상", "clean", "저크"], label: "용상" },
-  { keywords: ["스쿼트", "squat"], label: "백스쿼트" },
+  { keywords: ["인상", "snatch", "스내치"], label: "Snatch" },
+  { keywords: ["용상", "clean", "저크"], label: "Clean & Jerk" },
+  { keywords: ["스쿼트", "squat"], label: "Back Squat" },
 ];
 
 function toDisplayPRs(records: PersonalRecordInfo[] | undefined): PRItem[] {
@@ -71,8 +69,8 @@ function isFresh(prDate: string | null | undefined): boolean {
 function toLibraryItems(programs: ProgramRow[]): ProgramLibraryItem[] {
   return programs.slice(0, 3).map((p, idx) => ({
     id: p.id,
-    title: p.title ?? `프로그램 #${p.id}`,
-    meta: new Date(p.created_at).toLocaleDateString("ko-KR"),
+    title: p.title ?? `Program #${p.id}`,
+    meta: new Date(p.created_at).toLocaleDateString("en-US"),
     pct: 0,
     active: idx === 0,
   }));
@@ -90,8 +88,8 @@ export default function Home() {
     user?.email ?? null
   );
   const greeting = user?.user_metadata?.name
-    ? `안녕하세요, ${user.user_metadata.name}`
-    : "시작해볼까요";
+    ? `Hello, ${user.user_metadata.name}`
+    : "Let's get started";
 
   const isLoading = programsLoading || prLoading;
   const hasPrograms = (programs?.length ?? 0) > 0;
@@ -104,8 +102,8 @@ export default function Home() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col bg-[var(--yd-bg)] pb-20 text-[var(--yd-text)]">
       <HomeHeader
-        date={isFirstTime ? "환영합니다" : date}
-        greeting={isFirstTime ? "시작해볼까요" : greeting}
+        date={isFirstTime ? "Welcome" : date}
+        greeting={isFirstTime ? "Let's get started" : greeting}
         initial={initial}
         streak={!isFirstTime ? undefined : undefined}
         isAuthenticated={!!user}
@@ -115,8 +113,8 @@ export default function Home() {
         <HomeSkeleton />
       ) : isFirstTime ? (
         <>
-          <FirstTimeHero />
-          <SectionLabel>자기 기록</SectionLabel>
+          <FirstTimeHero isAuthenticated={!!user} />
+          <SectionLabel>Personal Records</SectionLabel>
           <PRBoard items={[]} />
         </>
       ) : (
@@ -124,26 +122,26 @@ export default function Home() {
           <IdleHero savedProgramsCount={programs?.length ?? 0} />
 
           <SectionLabel
-            actionLabel="전체 ›"
+            actionLabel="All ›"
             actionHref={ROUTES.SETTINGS.PERSONAL_RECORD}
           >
-            자기 기록
+            Personal Records
           </SectionLabel>
           <PRBoard items={prItems} />
 
           {libraryItems.length > 0 && (
             <>
               <SectionLabel
-                actionLabel="전체 ›"
+                actionLabel="All ›"
                 actionHref={ROUTES.TRAINING.PROGRAM_INPUT}
               >
-                프로그램 라이브러리
+                Program Library
               </SectionLabel>
               <ProgramLibraryPreview items={libraryItems} />
             </>
           )}
 
-          <SectionLabel>영상 분석</SectionLabel>
+          <SectionLabel>Video Analysis</SectionLabel>
           <VideoAnalysisCard />
         </>
       )}

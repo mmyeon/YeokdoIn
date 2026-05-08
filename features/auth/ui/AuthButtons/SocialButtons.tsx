@@ -17,7 +17,7 @@ const getProviderDetails = (provider: SocialAuthProvider) => {
       };
     case "kakao":
       return {
-        name: "카카오",
+        name: "Kakao",
         icon: "/icons/kakao.svg",
         bgColor: "bg-[#FEE500]",
         textColor: "text-black",
@@ -45,12 +45,12 @@ const SocialButtons = ({
       <div className="w-full flex items-center justify-center gap-2">
         <Image
           src={details.icon}
-          alt={`${details.name} 아이콘`}
+          alt={`${details.name} icon`}
           width={20}
           height={20}
         />
 
-        <span>{`${details.name}로 로그인하기`}</span>
+        <span>{`Sign in with ${details.name}`}</span>
       </div>
     </Button>
   );

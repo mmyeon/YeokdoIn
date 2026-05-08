@@ -28,7 +28,7 @@ function WorkoutSelect({ selectedId, onSelect }: WorkoutSelectProps) {
       }}
     >
       <SelectTrigger>
-        <SelectValue placeholder="선택해 주세요." />
+        <SelectValue placeholder="Select..." />
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>

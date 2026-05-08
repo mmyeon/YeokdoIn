@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       await authService.signIn(provider);
     } catch (error) {
       console.error("Error signing in with OAuth:", error);
-      toast.error("소셜 로그인 중 오류가 발생했습니다.");
+      toast.error("An error occurred during social login.");
     }
   };
 
@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       router.push(ROUTES.HOME);
     } catch (error) {
       console.error("Error signing out:", error);
-      toast.error("로그아웃 중 오류가 발생했습니다.");
+      toast.error("An error occurred during sign out.");
     }
   };
 

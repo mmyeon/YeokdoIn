@@ -34,7 +34,7 @@ export function ProgramForm({ program, onChange }: ProgramFormProps) {
       >
         <span className="text-[15px] font-bold text-yd-primary">+</span>
         <span className="text-[13px] font-semibold text-yd-text-muted">
-          블록 추가
+          Add Block
         </span>
       </button>
     </div>

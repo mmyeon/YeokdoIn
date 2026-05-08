@@ -126,11 +126,11 @@ export function RunnerStandardView({
         <div className="flex-1" />
         <div className="flex flex-col items-end gap-1">
           <span className="text-[10px] uppercase tracking-widest text-yd-text-muted">
-            세트 {current?.setNumber ?? 0}/{current?.totalSets ?? 0}
+            Set {current?.setNumber ?? 0}/{current?.totalSets ?? 0}
           </span>
           {delta !== null && delta !== 0 && (
             <Pill tone="primary" variant="outlined" size="sm">
-              {delta > 0 ? `+${delta}` : delta} kg 직전 대비
+              {delta > 0 ? `+${delta}` : delta} kg vs prev
             </Pill>
           )}
         </div>
@@ -144,14 +144,14 @@ export function RunnerStandardView({
       {/* Plate breakdown text — derived via calculatePlates */}
       <div className="px-5 text-center">
         <span className="text-[11px] text-yd-text-muted">
-          {displayKg != null ? formatPlateSummary(displayKg, barWeight) : "kg를 입력하세요"}
+          {displayKg != null ? formatPlateSummary(displayKg, barWeight) : "Enter kg"}
         </span>
       </div>
 
       {/* Section label */}
       <div className="px-5 pt-1">
         <span className="text-[11px] uppercase tracking-widest text-yd-text-muted">
-          세트 · {current ? formatSetsBySchemeLabel(current.reps, current.totalSets) : "—"}
+          Sets · {current ? formatSetsBySchemeLabel(current.reps, current.totalSets) : "—"}
         </span>
       </div>
 
@@ -193,12 +193,12 @@ export function RunnerStandardView({
                 </span>
                 {isCurrent && (
                   <Pill size="sm" tone="primary" variant="outlined">
-                    현재
+                    Current
                   </Pill>
                 )}
               </div>
               <span className="text-[11px] text-yd-text-muted">
-                {rec?.done ? "✓" : "기록"}
+                {rec?.done ? "✓" : "Log"}
               </span>
             </button>
           );
@@ -211,7 +211,7 @@ export function RunnerStandardView({
           type="button"
           onClick={onPrev}
           disabled={!canPrev}
-          aria-label="이전"
+          aria-label="Previous"
           className="flex h-[52px] w-[52px] items-center justify-center rounded-[var(--yd-r-md)] border border-yd-line text-yd-text disabled:opacity-40"
         >
           <ChevronLeft className="h-5 w-5" />
@@ -223,13 +223,13 @@ export function RunnerStandardView({
           className="flex h-[52px] flex-1 items-center justify-center gap-1.5 rounded-[var(--yd-r-md)] bg-yd-primary text-[14px] font-bold text-yd-on-primary shadow-[0_8px_24px_var(--yd-primary-soft)] disabled:opacity-40"
         >
           <Check className="h-4 w-4" />
-          세트 기록
+          Log Set
         </button>
         <button
           type="button"
           onClick={onNext}
           disabled={!canNext}
-          aria-label="다음"
+          aria-label="Next"
           className="flex h-[52px] w-[52px] items-center justify-center rounded-[var(--yd-r-md)] border border-yd-line text-yd-text disabled:opacity-40"
         >
           <ChevronRight className="h-5 w-5" />

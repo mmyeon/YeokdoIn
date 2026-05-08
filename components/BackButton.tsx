@@ -9,7 +9,7 @@ const BackButton = () => {
       variant="ghost"
       size="icon"
       className="h-8 w-8"
-      aria-label="뒤로 가기"
+      aria-label="Back"
       onClick={() => window.history.back()}
     >
       <ArrowLeft className="h-4 w-4" />

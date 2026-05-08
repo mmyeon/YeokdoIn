@@ -63,23 +63,23 @@ function PRDetailPage() {
 
   const addMutation = useAddPRHistoryEntry(
     () => {
-      toast.success("기록이 추가되었습니다.");
+      toast.success("Record added.");
       resetMode();
     },
-    () => toast.error("기록 추가 중 오류가 발생했습니다.")
+    () => toast.error("Failed to add record.")
   );
 
   const updateMutation = useUpdatePRHistoryEntry(
     () => {
-      toast.success("기록이 수정되었습니다.");
+      toast.success("Record updated.");
       resetMode();
     },
-    () => toast.error("기록 수정 중 오류가 발생했습니다.")
+    () => toast.error("Failed to update record.")
   );
 
   const deleteMutation = useDeletePRHistoryEntry(
-    () => toast.success("기록이 삭제되었습니다."),
-    () => toast.error("기록 삭제 중 오류가 발생했습니다.")
+    () => toast.success("Record deleted."),
+    () => toast.error("Failed to delete record.")
   );
 
   if (!isLoadingRecord && !record) {
@@ -89,7 +89,7 @@ function PRDetailPage() {
           <button
             type="button"
             onClick={handleBack}
-            aria-label="뒤로가기"
+            aria-label="Back"
             className="-ml-1 flex items-center gap-1 rounded-md px-2 py-1.5 text-yd-text-muted text-[14px] font-medium hover:bg-yd-elevated"
           >
             <ChevronLeft className="size-4" aria-hidden />
@@ -97,7 +97,7 @@ function PRDetailPage() {
           </button>
         </div>
         <div className="px-5 py-10 text-center text-[13px] text-yd-text-muted">
-          기록을 찾을 수 없습니다.
+          Record not found.
         </div>
       </main>
     );
@@ -109,7 +109,7 @@ function PRDetailPage() {
         <button
           type="button"
           onClick={handleBack}
-          aria-label="뒤로가기"
+          aria-label="Back"
           className="-ml-1 flex items-center gap-1 rounded-md px-2 py-1.5 text-yd-text-muted text-[14px] font-medium hover:bg-yd-elevated"
         >
           <ChevronLeft className="size-4" aria-hidden />
@@ -122,7 +122,7 @@ function PRDetailPage() {
             className="flex items-center gap-1 px-2 py-1 text-yd-primary text-[14px] font-semibold"
           >
             <Plus className="size-3.5" aria-hidden />
-            추가
+            Add
           </button>
         )}
       </div>
@@ -138,7 +138,7 @@ function PRDetailPage() {
           </span>
           <span className="ml-2">
             <Pill size="sm" tone="primary" variant="outlined">
-              현재
+              Current
             </Pill>
           </span>
         </div>
@@ -152,7 +152,7 @@ function PRDetailPage() {
         <section className="px-4">
           <div className="rounded-md border border-yd-line p-3">
             <PRHistoryEntryEditor
-              submitLabel="추가"
+              submitLabel="Add"
               isPending={addMutation.isPending}
               onSubmit={(draft) => {
                 addMutation.mutate({
@@ -170,18 +170,18 @@ function PRDetailPage() {
 
       <section className="px-5 pt-1">
         <h2 className="text-caption uppercase tracking-[0.08em] text-yd-text-muted">
-          기록
+          History
         </h2>
       </section>
 
       <section className="px-4">
         {isLoadingHistory ? (
           <div className="flex justify-center py-10 text-[13px] text-yd-text-muted">
-            불러오는 중...
+            Loading...
           </div>
         ) : history.length === 0 ? (
           <div className="flex justify-center rounded-md border border-dashed border-yd-line px-4 py-8 text-[13px] text-yd-text-muted">
-            아직 기록이 없습니다.
+            No records yet.
           </div>
         ) : (
           <ul className="flex flex-col gap-1.5">
@@ -198,7 +198,7 @@ function PRDetailPage() {
                           prDate: entry.prDate,
                           note: entry.note,
                         }}
-                        submitLabel="수정"
+                        submitLabel="Edit"
                         isPending={updateMutation.isPending}
                         onSubmit={(draft) => {
                           updateMutation.mutate({
@@ -219,7 +219,7 @@ function PRDetailPage() {
                       prevWeight={prev?.newWeight ?? null}
                       onEdit={() => setEditingId(entry.id)}
                       onDelete={() => {
-                        if (!window.confirm("이 기록을 삭제할까요?")) return;
+                        if (!window.confirm("Delete this record?")) return;
                         deleteMutation.mutate(entry.id);
                       }}
                       isDeleting={deleteMutation.isPending}
@@ -284,7 +284,7 @@ function HistoryRow({
           <button
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
-            aria-label="기록 메뉴"
+            aria-label="Record menu"
             className="flex size-6 items-center justify-center rounded-full text-yd-text-muted hover:bg-yd-elevated"
           >
             <MoreHorizontal className="size-4" />
@@ -300,7 +300,7 @@ function HistoryRow({
                 }}
               >
                 <Pencil className="size-3.5" aria-hidden />
-                수정
+                Edit
               </button>
               <button
                 type="button"
@@ -312,7 +312,7 @@ function HistoryRow({
                 }}
               >
                 <Trash2 className="size-3.5" aria-hidden />
-                삭제
+                Delete
               </button>
             </div>
           )}
