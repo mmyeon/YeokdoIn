@@ -26,6 +26,8 @@ export interface ExerciseGroup {
   items: string[];
 }
 
+const WEIGHTLIFTING_SECTION_MAX_ORDER = 4;
+
 export async function listExercisesGrouped(): Promise<ExerciseGroup[]> {
   const supabase = await supabaseServerClient();
   const { data, error } = await supabase
@@ -52,6 +54,7 @@ export async function listExercisesGrouped(): Promise<ExerciseGroup[]> {
   }
 
   return [...sectionMap.entries()]
+    .filter(([, { order }]) => order <= WEIGHTLIFTING_SECTION_MAX_ORDER)
     .sort((a, b) => a[1].order - b[1].order)
     .map(([category, { items }]) => ({ category, items }));
 }
