@@ -26,7 +26,7 @@ export function BigStepper({
     >
       <button
         type="button"
-        aria-label="감소"
+        aria-label="Decrease"
         onClick={dec}
         disabled={value <= min}
         className="flex h-full w-9 items-center justify-center text-[18px] font-medium text-yd-text-muted select-none disabled:opacity-40"
@@ -38,7 +38,7 @@ export function BigStepper({
       </div>
       <button
         type="button"
-        aria-label="증가"
+        aria-label="Increase"
         onClick={inc}
         disabled={value >= max}
         className="flex h-full w-9 items-center justify-center text-[18px] font-semibold text-yd-primary select-none disabled:opacity-40"

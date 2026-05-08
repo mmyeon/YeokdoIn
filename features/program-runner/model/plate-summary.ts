@@ -24,5 +24,5 @@ export function formatPlateSummary(totalKg: number, barWeight: number): string {
     .map((g) => (g.count === 1 ? `${g.kg}` : `${g.count}×${g.kg}`))
     .join(" + ");
 
-  return `${barWeight} bar + ${perSide} (한쪽)`;
+  return `${barWeight} bar + ${perSide} (per side)`;
 }

@@ -13,7 +13,7 @@ export function resolveRefMovement({
   movements: Movement[];
 }): Movement {
   if (movements.length === 0) {
-    throw new Error("블록에 동작이 없습니다.");
+    throw new Error("Block has no movements.");
   }
   return movements.length >= 2 ? movements[1] : movements[0];
 }

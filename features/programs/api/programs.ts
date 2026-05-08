@@ -11,7 +11,7 @@ export type ProgramRow = Tables<'programs'>;
 async function requireUserId(): Promise<string> {
   const supabase = await supabaseServerClient();
   const userId = (await supabase.auth.getUser()).data.user?.id;
-  if (!userId) throw new Error('사용자가 인증되지 않았습니다.');
+  if (!userId) throw new Error('User is not authenticated.');
   return userId;
 }
 
@@ -25,7 +25,7 @@ export async function saveProgram(input: SaveProgramInput): Promise<ProgramRow> 
 
   const parseResult = programSchema.safeParse(input.parsed);
   if (!parseResult.success) {
-    throw new Error('프로그램 데이터가 올바르지 않습니다.');
+    throw new Error('Program data is invalid.');
   }
 
   const { data, error } = await supabase
@@ -40,7 +40,7 @@ export async function saveProgram(input: SaveProgramInput): Promise<ProgramRow> 
     .single();
 
   if (error) handleDatabaseError(error);
-  if (!data) throw new Error('프로그램 저장에 실패했습니다.');
+  if (!data) throw new Error('Failed to save program.');
   return data as ProgramRow;
 }
 

@@ -31,7 +31,7 @@ const todayISO = () => {
 
 export default function PRHistoryEntryEditor({
   initial,
-  submitLabel = "저장하기",
+  submitLabel = "Save",
   isPending,
   onSubmit,
   onCancel,
@@ -58,7 +58,7 @@ export default function PRHistoryEntryEditor({
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <Label htmlFor="pr-weight">무게 (kg)</Label>
+          <Label htmlFor="pr-weight">Weight (kg)</Label>
           <Input
             id="pr-weight"
             type="number"
@@ -67,11 +67,11 @@ export default function PRHistoryEntryEditor({
               const v = e.target.valueAsNumber;
               setWeight(Number.isNaN(v) ? "" : v);
             }}
-            placeholder="예: 52"
+            placeholder="e.g. 52"
           />
         </div>
         <div className="space-y-1">
-          <Label htmlFor="pr-date">날짜</Label>
+          <Label htmlFor="pr-date">Date</Label>
           <Input
             id="pr-date"
             type="date"
@@ -83,25 +83,25 @@ export default function PRHistoryEntryEditor({
       </div>
 
       <div className="space-y-1">
-        <Label htmlFor="pr-note">메모 (선택)</Label>
+        <Label htmlFor="pr-note">Note (optional)</Label>
         <Textarea
           id="pr-note"
           rows={2}
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          placeholder="예: clean만 성공, jerk 실패"
+          placeholder="e.g. clean only, failed jerk"
         />
       </div>
 
       <div className="flex justify-end gap-2">
         {onCancel && (
           <Button variant="ghost" size="sm" onClick={onCancel}>
-            <X className="h-4 w-4 mr-1" /> 취소
+            <X className="h-4 w-4 mr-1" /> Cancel
           </Button>
         )}
         <Button size="sm" disabled={!canSubmit} onClick={handleSubmit}>
           <Save className="h-4 w-4 mr-1" />
-          {isPending ? "저장중..." : submitLabel}
+          {isPending ? "Saving..." : submitLabel}
         </Button>
       </div>
     </div>
