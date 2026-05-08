@@ -7,6 +7,7 @@ import type { Block, Movement, RepScheme } from '@/features/notation/model/types
 import {
   addMovement,
   addSetEntry,
+  addSetEntryFromPrevious,
   removeMovementAt,
   removeSetEntryAt,
   setEntryPercentage,
@@ -43,7 +44,7 @@ function simpleReps(r: RepScheme): number {
 
 function gridTemplate(movementCount: number): string {
   const repsCols = Math.max(movementCount, 1);
-  return `88px repeat(${repsCols}, 1fr) 1fr 28px`;
+  return `96px repeat(${repsCols}, 1fr) 1fr 28px`;
 }
 
 function repsForMovement(r: RepScheme, movementIndex: number): number {
@@ -228,15 +229,23 @@ export function BlockEditor({
                   onChange={onChange}
                 />
               ))}
-              <button
-                type="button"
-                onClick={() => onChange(addSetEntry(block))}
-                className="flex h-9 items-center justify-center rounded-lg border border-dashed border-yd-line"
-              >
-                <span className="text-[12px] text-yd-text-muted">
-                  + Add set scheme
-                </span>
-              </button>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => onChange(addSetEntry(block))}
+                  className="flex h-9 items-center justify-center rounded-lg border border-dashed border-yd-line"
+                >
+                  <span className="text-[12px] text-yd-text-muted">+ Default</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onChange(addSetEntryFromPrevious(block))}
+                  disabled={block.setEntries.length === 0}
+                  className="flex h-9 items-center justify-center rounded-lg border border-dashed border-yd-primary disabled:opacity-40"
+                >
+                  <span className="text-[12px] text-yd-primary">+ Copy previous</span>
+                </button>
+              </div>
             </div>
           </div>
         )}
