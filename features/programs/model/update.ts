@@ -89,6 +89,14 @@ export function addSetEntry(block: Block, entry?: SetEntry): Block {
   };
 }
 
+export function addSetEntryFromPrevious(block: Block): Block {
+  const last = block.setEntries[block.setEntries.length - 1];
+  const entry: SetEntry = last
+    ? { ...last, reps: { ...last.reps } }
+    : createEmptySetEntry();
+  return { ...block, setEntries: [...block.setEntries, entry] };
+}
+
 export function removeSetEntryAt(block: Block, index: number): Block {
   if (index < 0 || index >= block.setEntries.length) return block;
   if (block.setEntries.length <= 1) return block;

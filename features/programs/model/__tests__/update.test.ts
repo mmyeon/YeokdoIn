@@ -2,6 +2,7 @@ import {
   addBlock,
   addMovement,
   addSetEntry,
+  addSetEntryFromPrevious,
   createEmptyBlock,
   createEmptySetEntry,
   removeBlockAt,
@@ -326,5 +327,31 @@ describe('removeBlockAt 범위 체크', () => {
     const p = { blocks: [makeBlock('a')] };
     expect(removeBlockAt(p, 99)).toBe(p);
     expect(removeBlockAt(p, -1)).toBe(p);
+  });
+});
+
+describe('addSetEntryFromPrevious', () => {
+  it('마지막 set entry 를 복사해서 끝에 추가한다', () => {
+    const block = makeBlock('snatch');
+    const withEntry = setEntryPercentage(block, 0, 80);
+    const next = addSetEntryFromPrevious(withEntry);
+    expect(next.setEntries).toHaveLength(2);
+    expect(next.setEntries[1].percentage).toBe(80);
+    expect(next.setEntries[1].sets).toBe(withEntry.setEntries[0].sets);
+    expect(next.setEntries[1].reps).toEqual(withEntry.setEntries[0].reps);
+    expect(next.setEntries[1]).not.toBe(withEntry.setEntries[0]);
+  });
+
+  it('setEntries 가 비어있으면 빈 entry 를 추가한다', () => {
+    const block: Block = { movements: [{ name: 'snatch', modifiers: [] }], setEntries: [] };
+    const next = addSetEntryFromPrevious(block);
+    expect(next.setEntries).toHaveLength(1);
+    expect(next.setEntries[0].percentage).toBeNull();
+  });
+
+  it('원본 블록을 변경하지 않는다', () => {
+    const block = makeBlock('snatch');
+    addSetEntryFromPrevious(block);
+    expect(block.setEntries).toHaveLength(1);
   });
 });
