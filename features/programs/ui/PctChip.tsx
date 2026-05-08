@@ -18,6 +18,7 @@ export function PctChip({ value, onChange, ariaLabel }: PctChipProps) {
   const [showCustom, setShowCustom] = useState(false);
   const [customDraft, setCustomDraft] = useState('');
   const customInputRef = useRef<HTMLInputElement>(null);
+  const committedRef = useRef(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -40,7 +41,13 @@ export function PctChip({ value, onChange, ariaLabel }: PctChipProps) {
     return () => document.removeEventListener('mousedown', handler);
   }, [open]);
 
+  useEffect(() => {
+    if (!showCustom) committedRef.current = false;
+  }, [showCustom]);
+
   const commitCustom = () => {
+    if (committedRef.current) return;
+    committedRef.current = true;
     const parsed = parseInt(customDraft, 10);
     if (Number.isInteger(parsed) && parsed >= 1 && parsed <= 200) {
       onChange(parsed);

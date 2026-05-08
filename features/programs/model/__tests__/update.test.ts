@@ -354,4 +354,19 @@ describe('addSetEntryFromPrevious', () => {
     addSetEntryFromPrevious(block);
     expect(block.setEntries).toHaveLength(1);
   });
+
+  it('complex reps 배열을 복사할 때 새 배열 참조를 생성한다', () => {
+    const block: Block = {
+      movements: [
+        { name: 'snatch pull', modifiers: [] },
+        { name: 'squat snatch', modifiers: [] },
+      ],
+      setEntries: [{ percentage: 75, sets: 3, reps: { type: 'complex', reps: [3, 2] } }],
+    };
+    const next = addSetEntryFromPrevious(block);
+    expect(next.setEntries[1].reps).toEqual({ type: 'complex', reps: [3, 2] });
+    expect((next.setEntries[1].reps as { type: 'complex'; reps: number[] }).reps).not.toBe(
+      (block.setEntries[0].reps as { type: 'complex'; reps: number[] }).reps,
+    );
+  });
 });

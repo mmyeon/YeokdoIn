@@ -92,7 +92,13 @@ export function addSetEntry(block: Block, entry?: SetEntry): Block {
 export function addSetEntryFromPrevious(block: Block): Block {
   const last = block.setEntries[block.setEntries.length - 1];
   const entry: SetEntry = last
-    ? { ...last, reps: { ...last.reps } }
+    ? {
+        ...last,
+        reps:
+          last.reps.type === 'complex'
+            ? { type: 'complex', reps: [...last.reps.reps] }
+            : { ...last.reps },
+      }
     : createEmptySetEntry();
   return { ...block, setEntries: [...block.setEntries, entry] };
 }
