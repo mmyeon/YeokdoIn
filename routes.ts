@@ -1,6 +1,7 @@
 export const ROUTES = {
   TRAINING: {
     PROGRAM_INPUT: "/training/program-input",
+    PROGRAMS: "/training/programs",
     PROGRAM_RUNNER: (id: number | string) => `/training/program-runner/${id}`,
     MOVEMENT_ANALYSIS: "/training/movement-analysis",
     WEIGHT_CALCULATOR: "/training/weight-calculator",
