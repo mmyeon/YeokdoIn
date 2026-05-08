@@ -45,6 +45,7 @@ export function PctChip({ value, onChange, ariaLabel }: PctChipProps) {
     if (Number.isInteger(parsed) && parsed >= 1 && parsed <= 200) {
       onChange(parsed);
     }
+    setShowCustom(false);
     setOpen(false);
   };
 
