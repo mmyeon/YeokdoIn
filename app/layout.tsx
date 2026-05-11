@@ -18,6 +18,14 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "YeokdoIn",
   description: "Weightlifting training assistant",
+  themeColor: "#0A0B0C",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+  },
+  icons: {
+    apple: "/icons/icon-192.png",
+  },
 };
 
 export default function RootLayout({
@@ -27,18 +35,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#0A0B0C" />
-        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <InstallBanner />
         <ClientProvider>
+          <InstallBanner />
           {children}
-
           <Menu />
         </ClientProvider>
       </body>

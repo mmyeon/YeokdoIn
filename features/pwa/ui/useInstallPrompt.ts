@@ -7,6 +7,8 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+const DISMISS_KEY = "pwa-install-dismissed";
+
 interface UseInstallPromptResult {
   canInstall: boolean;
   isIOS: boolean;
@@ -25,12 +27,8 @@ export function useInstallPrompt(): UseInstallPromptResult {
 
   useEffect(() => {
     const ua = navigator.userAgent;
-    const iosDevice = /iPhone|iPad/.test(ua);
-    const notBrowserChrome = !/CriOS|FxiOS/.test(ua);
-    setIsIOS(iosDevice && notBrowserChrome);
-
-    setIsDismissed(localStorage.getItem("pwa-install-dismissed") === "true");
-
+    setIsIOS(/iPhone|iPad/.test(ua) && !/CriOS|FxiOS/.test(ua));
+    setIsDismissed(localStorage.getItem(DISMISS_KEY) === "true");
     setIsInstalled(window.matchMedia("(display-mode: standalone)").matches);
 
     const handler = (e: Event) => {
@@ -44,15 +42,16 @@ export function useInstallPrompt(): UseInstallPromptResult {
 
   async function handleInstall(): Promise<void> {
     if (!deferredPrompt) return;
-    await deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === "accepted") {
+    try {
+      await deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+    } finally {
       setDeferredPrompt(null);
     }
   }
 
   function handleDismiss(): void {
-    localStorage.setItem("pwa-install-dismissed", "true");
+    localStorage.setItem(DISMISS_KEY, "true");
     setIsDismissed(true);
   }
 

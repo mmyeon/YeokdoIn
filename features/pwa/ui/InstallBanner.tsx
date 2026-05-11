@@ -1,7 +1,7 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useInstallPrompt } from "../model/useInstallPrompt";
+import { useInstallPrompt } from "./useInstallPrompt";
 
 export function InstallBanner() {
   const { canInstall, isIOS, isDismissed, isInstalled, handleInstall, handleDismiss } =
