@@ -1,0 +1,14 @@
+{
+  "name": "역도인",
+  "short_name": "역도인",
+  "description": "역도 훈련 보조 앱",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A0B0C",
+  "theme_color": "#0A0B0C",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
