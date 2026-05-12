@@ -15,7 +15,6 @@ const VideoPlayer = ({
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const trajectoryCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const handleVideoPause = () => {
     setIsPlaying(false);
@@ -35,11 +34,9 @@ const VideoPlayer = ({
     if (!video) return;
 
     const handleMetadataLoad = () => {
-      if (canvasRef.current && trajectoryCanvasRef.current) {
+      if (canvasRef.current) {
         canvasRef.current.width = video.videoWidth;
         canvasRef.current.height = video.videoHeight;
-        trajectoryCanvasRef.current.width = video.videoWidth;
-        trajectoryCanvasRef.current.height = video.videoHeight;
       }
     };
 
@@ -65,7 +62,6 @@ const VideoPlayer = ({
       <PoseAnalyzer
         videoRef={videoRef}
         canvasRef={canvasRef}
-        trajectoryCanvasRef={trajectoryCanvasRef}
         isPlaying={isPlaying}
       />
 

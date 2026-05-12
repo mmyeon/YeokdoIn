@@ -22,16 +22,6 @@ export const VISIBILITY_THRESHOLD_FOR_DISPLAY = 0.3;
 export const VISIBILITY_THRESHOLD_FOR_CONNECTION = 0.4;
 
 // ============================================
-// 객체 감지 설정
-// ============================================
-
-/** 객체 감지 최소 신뢰도 점수 (0-1) */
-export const OBJECT_DETECTION_SCORE_THRESHOLD = 0.5;
-
-/** 기준 플레이트와 크기 비교 허용 오차 (±10%) */
-export const PLATE_SIZE_TOLERANCE = 0.1;
-
-// ============================================
 // MediaPipe 모델 URL
 // ============================================
 
@@ -42,7 +32,3 @@ export const MEDIAPIPE_WASM_URL =
 /** PoseLandmarker 모델 파일 URL */
 export const POSE_MODEL_URL =
   "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
-
-/** ObjectDetector 모델 파일 URL */
-export const OBJECT_MODEL_URL =
-  "https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite";
