@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Menu from "@/components/Menu";
 import ClientProvider from "./ClientProvider";
+import { ServiceWorkerRegister } from "./ServiceWorkerRegister";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,6 +18,14 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "YeokdoIn",
   description: "Weightlifting training assistant",
+  themeColor: "#0A0B0C",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+  },
+  icons: {
+    apple: "/icons/icon-192.png",
+  },
 };
 
 export default function RootLayout({
@@ -29,9 +38,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <ServiceWorkerRegister />
         <ClientProvider>
           {children}
-
           <Menu />
         </ClientProvider>
       </body>
