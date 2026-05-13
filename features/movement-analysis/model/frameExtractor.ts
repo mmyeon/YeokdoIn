@@ -9,6 +9,9 @@ export async function extractFrames(
   blob: Blob,
   { startSec, endSec, fps, onProgress }: ExtractOptions
 ): Promise<HTMLCanvasElement[]> {
+  if (fps <= 0) throw new Error("fps는 0보다 커야 합니다");
+  if (startSec >= endSec) throw new Error("startSec은 endSec보다 작아야 합니다");
+
   const url = URL.createObjectURL(blob);
   const video = document.createElement("video");
   video.src = url;
@@ -18,6 +21,10 @@ export async function extractFrames(
     video.addEventListener("loadedmetadata", () => resolve(), { once: true });
     video.addEventListener("error", () => reject(new Error("비디오 로드 실패")), { once: true });
   });
+
+  if (video.videoWidth === 0 || video.videoHeight === 0) {
+    throw new Error("비디오 크기를 읽을 수 없습니다");
+  }
 
   const interval = 1 / fps;
   const times: number[] = [];
