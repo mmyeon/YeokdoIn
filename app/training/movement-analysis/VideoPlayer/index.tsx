@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { Check } from "lucide-react";
 import PoseAnalyzer from "../PoseAnalyzer";
 import VideoController from "./VideoController";
 
@@ -12,6 +14,12 @@ interface VideoPlayerProps {
   seekTarget: number | null;
 }
 
+const formatSec = (s: number) => {
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return `${m}:${sec.toString().padStart(2, "0")}`;
+};
+
 const VideoPlayer = ({
   videoUrl,
   children,
@@ -20,25 +28,29 @@ const VideoPlayer = ({
 }: VideoPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
+  const [range, setRange] = useState<[number, number]>([0, 0]);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const handleVideoPause = () => {
-    setIsPlaying(false);
+  const handleRangeChange = (values: number[]) => {
+    const [newStart, newEnd] = values as [number, number];
+    const [prevStart] = range;
+
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = newStart !== prevStart ? newStart : newEnd;
+    }
+
+    setRange([newStart, newEnd]);
   };
 
-  const handleVideoPlay = () => {
-    setIsPlaying(true);
-  };
-
-  const handleVideoEnded = () => {
-    setIsPlaying(false);
-  };
+  const handleVideoPause = () => setIsPlaying(false);
+  const handleVideoPlay = () => setIsPlaying(true);
+  const handleVideoEnded = () => setIsPlaying(false);
 
   useEffect(() => {
     const video = videoRef.current;
-
     if (!video) return;
 
     const handleMetadataLoad = () => {
@@ -47,13 +59,11 @@ const VideoPlayer = ({
         canvasRef.current.height = video.videoHeight;
       }
       setDuration(video.duration);
+      setRange([0, video.duration]);
     };
 
     video.addEventListener("loadedmetadata", handleMetadataLoad);
-
-    return () => {
-      video.removeEventListener("loadedmetadata", handleMetadataLoad);
-    };
+    return () => video.removeEventListener("loadedmetadata", handleMetadataLoad);
   }, []);
 
   useEffect(() => {
@@ -64,15 +74,6 @@ const VideoPlayer = ({
 
   return (
     <div className="bg-black relative w-full h-[calc(100dvh-var(--tab-bar-height))] overflow-hidden">
-      <div className="absolute top-4 left-0 right-0 flex justify-center z-10">
-        <Button
-          onClick={() => onAnalyze(0, duration)}
-          disabled={duration === 0}
-          className="bg-black/70 text-white border border-white/30 hover:bg-black/90 hover:border-white/60 font-semibold px-6 py-2 shadow-lg"
-        >
-          Analyze Lift
-        </Button>
-      </div>
       <video
         playsInline
         ref={videoRef}
@@ -88,6 +89,35 @@ const VideoPlayer = ({
         canvasRef={canvasRef}
         isPlaying={isPlaying}
       />
+
+      {duration > 0 && (
+        <div className="absolute bottom-[76px] left-0 right-0 px-4 z-10">
+          <div className="flex items-center gap-3">
+            <span className="text-white/80 text-xs w-9 text-right shrink-0 tabular-nums">
+              {formatSec(range[0])}
+            </span>
+            <Slider
+              min={0}
+              max={duration}
+              step={0.1}
+              value={range}
+              onValueChange={handleRangeChange}
+              className="flex-1"
+            />
+            <span className="text-white/80 text-xs w-9 shrink-0 tabular-nums">
+              {formatSec(range[1])}
+            </span>
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => onAnalyze(range[0], range[1])}
+              className="shrink-0 h-7 w-7 p-0 bg-white text-black hover:bg-white/90 rounded-full"
+            >
+              <Check className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
 
       <VideoController videoRef={videoRef} isPlaying={isPlaying} />
 
