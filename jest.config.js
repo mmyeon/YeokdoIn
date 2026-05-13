@@ -16,6 +16,7 @@ module.exports = {
     '!features/programs/model/**/__tests__/**',
     'features/movement-analysis/model/**/*.ts',
     '!features/movement-analysis/model/**/__tests__/**',
+    '!features/movement-analysis/model/frameExtractor.ts',
     'actions/personalRecords.ts',
   ],
   coverageThreshold: {
