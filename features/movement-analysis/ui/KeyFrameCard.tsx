@@ -21,6 +21,7 @@ export function KeyFrameCard({
 }: KeyFrameCardProps) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className="w-full text-left rounded-lg border p-4 hover:bg-accent transition-colors"
     >
@@ -30,8 +31,8 @@ export function KeyFrameCard({
           {formatTime(timeMs / 1000)}
         </span>
       </div>
-      {metricsLines.map((line, i) => (
-        <p key={i} className="text-sm text-muted-foreground">
+      {metricsLines.map((line) => (
+        <p key={line} className="text-sm text-muted-foreground">
           {line}
         </p>
       ))}
