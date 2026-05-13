@@ -7,12 +7,16 @@ import VideoPlayer from "./VideoPlayer";
 const VideoDisplay = ({
   videoUrl,
   handleRemoveFile,
+  onAnalyze,
+  seekTarget,
 }: {
   videoUrl: string;
   handleRemoveFile: () => void;
+  onAnalyze: (startSec: number, endSec: number) => void;
+  seekTarget: number | null;
 }) => {
   return (
-    <VideoPlayer videoUrl={videoUrl}>
+    <VideoPlayer videoUrl={videoUrl} onAnalyze={onAnalyze} seekTarget={seekTarget}>
       <Button
         variant="ghost"
         size="sm"
