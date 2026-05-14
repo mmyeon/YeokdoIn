@@ -7,14 +7,17 @@ import {
   POSE_MODEL_URL,
 } from "@/hooks/constants/mediapipe";
 import { extractFrames } from "../model/frameExtractor";
+import { midpoint } from "../model/angleUtils";
 import {
   findFrameA,
   findFrameB,
+  findFrameC,
   findLiftoffFrame,
 } from "../model/keyFrameFinder";
 import {
   computeFrameAMetrics,
   computeFrameBMetrics,
+  computeFrameCMetrics,
 } from "../model/keyFrameMetrics";
 import type { KeyFrameResult, RawFrame } from "../model/types";
 
@@ -77,13 +80,28 @@ export function useKeyFrameAnalysis(): UseKeyFrameAnalysisReturn {
           setProgress(0.5 + ((i + 1) / total) * 0.5);
         }
 
-        const liftoffIndex = findLiftoffFrame(rawFrames);
+        const liftoffIndex = findLiftoffFrame(rawFrames) ?? 0;
         const frameAIndex = findFrameA(rawFrames);
-        const frameBIndex = findFrameB(rawFrames);
+        const frameBIndex = findFrameB(rawFrames, frameAIndex, liftoffIndex);
+        const frameCIndex = findFrameC(rawFrames, frameBIndex);
 
-        const liftoffFrame = liftoffIndex !== null ? rawFrames[liftoffIndex] : null;
+        const liftoffFrame = rawFrames[liftoffIndex] ?? null;
         const frameAData = frameAIndex !== null ? rawFrames[frameAIndex] : null;
         const frameBData = frameBIndex !== null ? rawFrames[frameBIndex] : null;
+        const frameCData = frameCIndex !== null ? rawFrames[frameCIndex] : null;
+
+        const baselineEnd = Math.min(liftoffIndex + 5, rawFrames.length);
+        const baselineFrames = rawFrames
+          .slice(liftoffIndex, baselineEnd)
+          .filter((f) => f.landmarks.length >= 33);
+        const baselineHeelY =
+          baselineFrames.length > 0
+            ? baselineFrames.reduce((sum, f) => sum + midpoint(f.landmarks[29], f.landmarks[30]).y, 0) / baselineFrames.length
+            : 0.9;
+        const baselineHipY =
+          baselineFrames.length > 0
+            ? baselineFrames.reduce((sum, f) => sum + midpoint(f.landmarks[23], f.landmarks[24]).y, 0) / baselineFrames.length
+            : 0.5;
 
         setResult({
           frameA:
@@ -99,7 +117,15 @@ export function useKeyFrameAnalysis(): UseKeyFrameAnalysisReturn {
               ? {
                   timeMs: frameBData.timeMs,
                   frameIndex: frameBData.frameIndex,
-                  metrics: computeFrameBMetrics(frameBData),
+                  metrics: computeFrameBMetrics(frameBData, baselineHeelY, baselineHipY),
+                }
+              : null,
+          frameC:
+            frameCData !== null
+              ? {
+                  timeMs: frameCData.timeMs,
+                  frameIndex: frameCData.frameIndex,
+                  metrics: computeFrameCMetrics(frameCData),
                 }
               : null,
         });
