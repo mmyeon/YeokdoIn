@@ -5,36 +5,86 @@ import type { KeyFrameResult } from "../model/types";
 
 interface KeyFrameResultsProps {
   result: KeyFrameResult;
+  activeFrameId: "A" | "B" | "C" | null;
   onSeek: (timeMs: number) => void;
+  onFrameSelect: (id: "A" | "B" | "C") => void;
 }
 
-export function KeyFrameResults({ result, onSeek }: KeyFrameResultsProps) {
-  const { frameA, frameB } = result;
+export function KeyFrameResults({
+  result,
+  activeFrameId,
+  onSeek,
+  onFrameSelect,
+}: KeyFrameResultsProps) {
+  const { frameA, frameB, frameC } = result;
 
   return (
-    <div className="space-y-3">
-      <h2 className="text-base font-semibold">Key Frames</h2>
-
+    <div className="flex flex-col gap-1.5">
       {frameA !== null && (
         <KeyFrameCard
-          label="Frame A — 무릎 통과 시점"
+          frameId="A"
+          label="Knee Pass"
           timeMs={frameA.timeMs}
-          metricsLines={[
-            `상체 기울기: ${Math.round(frameA.metrics.shoulderHipAngleDeg)}°`,
-            `시작 대비: ${frameA.metrics.angleDeltaDeg > 0 ? "+" : ""}${Math.round(frameA.metrics.angleDeltaDeg)}° ${frameA.metrics.angleDeltaDeg > 0 ? "(더 세워짐)" : "(더 앞으로 기울어짐)"}`,
+          metrics={[
+            {
+              key: "Torso angle",
+              value: `${Math.round(frameA.metrics.shoulderHipAngleDeg)}°`,
+            },
+            {
+              key: "vs start",
+              value: `${frameA.metrics.angleDeltaDeg > 0 ? "+" : ""}${Math.round(frameA.metrics.angleDeltaDeg)}°`,
+              accent: true,
+              note:
+                frameA.metrics.angleDeltaDeg > 0 ? "more upright" : "more leaned",
+            },
           ]}
-          onClick={() => onSeek(frameA.timeMs)}
+          isActive={activeFrameId === "A"}
+          onClick={() => {
+            onFrameSelect("A");
+            onSeek(frameA.timeMs);
+          }}
         />
       )}
 
       {frameB !== null && (
         <KeyFrameCard
-          label="Frame B — 최대 신전 시점"
+          frameId="B"
+          label="Bar Contact"
           timeMs={frameB.timeMs}
-          metricsLines={[
-            `몸통 수직도: ${Math.round(frameB.metrics.trunkVerticalityDeg)}° ${frameB.metrics.isGood ? "✓ Good" : "✗ Bad"}`,
+          metrics={[
+            {
+              key: "Knee angle",
+              value: `${Math.round(frameB.metrics.kneeAngleDeg)}°`,
+            },
+            {
+              key: "Heel rise",
+              value: `${(frameB.metrics.heelRiseNorm * 100).toFixed(1)}%`,
+            },
           ]}
-          onClick={() => onSeek(frameB.timeMs)}
+          isActive={activeFrameId === "B"}
+          onClick={() => {
+            onFrameSelect("B");
+            onSeek(frameB.timeMs);
+          }}
+        />
+      )}
+
+      {frameC !== null && (
+        <KeyFrameCard
+          frameId="C"
+          label="Catch"
+          timeMs={frameC.timeMs}
+          metrics={[
+            {
+              key: "Arm extension",
+              value: `${Math.round(frameC.metrics.armAngleDeg)}°`,
+            },
+          ]}
+          isActive={activeFrameId === "C"}
+          onClick={() => {
+            onFrameSelect("C");
+            onSeek(frameC.timeMs);
+          }}
         />
       )}
     </div>

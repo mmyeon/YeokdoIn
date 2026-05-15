@@ -20,8 +20,14 @@ export interface FrameAMetrics {
 }
 
 export interface FrameBMetrics {
-  trunkVerticalityDeg: number;
-  isGood: boolean;
+  kneeAngleDeg: number;
+  hipRiseNorm: number;
+  heelRiseNorm: number;
+}
+
+export interface FrameCMetrics {
+  armAngleDeg: number;
+  wristToHeadNorm: number;
 }
 
 export interface KeyFrameData<T> {
@@ -33,4 +39,5 @@ export interface KeyFrameData<T> {
 export interface KeyFrameResult {
   frameA: KeyFrameData<FrameAMetrics> | null;
   frameB: KeyFrameData<FrameBMetrics> | null;
+  frameC: KeyFrameData<FrameCMetrics> | null;
 }

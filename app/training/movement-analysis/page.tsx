@@ -2,107 +2,99 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useKeyFrameAnalysis } from "@/features/movement-analysis/ui/useKeyFrameAnalysis";
-import { KeyFrameResults } from "@/features/movement-analysis/ui/KeyFrameResults";
-import VideoDisplay from "./VideoDisplay";
 import VideoUpload from "./VideoUpload";
+import TrimScreen from "./TrimScreen";
+import AnalyzingScreen from "./AnalyzingScreen";
+import ResultsScreen from "./ResultsScreen";
 
-const STATUS_LABEL: Record<"extracting" | "detecting", string> = {
-  extracting: "Extracting frames…",
-  detecting: "Detecting poses…",
-};
+type Step = "upload" | "trim" | "analyzing" | "done";
 
 const MovementAnalysisPage = () => {
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [step, setStep] = useState<Step>("upload");
+  const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [seekTarget, setSeekTarget] = useState<number | null>(null);
+  const [trimRange, setTrimRange] = useState<[number, number]>([0, 0]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { analyze, status, progress, result, error } = useKeyFrameAnalysis();
 
   const handleFileSelect = (file: File) => {
-    setUploadedFile(file);
+    setVideoFile(file);
+    setStep("trim");
   };
 
-  const handleRemoveFile = () => {
-    setUploadedFile(null);
+  const handleBack = () => {
+    setVideoFile(null);
     setVideoUrl(null);
+    setStep("upload");
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleAnalyze = async (startSec: number, endSec: number) => {
-    if (!uploadedFile) return;
-    await analyze(uploadedFile, startSec, endSec);
+    if (!videoFile) return;
+    setTrimRange([startSec, endSec]);
+    setStep("analyzing");
+    await analyze(videoFile, startSec, endSec);
   };
 
-  const handleSeek = (timeMs: number) => {
-    setSeekTarget(timeMs);
+  const handleCancelAnalysis = () => {
+    setStep("trim");
   };
 
   useEffect(() => {
-    if (!uploadedFile) {
+    if (status === "done") setStep("done");
+    if (status === "error") setStep("trim");
+  }, [status]);
+
+  useEffect(() => {
+    if (!videoFile) {
       setVideoUrl(null);
       return;
     }
-    const url = URL.createObjectURL(uploadedFile);
+    const url = URL.createObjectURL(videoFile);
     setVideoUrl(url);
-    return () => {
-      URL.revokeObjectURL(url);
-    };
-  }, [uploadedFile]);
+    return () => URL.revokeObjectURL(url);
+  }, [videoFile]);
 
-  return (
-    <div className="max-w-md mx-auto overflow-y-auto flex flex-col">
-      {!videoUrl ? (
-        <div className="px-4 py-8">
-          <h1 className="text-3xl font-bold mb-8">Movement Analysis</h1>
-          <div className="bg-card rounded-lg p-6 shadow-sm">
-            <VideoUpload
-              handleFileSelect={handleFileSelect}
-              fileInputRef={fileInputRef}
-            />
-          </div>
-        </div>
-      ) : (
-        <>
-          <VideoDisplay
-            videoUrl={videoUrl}
-            handleRemoveFile={handleRemoveFile}
-            onAnalyze={handleAnalyze}
-            seekTarget={seekTarget}
-          />
+  if (step === "upload") {
+    return (
+      <VideoUpload fileInputRef={fileInputRef} onFileSelect={handleFileSelect} />
+    );
+  }
 
-          {(status === "extracting" || status === "detecting") && (
-            <div className="px-4 py-4 border-t">
-              <p className="text-sm text-muted-foreground mb-2">
-                {STATUS_LABEL[status]}
-              </p>
-              <div className="w-full bg-muted rounded-full h-2">
-                <div
-                  className="bg-primary h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${Math.round(progress * 100)}%` }}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground mt-1 text-right">
-                {Math.round(progress * 100)}%
-              </p>
-            </div>
-          )}
+  if (step === "trim" && videoUrl) {
+    return (
+      <TrimScreen
+        videoUrl={videoUrl}
+        onBack={handleBack}
+        onAnalyze={handleAnalyze}
+        error={status === "error" ? error : null}
+      />
+    );
+  }
 
-          {status === "error" && error !== null && (
-            <div className="px-4 py-4 border-t">
-              <p className="text-sm text-destructive">{error}</p>
-            </div>
-          )}
+  if (step === "analyzing") {
+    return (
+      <AnalyzingScreen
+        progress={progress}
+        pipelineStatus={status as "extracting" | "detecting"}
+        onCancel={handleCancelAnalysis}
+      />
+    );
+  }
 
-          {status === "done" && result !== null && (
-            <div className="px-4 py-4 border-t">
-              <KeyFrameResults result={result} onSeek={handleSeek} />
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
+  if (step === "done" && result !== null && videoUrl !== null) {
+    return (
+      <ResultsScreen
+        videoUrl={videoUrl}
+        result={result}
+        trimRange={trimRange}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  return null;
 };
 
 export default MovementAnalysisPage;

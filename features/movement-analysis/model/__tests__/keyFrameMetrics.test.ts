@@ -1,4 +1,4 @@
-import { computeFrameAMetrics, computeFrameBMetrics } from "../keyFrameMetrics";
+import { computeFrameAMetrics, computeFrameBMetrics, computeFrameCMetrics } from "../keyFrameMetrics";
 import type { RawFrame } from "../types";
 
 function lm33(overrides: Record<number, { x: number; y: number }> = {}): { x: number; y: number }[] {
@@ -31,24 +31,47 @@ describe("computeFrameAMetrics", () => {
 });
 
 describe("computeFrameBMetrics", () => {
-  it("발목-고관절-어깨가 일직선이면 isGood이 true이다", () => {
+  it("kneeAngleDeg, hipRiseNorm, heelRiseNorm을 반환한다", () => {
     const frame = makeFrame({
-      11: { x: 0.5, y: 0.1 }, 12: { x: 0.5, y: 0.1 },
-      23: { x: 0.5, y: 0.5 }, 24: { x: 0.5, y: 0.5 },
-      27: { x: 0.5, y: 0.9 }, 28: { x: 0.5, y: 0.9 },
+      23: { x: 0.5, y: 0.4 }, 24: { x: 0.5, y: 0.4 },
+      25: { x: 0.5, y: 0.5 }, 26: { x: 0.5, y: 0.5 },
+      27: { x: 0.5, y: 0.75 }, 28: { x: 0.5, y: 0.75 },
+      29: { x: 0.5, y: 0.84 }, 30: { x: 0.5, y: 0.84 },
     });
-    const result = computeFrameBMetrics(frame);
-    expect(result.trunkVerticalityDeg).toBeGreaterThan(150);
-    expect(result.isGood).toBe(true);
+    const result = computeFrameBMetrics(frame, 0.9, 0.6);
+    expect(result.kneeAngleDeg).toBeGreaterThan(0);
+    expect(result.hipRiseNorm).toBeCloseTo(0.2, 5);  // 0.6 - 0.4
+    expect(result.heelRiseNorm).toBeCloseTo(0.06, 5); // 0.9 - 0.84
   });
 
-  it("어깨가 옆으로 무너지면 isGood이 false이다", () => {
+  it("골반이 baseline보다 낮으면 hipRiseNorm이 음수이다", () => {
+    const frame = makeFrame({ 23: { x: 0.5, y: 0.7 }, 24: { x: 0.5, y: 0.7 } });
+    const result = computeFrameBMetrics(frame, 0.9, 0.5);
+    expect(result.hipRiseNorm).toBeLessThan(0); // 0.5 - 0.7 = -0.2
+  });
+});
+
+describe("computeFrameCMetrics", () => {
+  it("armAngleDeg와 wristToHeadNorm을 반환한다", () => {
     const frame = makeFrame({
-      11: { x: 0.1, y: 0.5 }, 12: { x: 0.1, y: 0.5 },
-      23: { x: 0.5, y: 0.5 }, 24: { x: 0.5, y: 0.5 },
-      27: { x: 0.5, y: 0.9 }, 28: { x: 0.5, y: 0.9 },
+      0:  { x: 0.5, y: 0.1 },
+      11: { x: 0.5, y: 0.3 }, 12: { x: 0.5, y: 0.3 },
+      13: { x: 0.5, y: 0.2 }, 14: { x: 0.5, y: 0.2 },
+      15: { x: 0.5, y: 0.1 }, 16: { x: 0.5, y: 0.1 },
     });
-    const result = computeFrameBMetrics(frame);
-    expect(result.isGood).toBe(false);
+    const result = computeFrameCMetrics(frame);
+    expect(typeof result.armAngleDeg).toBe("number");
+    expect(result.wristToHeadNorm).toBeCloseTo(0, 5); // nose Y - wrist Y = 0.1 - 0.1 = 0
+  });
+
+  it("손목이 머리 위에 있으면 wristToHeadNorm이 양수이다", () => {
+    const frame = makeFrame({
+      0:  { x: 0.5, y: 0.2 },
+      11: { x: 0.5, y: 0.4 }, 12: { x: 0.5, y: 0.4 },
+      13: { x: 0.5, y: 0.3 }, 14: { x: 0.5, y: 0.3 },
+      15: { x: 0.5, y: 0.05 }, 16: { x: 0.5, y: 0.05 }, // wrist above head
+    });
+    const result = computeFrameCMetrics(frame);
+    expect(result.wristToHeadNorm).toBeGreaterThan(0);
   });
 });
