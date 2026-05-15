@@ -40,31 +40,6 @@ const AnalyzingScreen = ({ progress, pipelineStatus, onCancel }: AnalyzingScreen
         <div className="w-6" />
       </div>
 
-      {/* Striped placeholder + spinner */}
-      <div className="px-4 pb-2.5">
-        <div className="relative w-full" style={{ aspectRatio: "9/11" }}>
-          <div
-            className="w-full h-full rounded-xl border border-border flex items-center justify-center"
-            style={{
-              background: `repeating-linear-gradient(135deg, hsl(var(--muted)) 0 8px, hsl(var(--background)) 8px 16px)`,
-            }}
-          >
-            <div
-              className="w-16 h-16 rounded-full animate-spin"
-              style={{
-                border: "3px solid hsl(var(--border))",
-                borderTopColor: "hsl(var(--primary))",
-              }}
-            />
-          </div>
-          <div className="absolute top-2 right-2">
-            <span className="px-2 py-0.5 rounded-full text-[11px] border border-border bg-background/80">
-              {pct}%
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* Progress number + bar */}
       <div className="px-5 pb-2.5">
         <div className="flex justify-between items-baseline mb-2">
