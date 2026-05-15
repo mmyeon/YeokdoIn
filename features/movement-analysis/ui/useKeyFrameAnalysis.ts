@@ -78,6 +78,8 @@ export function useKeyFrameAnalysis(): UseKeyFrameAnalysisReturn {
             landmarks: detected.landmarks[0] ?? [],
           });
           setProgress(0.5 + ((i + 1) / total) * 0.5);
+          // 브라우저에 제어권을 넘겨 React가 progress 상태를 렌더링할 수 있게 함
+          await new Promise<void>((resolve) => setTimeout(resolve, 0));
         }
 
         const liftoffIndex = findLiftoffFrame(rawFrames) ?? 0;

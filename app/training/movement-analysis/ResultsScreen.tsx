@@ -37,6 +37,7 @@ const ResultsScreen = ({
   const [currentTime, setCurrentTime] = useState(0);
   const [speedIndex, setSpeedIndex] = useState(1);
   const [activeFrameId, setActiveFrameId] = useState<FrameId | null>(null);
+  const [showSpeedPicker, setShowSpeedPicker] = useState(false);
 
   const speed = SPEEDS[speedIndex];
   const [trimStart, trimEnd] = trimRange;
@@ -66,7 +67,10 @@ const ResultsScreen = ({
     else videoRef.current.play();
   };
 
-  const cycleSpeed = () => setSpeedIndex((i) => (i + 1) % SPEEDS.length);
+  const selectSpeed = (index: number) => {
+    setSpeedIndex(index);
+    setShowSpeedPicker(false);
+  };
 
   const handleSeek = (timeMs: number) => {
     if (!videoRef.current) return;
@@ -169,14 +173,35 @@ const ResultsScreen = ({
           )}
         </button>
 
-        {/* Speed chip */}
-        <button
-          type="button"
-          onClick={cycleSpeed}
-          className="absolute bottom-2.5 right-3 px-2 py-0.5 rounded-full border border-white/30 bg-black/50 text-white text-[11px]"
-        >
-          {speed}×
-        </button>
+        {/* Speed picker */}
+        <div className="absolute bottom-2.5 right-3">
+          {showSpeedPicker && (
+            <div className="absolute bottom-full right-0 mb-1.5 flex flex-col items-end gap-0.5">
+              {SPEEDS.map((s, i) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => selectSpeed(i)}
+                  className="px-2.5 py-1 rounded-full text-[11px] font-semibold transition-colors"
+                  style={{
+                    background: s === speed ? "hsl(var(--primary))" : "rgba(0,0,0,0.6)",
+                    color: s === speed ? "hsl(var(--primary-foreground))" : "white",
+                    border: "1px solid rgba(255,255,255,0.25)",
+                  }}
+                >
+                  {s}×
+                </button>
+              ))}
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => setShowSpeedPicker((v) => !v)}
+            className="px-2 py-0.5 rounded-full border border-white/30 bg-black/50 text-white text-[11px]"
+          >
+            {speed}×
+          </button>
+        </div>
       </div>
 
       {/* Scrub bar with frame markers */}
