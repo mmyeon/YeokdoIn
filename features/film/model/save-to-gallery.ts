@@ -6,20 +6,19 @@ function buildFileName(ext: VideoExtension): string {
 }
 
 function canUseShareApi(file: File): boolean {
-  return (
-    typeof navigator.share === "function" &&
-    typeof navigator.canShare === "function" &&
-    navigator.canShare({ files: [file] })
-  );
+  try {
+    return (
+      typeof navigator.share === "function" &&
+      typeof navigator.canShare === "function" &&
+      navigator.canShare({ files: [file] })
+    );
+  } catch {
+    return false;
+  }
 }
 
 async function shareFile(file: File): Promise<void> {
-  try {
-    await navigator.share({ files: [file] });
-  } catch (err: unknown) {
-    if (err instanceof Error && err.name === "AbortError") return;
-    throw err;
-  }
+  await navigator.share({ files: [file] });
 }
 
 function downloadFile(blob: Blob, fileName: string): void {
@@ -30,7 +29,7 @@ function downloadFile(blob: Blob, fileName: string): void {
   document.body.appendChild(anchor);
   anchor.click();
   document.body.removeChild(anchor);
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 100);
 }
 
 export async function saveToGallery(
@@ -41,8 +40,12 @@ export async function saveToGallery(
   const file = new File([blob], fileName, { type: blob.type });
 
   if (canUseShareApi(file)) {
-    await shareFile(file);
-  } else {
-    downloadFile(blob, fileName);
+    try {
+      await shareFile(file);
+      return;
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === "AbortError") return;
+    }
   }
+  downloadFile(blob, fileName);
 }
