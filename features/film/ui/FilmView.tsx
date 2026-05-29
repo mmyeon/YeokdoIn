@@ -36,6 +36,8 @@ export function FilmView({ positions, initialPositionIdx = 0 }: FilmViewProps) {
   // 언마운트 cleanup에서 최신 stream에 접근하기 위한 ref
   const streamRef = useRef<MediaStream | null>(null);
   streamRef.current = stream;
+  // handleFlip 진행 중 이중 호출 방지
+  const flippingRef = useRef(false);
 
   const openCamera = useCallback(async () => {
     setCameraError(null);
@@ -43,8 +45,17 @@ export function FilmView({ positions, initialPositionIdx = 0 }: FilmViewProps) {
       const s = await startStream(facing);
       setStream(s);
       setFilmMode(true);
-    } catch {
-      setCameraError("카메라 권한이 필요합니다. 설정에서 카메라 접근을 허용해 주세요.");
+    } catch (err) {
+      const name = err instanceof DOMException ? err.name : "";
+      if (name === "NotFoundError" || name === "DevicesNotFoundError") {
+        setCameraError("카메라를 찾을 수 없습니다. 디바이스에 카메라가 연결되어 있는지 확인해 주세요.");
+      } else if (name === "OverconstrainedError" || name === "ConstraintNotSatisfiedError") {
+        setCameraError("카메라 설정을 지원하지 않습니다. 다른 카메라를 시도해 주세요.");
+      } else if (name === "NotReadableError" || name === "TrackStartError") {
+        setCameraError("카메라를 사용할 수 없습니다. 다른 앱에서 카메라를 사용 중인지 확인해 주세요.");
+      } else {
+        setCameraError("카메라 권한이 필요합니다. 설정에서 카메라 접근을 허용해 주세요.");
+      }
     }
   }, [facing]);
 
@@ -55,6 +66,10 @@ export function FilmView({ positions, initialPositionIdx = 0 }: FilmViewProps) {
   }, [stream]);
 
   const handleFlip = useCallback(async () => {
+    if (flippingRef.current) return;
+    flippingRef.current = true;
+
+    const prevFacing = facing;
     const nextFacing: FacingMode = facing === "environment" ? "user" : "environment";
     if (stream) stopStream(stream);
     setFacing(nextFacing);
@@ -64,7 +79,10 @@ export function FilmView({ positions, initialPositionIdx = 0 }: FilmViewProps) {
     } catch {
       setStream(null);
       setFilmMode(false);
+      setFacing(prevFacing);
       setCameraError("카메라를 전환할 수 없습니다.");
+    } finally {
+      flippingRef.current = false;
     }
   }, [facing, stream]);
 
@@ -119,7 +137,7 @@ export function FilmView({ positions, initialPositionIdx = 0 }: FilmViewProps) {
       <div className="flex flex-col gap-2">
         {positions.map((pos, posIdx) => (
           <div
-            key={`${pos.blockIdx}-${pos.exerciseIdx}`}
+            key={posIdx}
             className={[
               "rounded-xl border px-4 py-3 text-sm",
               posIdx === nav.positionIdx
