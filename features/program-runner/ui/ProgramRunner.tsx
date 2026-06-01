@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { ROUTES } from "@/routes";
 import type { Program } from "@/features/notation/model/types";
 import { useBarbellWeight } from "@/hooks/useBarbellWeight";
+import { FilmView } from "@/features/film/ui/FilmView";
 
 import { flattenProgram } from "../model/flatten";
 import { propagateManualWeight } from "../model/propagate-weight";
@@ -54,6 +55,7 @@ export function ProgramRunner({ program, aliasMap, prRefMap, prMap }: ProgramRun
   const [posIdx, setPosIdx] = useState(0);
   const [setIdx, setSetIdx] = useState(0);
   const [view, setView] = useState<ViewMode>("standard");
+  const [filming, setFilming] = useState(false);
 
   if (positions.length === 0) {
     return (
@@ -126,11 +128,12 @@ export function ProgramRunner({ program, aliasMap, prRefMap, prMap }: ProgramRun
         exerciseIdx={position.exerciseIdx}
         totalExercises={position.totalExercises}
         onClose={() => router.push(ROUTES.HOME)}
+        onFilm={() => setFilming(true)}
       />
 
       <ViewToggle view={view} onChange={setView} />
 
-      {view === "standard" ? (
+      {view === "standard" && (
         <RunnerStandardView
           position={position}
           records={currentRecords}
@@ -144,7 +147,8 @@ export function ProgramRunner({ program, aliasMap, prRefMap, prMap }: ProgramRun
           onSelectSet={setSetIdx}
           onSetKg={handleSetKg}
         />
-      ) : (
+      )}
+      {view === "focus" && (
         <RunnerFocusView
           position={position}
           records={currentRecords}
@@ -155,6 +159,15 @@ export function ProgramRunner({ program, aliasMap, prRefMap, prMap }: ProgramRun
           onPrev={handlePrev}
           onNext={handleNext}
           onLogSet={handleLogSet}
+        />
+      )}
+      {filming && (
+        <FilmView
+          positions={positions}
+          records={records}
+          initialPosIdx={posIdx}
+          initialSetIdx={setIdx}
+          onClose={() => setFilming(false)}
         />
       )}
     </div>
