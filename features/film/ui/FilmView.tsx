@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Video } from "lucide-react";
 
-import type { ExercisePosition } from "@/features/program-runner/model/types";
+import type {
+  ExercisePosition,
+  SetRecord,
+} from "@/features/program-runner/model/types";
 import type { FacingMode } from "../model/use-camera";
 import { startStream, stopStream } from "../model/use-camera";
 import { pickVideoMimeType } from "../model/codecs";
@@ -19,13 +21,40 @@ import { ProgramOverlay } from "./ProgramOverlay";
 
 interface FilmViewProps {
   positions: ExercisePosition[];
-  posIdx: number;
-  setIdx: number;
-  onNavigate: (posIdx: number, setIdx: number) => void;
+  records: SetRecord[][];
+  /** 카메라를 열 때 시작할 위치 — 이후 탐색은 로컬 상태로 운동 로깅과 분리된다 */
+  initialPosIdx: number;
+  initialSetIdx: number;
+  onClose: () => void;
 }
 
-export function FilmView({ positions, posIdx, setIdx, onNavigate }: FilmViewProps) {
-  const [filmMode, setFilmMode] = useState(false);
+function cameraErrorMessage(err: unknown): string {
+  const name = err instanceof DOMException ? err.name : "";
+  if (name === "NotFoundError" || name === "DevicesNotFoundError") {
+    return "카메라를 찾을 수 없습니다. 디바이스에 카메라가 연결되어 있는지 확인해 주세요.";
+  }
+  if (name === "OverconstrainedError" || name === "ConstraintNotSatisfiedError") {
+    return "카메라 설정을 지원하지 않습니다. 다른 카메라를 시도해 주세요.";
+  }
+  if (name === "NotReadableError" || name === "TrackStartError") {
+    return "카메라를 사용할 수 없습니다. 다른 앱에서 카메라를 사용 중인지 확인해 주세요.";
+  }
+  return "카메라 권한이 필요합니다. 설정에서 카메라 접근을 허용해 주세요.";
+}
+
+export function FilmView({
+  positions,
+  records,
+  initialPosIdx,
+  initialSetIdx,
+  onClose,
+}: FilmViewProps) {
+  // 촬영 탐색은 로컬 상태 — 운동 로깅(Standard/Focus의 현재 세트)과 분리된다
+  const [nav, setNav] = useState<FilmNavigatorState>({
+    positionIdx: initialPosIdx,
+    setIdx: initialSetIdx,
+  });
+  const [recording, setRecording] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [mimeType] = useState(() => pickVideoMimeType());
   const [facing, setFacing] = useState<FacingMode>("environment");
@@ -37,135 +66,109 @@ export function FilmView({ positions, posIdx, setIdx, onNavigate }: FilmViewProp
   // handleFlip 진행 중 이중 호출 방지
   const flippingRef = useRef(false);
 
-  const openCamera = useCallback(async () => {
-    setCameraError(null);
-    try {
-      const s = await startStream(facing);
-      setStream(s);
-      setFilmMode(true);
-    } catch (err) {
-      const name = err instanceof DOMException ? err.name : "";
-      if (name === "NotFoundError" || name === "DevicesNotFoundError") {
-        setCameraError("카메라를 찾을 수 없습니다. 디바이스에 카메라가 연결되어 있는지 확인해 주세요.");
-      } else if (name === "OverconstrainedError" || name === "ConstraintNotSatisfiedError") {
-        setCameraError("카메라 설정을 지원하지 않습니다. 다른 카메라를 시도해 주세요.");
-      } else if (name === "NotReadableError" || name === "TrackStartError") {
-        setCameraError("카메라를 사용할 수 없습니다. 다른 앱에서 카메라를 사용 중인지 확인해 주세요.");
-      } else {
-        setCameraError("카메라 권한이 필요합니다. 설정에서 카메라 접근을 허용해 주세요.");
+  // 마운트 시 카메라를 즉시 연다 — 중간 단계 없이 1탭 진입
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const s = await startStream("environment");
+        if (cancelled) {
+          stopStream(s);
+          return;
+        }
+        setStream(s);
+      } catch (err) {
+        if (!cancelled) setCameraError(cameraErrorMessage(err));
       }
-    }
-  }, [facing]);
+    })();
+    return () => {
+      cancelled = true;
+      if (streamRef.current) stopStream(streamRef.current);
+    };
+  }, []);
 
-  const closeCamera = useCallback(() => {
-    if (stream) stopStream(stream);
-    setStream(null);
-    setFilmMode(false);
-  }, [stream]);
+  // 에러 화면으로 전환되면 카메라를 즉시 해제 — 프리뷰가 사라진 채 카메라가 켜져 있지 않도록
+  useEffect(() => {
+    if (cameraError && streamRef.current) {
+      stopStream(streamRef.current);
+      setStream(null);
+    }
+  }, [cameraError]);
 
   const handleFlip = useCallback(async () => {
     if (flippingRef.current) return;
     flippingRef.current = true;
 
     const prevFacing = facing;
-    const nextFacing: FacingMode = facing === "environment" ? "user" : "environment";
+    const nextFacing: FacingMode =
+      facing === "environment" ? "user" : "environment";
     if (stream) stopStream(stream);
     setFacing(nextFacing);
     try {
       const s = await startStream(nextFacing);
       setStream(s);
     } catch {
-      setStream(null);
-      setFilmMode(false);
+      // 전환 실패 — 촬영을 유지하기 위해 이전 카메라로 복구 시도
       setFacing(prevFacing);
-      setCameraError("카메라를 전환할 수 없습니다.");
+      try {
+        const s = await startStream(prevFacing);
+        setStream(s);
+      } catch {
+        setStream(null);
+        setCameraError("카메라를 전환할 수 없습니다.");
+      }
     } finally {
       flippingRef.current = false;
     }
   }, [facing, stream]);
 
-  // 언마운트 시 스트림 정리 — setState 없이 ref를 통해 직접 해제
-  useEffect(() => {
-    return () => {
-      if (streamRef.current) stopStream(streamRef.current);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const currentPosition = positions[nav.positionIdx];
 
-  const nav: FilmNavigatorState = { positionIdx: posIdx, setIdx };
-  const currentPosition = positions[posIdx];
-
-  if (filmMode && currentPosition) {
+  if (cameraError || !currentPosition) {
     return (
-      <div className="fixed inset-0 z-50 bg-black">
-        <CameraPane
-          stream={stream}
-          mimeType={mimeType}
-          onFlip={handleFlip}
-          onClose={closeCamera}
-          onSaveError={(err) =>
-            setCameraError(
-              err instanceof Error ? err.message : "영상 저장에 실패했습니다."
-            )
-          }
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 bg-black p-6 text-center">
+        <p role="alert" className="text-sm text-red-300">
+          {cameraError ?? "촬영할 동작을 찾을 수 없습니다."}
+        </p>
+        <button
+          type="button"
+          onClick={onClose}
+          className="rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-gray-900"
         >
-          <ProgramOverlay
-            position={currentPosition}
-            setIdx={setIdx}
-            canPrev={canPrev(nav)}
-            canNext={canNext(nav, positions)}
-            onPrev={() => {
-              const next = stepPrev(nav, positions);
-              onNavigate(next.positionIdx, next.setIdx);
-            }}
-            onNext={() => {
-              const next = stepNext(nav, positions);
-              onNavigate(next.positionIdx, next.setIdx);
-            }}
-          />
-        </CameraPane>
+          닫기
+        </button>
       </div>
     );
   }
 
+  const kg = records[nav.positionIdx]?.[nav.setIdx]?.kg ?? null;
+
   return (
-    <div className="flex flex-col gap-4 p-4">
-      {cameraError ? (
-        <p
-          role="alert"
-          className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600"
-        >
-          {cameraError}
-        </p>
-      ) : null}
-
-      <div className="flex flex-col gap-2">
-        {positions.map((pos, posItemIdx) => (
-          <div
-            key={posItemIdx}
-            className={[
-              "rounded-xl border px-4 py-3 text-sm",
-              posItemIdx === posIdx
-                ? "border-blue-400 bg-blue-50 font-semibold text-blue-900"
-                : "border-gray-200 bg-white text-gray-700",
-            ].join(" ")}
-          >
-            <span className="block font-medium">{pos.movement.name}</span>
-            <span className="text-xs text-gray-500">
-              {pos.sets.length}세트
-            </span>
-          </div>
-        ))}
-      </div>
-
-      <button
-        type="button"
-        onClick={openCamera}
-        className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 py-4 text-base font-semibold text-white active:scale-95"
+    <div className="fixed inset-0 z-50 bg-black">
+      <CameraPane
+        stream={stream}
+        mimeType={mimeType}
+        recording={recording}
+        onRecordingChange={setRecording}
+        onFlip={handleFlip}
+        onClose={onClose}
+        onSaveError={(err) =>
+          setCameraError(
+            err instanceof Error ? err.message : "영상 저장에 실패했습니다."
+          )
+        }
       >
-        <Video className="h-5 w-5" />
-        촬영하기
-      </button>
+        <ProgramOverlay
+          position={currentPosition}
+          setIdx={nav.setIdx}
+          kg={kg}
+          canPrev={canPrev(nav)}
+          canNext={canNext(nav, positions)}
+          locked={recording}
+          onPrev={() => setNav((s) => stepPrev(s, positions))}
+          onNext={() => setNav((s) => stepNext(s, positions))}
+        />
+      </CameraPane>
     </div>
   );
 }

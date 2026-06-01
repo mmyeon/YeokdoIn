@@ -11,6 +11,8 @@ import { saveToGallery } from "../model/save-to-gallery";
 interface CameraPaneProps {
   stream: MediaStream | null;
   mimeType: string;
+  recording: boolean;
+  onRecordingChange: (recording: boolean) => void;
   onFlip: () => void;
   onClose: () => void;
   onSaveError?: (err: unknown) => void;
@@ -20,13 +22,14 @@ interface CameraPaneProps {
 export function CameraPane({
   stream,
   mimeType,
+  recording,
+  onRecordingChange,
   onFlip,
   onClose,
   onSaveError,
   children,
 }: CameraPaneProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [recording, setRecording] = useState(false);
   const [closePending, setClosePending] = useState(false);
   // handleRef: recording 중 ref로 관리해 상태와 분리 — race condition 방지
   const handleRef = useRef<RecordingHandle | null>(null);
@@ -72,13 +75,13 @@ export function CameraPane({
       if (!handleRef.current) {
         if (!stream) return;
         handleRef.current = startRecording(stream, mimeType);
-        setRecording(true);
+        onRecordingChange(true);
         return;
       }
 
       const handle = handleRef.current;
       handleRef.current = null;
-      setRecording(false);
+      onRecordingChange(false);
       try {
         const blob = await handle.stop();
         await saveToGallery(blob, extensionFor(mimeType));
@@ -102,7 +105,7 @@ export function CameraPane({
     setClosePending(false);
     const handle = handleRef.current;
     handleRef.current = null;
-    setRecording(false);
+    onRecordingChange(false);
     // stop()을 await해 MediaRecorder가 flush할 시간을 준 뒤 닫기
     if (handle) await handle.stop().catch(() => {});
     onClose();
@@ -148,8 +151,8 @@ export function CameraPane({
       {/* ProgramOverlay 슬롯 */}
       {children}
 
-      {/* REC 버튼 */}
-      <div className="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2">
+      {/* REC 버튼 — 하단 ProgramOverlay 띠와 겹치지 않도록 위로 띄움 */}
+      <div className="absolute bottom-24 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2">
         {recording ? (
           <span className="text-xs font-bold tracking-widest text-red-500">
             ● REC

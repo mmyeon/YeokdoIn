@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { X } from "lucide-react";
+import { Video, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { ROUTES } from "@/routes";
@@ -12,6 +12,7 @@ interface RunnerHeaderProps {
   exerciseIdx: number;
   totalExercises: number;
   onClose?: () => void;
+  onFilm?: () => void;
 }
 
 export function RunnerHeader({
@@ -20,6 +21,7 @@ export function RunnerHeader({
   exerciseIdx,
   totalExercises,
   onClose,
+  onFilm,
 }: RunnerHeaderProps) {
   const currentEx = exerciseIdx + 1;
 
@@ -61,8 +63,18 @@ export function RunnerHeader({
         </div>
       </div>
 
-      {/* Right slot kept visible as a reserved affordance (PR shortcut) */}
-      <span className="w-8" aria-hidden />
+      {onFilm ? (
+        <button
+          type="button"
+          onClick={onFilm}
+          aria-label="촬영"
+          className="flex h-8 w-8 items-center justify-center text-yd-text-muted"
+        >
+          <Video className="h-5 w-5" />
+        </button>
+      ) : (
+        <span className="w-8" aria-hidden />
+      )}
     </div>
   );
 }

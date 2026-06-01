@@ -23,7 +23,7 @@ interface ProgramRunnerProps {
   prMap: Readonly<Record<number, number>>;
 }
 
-type ViewMode = "standard" | "focus" | "film";
+type ViewMode = "standard" | "focus";
 
 /** Build initial record state: records[posIdx][setIdx] = { kg, done } */
 function buildInitialRecords(
@@ -55,6 +55,7 @@ export function ProgramRunner({ program, aliasMap, prRefMap, prMap }: ProgramRun
   const [posIdx, setPosIdx] = useState(0);
   const [setIdx, setSetIdx] = useState(0);
   const [view, setView] = useState<ViewMode>("standard");
+  const [filming, setFilming] = useState(false);
 
   if (positions.length === 0) {
     return (
@@ -127,6 +128,7 @@ export function ProgramRunner({ program, aliasMap, prRefMap, prMap }: ProgramRun
         exerciseIdx={position.exerciseIdx}
         totalExercises={position.totalExercises}
         onClose={() => router.push(ROUTES.HOME)}
+        onFilm={() => setFilming(true)}
       />
 
       <ViewToggle view={view} onChange={setView} />
@@ -159,15 +161,13 @@ export function ProgramRunner({ program, aliasMap, prRefMap, prMap }: ProgramRun
           onLogSet={handleLogSet}
         />
       )}
-      {view === "film" && (
+      {filming && (
         <FilmView
           positions={positions}
-          posIdx={posIdx}
-          setIdx={setIdx}
-          onNavigate={(nextPos, nextSet) => {
-            setPosIdx(nextPos);
-            setSetIdx(nextSet);
-          }}
+          records={records}
+          initialPosIdx={posIdx}
+          initialSetIdx={setIdx}
+          onClose={() => setFilming(false)}
         />
       )}
     </div>
@@ -183,7 +183,6 @@ function ViewToggle({ view, onChange }: ViewToggleProps) {
   const options: Array<{ id: ViewMode; label: string }> = [
     { id: "standard", label: "Standard" },
     { id: "focus", label: "Focus" },
-    { id: "film", label: "촬영" },
   ];
   return (
     <div
