@@ -67,7 +67,7 @@ export function RunnerHeader({
         <button
           type="button"
           onClick={onFilm}
-          aria-label="촬영"
+          aria-label="Film"
           className="flex h-8 w-8 items-center justify-center text-yd-text-muted"
         >
           <Video className="h-5 w-5" />

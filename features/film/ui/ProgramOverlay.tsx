@@ -34,13 +34,13 @@ export function ProgramOverlay({
     <div
       className="absolute inset-x-0 bottom-0 flex items-center gap-3 bg-black/50 px-4 py-3 backdrop-blur-sm"
       role="region"
-      aria-label="현재 세트 정보"
+      aria-label="Current set info"
     >
       <button
         type="button"
         onClick={onPrev}
         disabled={locked || !canPrev}
-        aria-label="이전 세트"
+        aria-label="Previous set"
         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white disabled:opacity-30"
       >
         <ChevronLeft className="h-5 w-5" />
@@ -54,7 +54,7 @@ export function ProgramOverlay({
         type="button"
         onClick={onNext}
         disabled={locked || !canNext}
-        aria-label="다음 세트"
+        aria-label="Next set"
         className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white disabled:opacity-30"
       >
         <ChevronRight className="h-5 w-5" />

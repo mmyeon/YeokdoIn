@@ -65,6 +65,15 @@ export function FilmView({
   streamRef.current = stream;
   // handleFlip 진행 중 이중 호출 방지
   const flippingRef = useRef(false);
+  // 비동기 startStream 완료 시점에 마운트 여부 확인 — 언마운트 후 생성된 스트림 누수 방지
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   // 마운트 시 카메라를 즉시 연다 — 중간 단계 없이 1탭 진입
   useEffect(() => {
@@ -106,12 +115,20 @@ export function FilmView({
     setFacing(nextFacing);
     try {
       const s = await startStream(nextFacing);
+      if (!mountedRef.current) {
+        stopStream(s);
+        return;
+      }
       setStream(s);
     } catch {
       // 전환 실패 — 촬영을 유지하기 위해 이전 카메라로 복구 시도
       setFacing(prevFacing);
       try {
         const s = await startStream(prevFacing);
+        if (!mountedRef.current) {
+          stopStream(s);
+          return;
+        }
         setStream(s);
       } catch {
         setStream(null);

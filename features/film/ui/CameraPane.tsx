@@ -123,7 +123,7 @@ export function CameraPane({
         autoPlay
         playsInline
         muted
-        aria-label="카메라 프리뷰"
+        aria-label="Camera preview"
       />
 
       {/* 상단 버튼 영역 */}
@@ -132,7 +132,7 @@ export function CameraPane({
           type="button"
           onClick={onFlip}
           disabled={recording}
-          aria-label="카메라 전환"
+          aria-label="Switch camera"
           className="flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white disabled:opacity-30"
         >
           <FlipHorizontal2 className="h-5 w-5" />
@@ -141,7 +141,7 @@ export function CameraPane({
         <button
           type="button"
           onClick={handleCloseRequest}
-          aria-label="촬영 종료"
+          aria-label="Close camera"
           className="flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white"
         >
           <X className="h-5 w-5" />
@@ -161,7 +161,7 @@ export function CameraPane({
         <button
           type="button"
           onClick={handleToggleRecording}
-          aria-label={recording ? "녹화 중지" : "녹화 시작"}
+          aria-label={recording ? "Stop recording" : "Record"}
           className="flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-lg active:scale-95"
         >
           {recording ? (
