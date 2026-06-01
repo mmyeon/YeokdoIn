@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { ROUTES } from "@/routes";
 import type { Program } from "@/features/notation/model/types";
 import { useBarbellWeight } from "@/hooks/useBarbellWeight";
+import { FilmView } from "@/features/film/ui/FilmView";
 
 import { flattenProgram } from "../model/flatten";
 import { propagateManualWeight } from "../model/propagate-weight";
@@ -22,7 +23,7 @@ interface ProgramRunnerProps {
   prMap: Readonly<Record<number, number>>;
 }
 
-type ViewMode = "standard" | "focus";
+type ViewMode = "standard" | "focus" | "film";
 
 /** Build initial record state: records[posIdx][setIdx] = { kg, done } */
 function buildInitialRecords(
@@ -130,7 +131,7 @@ export function ProgramRunner({ program, aliasMap, prRefMap, prMap }: ProgramRun
 
       <ViewToggle view={view} onChange={setView} />
 
-      {view === "standard" ? (
+      {view === "standard" && (
         <RunnerStandardView
           position={position}
           records={currentRecords}
@@ -144,7 +145,8 @@ export function ProgramRunner({ program, aliasMap, prRefMap, prMap }: ProgramRun
           onSelectSet={setSetIdx}
           onSetKg={handleSetKg}
         />
-      ) : (
+      )}
+      {view === "focus" && (
         <RunnerFocusView
           position={position}
           records={currentRecords}
@@ -155,6 +157,17 @@ export function ProgramRunner({ program, aliasMap, prRefMap, prMap }: ProgramRun
           onPrev={handlePrev}
           onNext={handleNext}
           onLogSet={handleLogSet}
+        />
+      )}
+      {view === "film" && (
+        <FilmView
+          positions={positions}
+          posIdx={posIdx}
+          setIdx={setIdx}
+          onNavigate={(nextPos, nextSet) => {
+            setPosIdx(nextPos);
+            setSetIdx(nextSet);
+          }}
         />
       )}
     </div>
@@ -170,6 +183,7 @@ function ViewToggle({ view, onChange }: ViewToggleProps) {
   const options: Array<{ id: ViewMode; label: string }> = [
     { id: "standard", label: "Standard" },
     { id: "focus", label: "Focus" },
+    { id: "film", label: "촬영" },
   ];
   return (
     <div

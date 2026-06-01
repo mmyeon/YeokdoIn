@@ -8,7 +8,6 @@ import type { FacingMode } from "../model/use-camera";
 import { startStream, stopStream } from "../model/use-camera";
 import { pickVideoMimeType } from "../model/codecs";
 import {
-  initialState,
   canPrev,
   canNext,
   stepPrev,
@@ -20,14 +19,13 @@ import { ProgramOverlay } from "./ProgramOverlay";
 
 interface FilmViewProps {
   positions: ExercisePosition[];
-  initialPositionIdx?: number;
+  posIdx: number;
+  setIdx: number;
+  onNavigate: (posIdx: number, setIdx: number) => void;
 }
 
-export function FilmView({ positions, initialPositionIdx = 0 }: FilmViewProps) {
+export function FilmView({ positions, posIdx, setIdx, onNavigate }: FilmViewProps) {
   const [filmMode, setFilmMode] = useState(false);
-  const [nav, setNav] = useState<FilmNavigatorState>(() =>
-    initialState(initialPositionIdx)
-  );
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [mimeType] = useState(() => pickVideoMimeType());
   const [facing, setFacing] = useState<FacingMode>("environment");
@@ -94,7 +92,8 @@ export function FilmView({ positions, initialPositionIdx = 0 }: FilmViewProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const currentPosition = positions[nav.positionIdx];
+  const nav: FilmNavigatorState = { positionIdx: posIdx, setIdx };
+  const currentPosition = positions[posIdx];
 
   if (filmMode && currentPosition) {
     return (
@@ -112,11 +111,17 @@ export function FilmView({ positions, initialPositionIdx = 0 }: FilmViewProps) {
         >
           <ProgramOverlay
             position={currentPosition}
-            setIdx={nav.setIdx}
+            setIdx={setIdx}
             canPrev={canPrev(nav)}
             canNext={canNext(nav, positions)}
-            onPrev={() => setNav((s) => stepPrev(s, positions))}
-            onNext={() => setNav((s) => stepNext(s, positions))}
+            onPrev={() => {
+              const next = stepPrev(nav, positions);
+              onNavigate(next.positionIdx, next.setIdx);
+            }}
+            onNext={() => {
+              const next = stepNext(nav, positions);
+              onNavigate(next.positionIdx, next.setIdx);
+            }}
           />
         </CameraPane>
       </div>
@@ -135,12 +140,12 @@ export function FilmView({ positions, initialPositionIdx = 0 }: FilmViewProps) {
       ) : null}
 
       <div className="flex flex-col gap-2">
-        {positions.map((pos, posIdx) => (
+        {positions.map((pos, posItemIdx) => (
           <div
-            key={posIdx}
+            key={posItemIdx}
             className={[
               "rounded-xl border px-4 py-3 text-sm",
-              posIdx === nav.positionIdx
+              posItemIdx === posIdx
                 ? "border-blue-400 bg-blue-50 font-semibold text-blue-900"
                 : "border-gray-200 bg-white text-gray-700",
             ].join(" ")}
