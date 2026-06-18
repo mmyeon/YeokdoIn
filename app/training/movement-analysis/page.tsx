@@ -1,19 +1,24 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import { useAtom } from "jotai";
 import { useKeyFrameAnalysis } from "@/features/movement-analysis/ui/useKeyFrameAnalysis";
+import {
+  stepAtom,
+  videoFileAtom,
+  videoUrlAtom,
+  trimRangeAtom,
+} from "@/features/movement-analysis/model/atoms";
 import VideoUpload from "./VideoUpload";
 import TrimScreen from "./TrimScreen";
 import AnalyzingScreen from "./AnalyzingScreen";
 import ResultsScreen from "./ResultsScreen";
 
-type Step = "upload" | "trim" | "analyzing" | "done";
-
 const MovementAnalysisPage = () => {
-  const [step, setStep] = useState<Step>("upload");
-  const [videoFile, setVideoFile] = useState<File | null>(null);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [trimRange, setTrimRange] = useState<[number, number]>([0, 0]);
+  const [step, setStep] = useAtom(stepAtom);
+  const [videoFile, setVideoFile] = useAtom(videoFileAtom);
+  const [videoUrl, setVideoUrl] = useAtom(videoUrlAtom);
+  const [trimRange, setTrimRange] = useAtom(trimRangeAtom);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const analysisAbortRef = useRef<AbortController | null>(null);
 
@@ -54,10 +59,20 @@ const MovementAnalysisPage = () => {
     if (step !== "analyzing") return;
     if (status === "done") setStep("done");
     if (status === "error") setStep("trim");
-  }, [status, step]);
+  }, [status, step, setStep]);
 
-  // 언마운트 시 진행 중인 분석 정리.
-  useEffect(() => () => analysisAbortRef.current?.abort(), []);
+  // 언마운트 시 진행 중인 분석을 정리하고 플로우 상태를 초기화한다.
+  // 전역 atom이라 초기화하지 않으면 재방문 시 stale 단계(예: result가
+  // 사라진 "done")로 빈 화면이 렌더될 수 있다.
+  useEffect(() => {
+    return () => {
+      analysisAbortRef.current?.abort();
+      setStep("upload");
+      setVideoFile(null);
+      setVideoUrl(null);
+      setTrimRange([0, 0]);
+    };
+  }, [setStep, setVideoFile, setVideoUrl, setTrimRange]);
 
   useEffect(() => {
     if (!videoFile) {
@@ -67,7 +82,7 @@ const MovementAnalysisPage = () => {
     const url = URL.createObjectURL(videoFile);
     setVideoUrl(url);
     return () => URL.revokeObjectURL(url);
-  }, [videoFile]);
+  }, [videoFile, setVideoUrl]);
 
   if (step === "upload") {
     return (
