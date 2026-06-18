@@ -46,10 +46,14 @@ const ResultsScreen = ({
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    const handleTime = () => setCurrentTime(video.currentTime);
+    const handleTime = () => {
+      setCurrentTime(video.currentTime);
+      // 선택 구간 끝에 도달하면 재생을 멈춰 구간 밖으로 넘어가지 않게 한다.
+      if (trimEnd > 0 && video.currentTime >= trimEnd) video.pause();
+    };
     video.addEventListener("timeupdate", handleTime);
     return () => video.removeEventListener("timeupdate", handleTime);
-  }, []);
+  }, [trimEnd]);
 
   useEffect(() => {
     if (videoRef.current && trimStart > 0) {
@@ -62,9 +66,17 @@ const ResultsScreen = ({
   }, [speed]);
 
   const togglePlay = () => {
-    if (!videoRef.current) return;
-    if (isPlaying) videoRef.current.pause();
-    else videoRef.current.play();
+    const video = videoRef.current;
+    if (!video) return;
+    if (isPlaying) {
+      video.pause();
+      return;
+    }
+    // 구간 끝(또는 그 이후)에서 다시 재생하면 선택 구간 시작으로 되돌린다.
+    if (trimEnd > 0 && video.currentTime >= trimEnd) {
+      video.currentTime = trimStart;
+    }
+    video.play();
   };
 
   const selectSpeed = (index: number) => {
@@ -142,7 +154,7 @@ const ResultsScreen = ({
         <video
           ref={videoRef}
           src={videoUrl}
-          muted
+          muted={speed !== 1}
           playsInline
           className="h-full"
           style={{ aspectRatio: "9/16", objectFit: "cover" }}
