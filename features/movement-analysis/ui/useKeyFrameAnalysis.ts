@@ -6,7 +6,7 @@ import {
   MEDIAPIPE_WASM_URL,
   POSE_MODEL_URL,
 } from "@/hooks/constants/mediapipe";
-import { extractFrames } from "../model/frameExtractor";
+import { extractFrames } from "./frameExtractor";
 import { midpoint } from "../model/angleUtils";
 import {
   findFrameA,
