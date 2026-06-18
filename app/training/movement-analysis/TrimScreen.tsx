@@ -2,6 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Slider } from "@/components/ui/slider";
+import {
+  isClipLongEnough,
+  MIN_CLIP_SEC,
+} from "@/features/movement-analysis/model/videoValidation";
 
 interface TrimScreenProps {
   videoUrl: string;
@@ -56,6 +60,7 @@ const TrimScreen = ({ videoUrl, onBack, onAnalyze, error }: TrimScreenProps) => 
   };
 
   const selectedDuration = range[1] - range[0];
+  const clipTooShort = duration > 0 && !isClipLongEnough(selectedDuration);
   const startPct = duration > 0 ? (range[0] / duration) * 100 : 0;
   const endPct = duration > 0 ? (range[1] / duration) * 100 : 100;
 
@@ -184,6 +189,14 @@ const TrimScreen = ({ videoUrl, onBack, onAnalyze, error }: TrimScreenProps) => 
         </div>
       </div>
 
+      {clipTooShort && (
+        <div className="px-5 pt-2">
+          <p className="text-sm text-muted-foreground">
+            Select at least {MIN_CLIP_SEC}s to analyze.
+          </p>
+        </div>
+      )}
+
       {error && (
         <div className="px-5 pt-2">
           <p className="text-sm text-destructive">{error}</p>
@@ -195,7 +208,7 @@ const TrimScreen = ({ videoUrl, onBack, onAnalyze, error }: TrimScreenProps) => 
         <button
           type="button"
           onClick={() => onAnalyze(range[0], range[1])}
-          disabled={duration === 0}
+          disabled={duration === 0 || clipTooShort}
           className="w-full h-[52px] rounded-[14px] bg-primary text-primary-foreground font-bold text-[15px] flex items-center justify-center gap-2.5 disabled:opacity-50"
         >
           <span>✓</span>

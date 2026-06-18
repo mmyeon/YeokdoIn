@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import useDragAndDrop from "@/hooks/useDragAndDrop";
 import { toast } from "sonner";
 import { RefObject } from "react";
+import { validateVideoFile } from "@/features/movement-analysis/model/videoValidation";
 
 interface VideoUploadProps {
   onFileSelect: (file: File) => void;
@@ -12,6 +13,15 @@ interface VideoUploadProps {
 }
 
 const VideoUpload = ({ onFileSelect, fileInputRef }: VideoUploadProps) => {
+  const selectFile = (file: File) => {
+    const result = validateVideoFile(file);
+    if (!result.ok) {
+      toast.error(result.reason);
+      return;
+    }
+    onFileSelect(file);
+  };
+
   const { isDragOver, handleDragLeave, handleDragOver, handleDrop } =
     useDragAndDrop({
       onDropCallback: (files) => {
@@ -19,13 +29,14 @@ const VideoUpload = ({ onFileSelect, fileInputRef }: VideoUploadProps) => {
           toast.info("You can only upload one video.");
           return;
         }
-        onFileSelect(files[0]);
+        const file = files[0];
+        if (file) selectFile(file);
       },
     });
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) onFileSelect(file);
+    if (file) selectFile(file);
   };
 
   return (

@@ -24,7 +24,12 @@ import type { KeyFrameResult, RawFrame } from "../model/types";
 type AnalysisStatus = "idle" | "extracting" | "detecting" | "done" | "error";
 
 interface UseKeyFrameAnalysisReturn {
-  analyze: (blob: Blob, startSec: number, endSec: number) => Promise<void>;
+  analyze: (
+    blob: Blob,
+    startSec: number,
+    endSec: number,
+    signal?: AbortSignal
+  ) => Promise<void>;
   status: AnalysisStatus;
   progress: number;
   result: KeyFrameResult | null;
@@ -39,11 +44,20 @@ export function useKeyFrameAnalysis(): UseKeyFrameAnalysisReturn {
   const poseLandmarkerRef = useRef<PoseLandmarker | null>(null);
 
   const analyze = useCallback(
-    async (blob: Blob, startSec: number, endSec: number): Promise<void> => {
+    async (
+      blob: Blob,
+      startSec: number,
+      endSec: number,
+      signal?: AbortSignal
+    ): Promise<void> => {
       setStatus("extracting");
       setProgress(0);
       setResult(null);
       setError(null);
+
+      const throwIfAborted = () => {
+        if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
+      };
 
       try {
         const canvases = await extractFrames(blob, {
@@ -52,6 +66,9 @@ export function useKeyFrameAnalysis(): UseKeyFrameAnalysisReturn {
           fps: 30,
           onProgress: (p) => setProgress(p * 0.5),
         });
+
+        // 프레임 추출은 중단을 지원하지 않으므로 완료 직후 취소 여부를 확인한다.
+        throwIfAborted();
 
         setStatus("detecting");
 
@@ -71,6 +88,7 @@ export function useKeyFrameAnalysis(): UseKeyFrameAnalysisReturn {
         const total = canvases.length;
 
         for (let i = 0; i < total; i++) {
+          throwIfAborted();
           const detected = poseLandmarkerRef.current.detect(canvases[i]);
           rawFrames.push({
             timeMs: (startSec + i / 30) * 1000,
@@ -135,6 +153,9 @@ export function useKeyFrameAnalysis(): UseKeyFrameAnalysisReturn {
         setStatus("done");
         setProgress(1);
       } catch (err: unknown) {
+        // 취소된 실행은 오류로 표시하지 않고 종료한다. 상태를 건드리지 않아
+        // 곧바로 시작된 새 분석의 status/progress를 덮어쓰지 않게 한다.
+        if (signal?.aborted) return;
         setStatus("error");
         setError(
           err instanceof Error ? err.message : "분석 중 오류가 발생했습니다"

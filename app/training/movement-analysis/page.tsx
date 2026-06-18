@@ -15,6 +15,7 @@ const MovementAnalysisPage = () => {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [trimRange, setTrimRange] = useState<[number, number]>([0, 0]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const analysisAbortRef = useRef<AbortController | null>(null);
 
   const { analyze, status, progress, result, error } = useKeyFrameAnalysis();
 
@@ -24,6 +25,7 @@ const MovementAnalysisPage = () => {
   };
 
   const handleBack = () => {
+    analysisAbortRef.current?.abort();
     setVideoFile(null);
     setVideoUrl(null);
     setStep("upload");
@@ -32,19 +34,30 @@ const MovementAnalysisPage = () => {
 
   const handleAnalyze = async (startSec: number, endSec: number) => {
     if (!videoFile) return;
+    // 이전 실행이 남아 있으면 중단해 상태 경합을 막는다.
+    analysisAbortRef.current?.abort();
+    const controller = new AbortController();
+    analysisAbortRef.current = controller;
     setTrimRange([startSec, endSec]);
     setStep("analyzing");
-    await analyze(videoFile, startSec, endSec);
+    await analyze(videoFile, startSec, endSec, controller.signal);
   };
 
   const handleCancelAnalysis = () => {
+    analysisAbortRef.current?.abort();
     setStep("trim");
   };
 
+  // 분석 화면에 머무는 동안에만 status 변화로 화면을 전환한다.
+  // 취소 후 뒤늦게 끝난 stale 실행이 화면을 가로채지 못하게 한다.
   useEffect(() => {
+    if (step !== "analyzing") return;
     if (status === "done") setStep("done");
     if (status === "error") setStep("trim");
-  }, [status]);
+  }, [status, step]);
+
+  // 언마운트 시 진행 중인 분석 정리.
+  useEffect(() => () => analysisAbortRef.current?.abort(), []);
 
   useEffect(() => {
     if (!videoFile) {
