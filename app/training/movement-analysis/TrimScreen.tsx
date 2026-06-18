@@ -85,6 +85,7 @@ const TrimScreen = ({ videoUrl, onBack, onAnalyze, error }: TrimScreenProps) => 
           <video
             ref={videoRef}
             src={videoUrl}
+            muted
             playsInline
             className="w-full h-full rounded-xl object-contain bg-black"
             onPlay={() => setIsPlaying(true)}
