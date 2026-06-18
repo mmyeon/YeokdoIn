@@ -154,7 +154,7 @@ const ResultsScreen = ({
         <video
           ref={videoRef}
           src={videoUrl}
-          muted={speed !== 1}
+          muted
           playsInline
           className="h-full"
           style={{ aspectRatio: "9/16", objectFit: "cover" }}
