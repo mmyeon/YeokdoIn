@@ -88,7 +88,7 @@ export function findFrameB(
 // Filter: wristY < shoulderY (바가 오버헤드 = 어깨보다 손목이 위)
 // Selector: filter 통과 프레임 중 무릎 각도가 가장 작은(가장 깊이 앉은) 프레임
 export function findFrameC(frames: RawFrame[], frameBIndex: number | null = null): number | null {
-  const startIndex = frameBIndex !== null ? frameBIndex + 1 : 1;
+  const startIndex = frameBIndex !== null ? frameBIndex + 1 : 0;
 
   let bestIndex: number | null = null;
   let minKneeAngle = Infinity;

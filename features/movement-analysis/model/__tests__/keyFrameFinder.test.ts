@@ -190,6 +190,15 @@ describe("findFrameC", () => {
     const frames = Array.from({ length: 5 }, (_, i) => makeFrame(i, []));
     expect(findFrameC(frames, null)).toBeNull();
   });
+
+  it("frameBIndex가 null이면 0번 프레임부터 탐색한다", () => {
+    // 0번이 유일한 오버헤드 프레임 → off-by-one이면 0번을 놓쳐 null이 된다
+    const frames = [
+      makeFrame(0, makeLm(0.2, 0.4, { hipY: 0.5, kneeY: 0.6, ankleY: 0.8 })), // 오버헤드
+      makeFrame(1, makeLm(0.5, 0.4, { hipY: 0.5, kneeY: 0.6, ankleY: 0.8 })), // 비오버헤드
+    ];
+    expect(findFrameC(frames, null)).toBe(0);
+  });
 });
 
 describe("findLiftoffFrame", () => {

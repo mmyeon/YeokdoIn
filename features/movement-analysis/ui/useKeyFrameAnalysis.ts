@@ -7,8 +7,8 @@ import {
   POSE_MODEL_URL,
 } from "@/hooks/constants/mediapipe";
 import { extractFrames } from "./frameExtractor";
-import { midpoint } from "../model/angleUtils";
 import {
+  computeBaseline,
   findFrameA,
   findFrameB,
   findFrameC,
@@ -21,7 +21,23 @@ import {
 } from "../model/keyFrameMetrics";
 import type { KeyFrameResult, RawFrame } from "../model/types";
 
+/** 프레임 추출·타임스탬프 계산에 사용하는 분석 프레임레이트. */
+const ANALYSIS_FPS = 30;
+
+/** baseline 프레임이 없을 때 사용하는 발뒤꿈치/엉덩이 Y 기본값. */
+const DEFAULT_BASELINE_HEEL_Y = 0.9;
+const DEFAULT_BASELINE_HIP_Y = 0.5;
+
 type AnalysisStatus = "idle" | "extracting" | "detecting" | "done" | "error";
+
+async function createPoseLandmarker(): Promise<PoseLandmarker> {
+  const vision = await FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_URL);
+  return PoseLandmarker.createFromOptions(vision, {
+    baseOptions: { modelAssetPath: POSE_MODEL_URL },
+    runningMode: "IMAGE",
+    numPoses: 1,
+  });
+}
 
 interface UseKeyFrameAnalysisReturn {
   analyze: (
@@ -42,6 +58,24 @@ export function useKeyFrameAnalysis(): UseKeyFrameAnalysisReturn {
   const [result, setResult] = useState<KeyFrameResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const poseLandmarkerRef = useRef<PoseLandmarker | null>(null);
+  const poseLandmarkerPromiseRef = useRef<Promise<PoseLandmarker> | null>(null);
+
+  // 동시 호출 시 PoseLandmarker가 중복 생성되지 않도록 init Promise를 캐싱한다.
+  const getPoseLandmarker = useCallback((): Promise<PoseLandmarker> => {
+    if (!poseLandmarkerPromiseRef.current) {
+      poseLandmarkerPromiseRef.current = createPoseLandmarker().then(
+        (landmarker) => {
+          poseLandmarkerRef.current = landmarker;
+          return landmarker;
+        },
+        (err) => {
+          poseLandmarkerPromiseRef.current = null; // 실패 시 다음 호출에서 재시도
+          throw err;
+        }
+      );
+    }
+    return poseLandmarkerPromiseRef.current;
+  }, []);
 
   const analyze = useCallback(
     async (
@@ -63,7 +97,7 @@ export function useKeyFrameAnalysis(): UseKeyFrameAnalysisReturn {
         const canvases = await extractFrames(blob, {
           startSec,
           endSec,
-          fps: 30,
+          fps: ANALYSIS_FPS,
           onProgress: (p) => setProgress(p * 0.5),
         });
 
@@ -72,26 +106,16 @@ export function useKeyFrameAnalysis(): UseKeyFrameAnalysisReturn {
 
         setStatus("detecting");
 
-        if (!poseLandmarkerRef.current) {
-          const vision = await FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_URL);
-          poseLandmarkerRef.current = await PoseLandmarker.createFromOptions(
-            vision,
-            {
-              baseOptions: { modelAssetPath: POSE_MODEL_URL },
-              runningMode: "IMAGE",
-              numPoses: 1,
-            }
-          );
-        }
+        const poseLandmarker = await getPoseLandmarker();
 
         const rawFrames: RawFrame[] = [];
         const total = canvases.length;
 
         for (let i = 0; i < total; i++) {
           throwIfAborted();
-          const detected = poseLandmarkerRef.current.detect(canvases[i]);
+          const detected = poseLandmarker.detect(canvases[i]);
           rawFrames.push({
-            timeMs: (startSec + i / 30) * 1000,
+            timeMs: (startSec + i / ANALYSIS_FPS) * 1000,
             frameIndex: i,
             landmarks: detected.landmarks[0] ?? [],
           });
@@ -110,18 +134,10 @@ export function useKeyFrameAnalysis(): UseKeyFrameAnalysisReturn {
         const frameBData = frameBIndex !== null ? rawFrames[frameBIndex] : null;
         const frameCData = frameCIndex !== null ? rawFrames[frameCIndex] : null;
 
-        const baselineEnd = Math.min(liftoffIndex + 5, rawFrames.length);
-        const baselineFrames = rawFrames
-          .slice(liftoffIndex, baselineEnd)
-          .filter((f) => f.landmarks.length >= 33);
-        const baselineHeelY =
-          baselineFrames.length > 0
-            ? baselineFrames.reduce((sum, f) => sum + midpoint(f.landmarks[29], f.landmarks[30]).y, 0) / baselineFrames.length
-            : 0.9;
-        const baselineHipY =
-          baselineFrames.length > 0
-            ? baselineFrames.reduce((sum, f) => sum + midpoint(f.landmarks[23], f.landmarks[24]).y, 0) / baselineFrames.length
-            : 0.5;
+        // findFrameB와 동일한 baseline 로직을 재사용한다(중복 제거).
+        const baseline = computeBaseline(rawFrames, liftoffIndex);
+        const baselineHeelY = baseline?.heelY ?? DEFAULT_BASELINE_HEEL_Y;
+        const baselineHipY = baseline?.hipY ?? DEFAULT_BASELINE_HIP_Y;
 
         setResult({
           frameA:
@@ -162,13 +178,14 @@ export function useKeyFrameAnalysis(): UseKeyFrameAnalysisReturn {
         );
       }
     },
-    []
+    [getPoseLandmarker]
   );
 
   useEffect(() => {
     return () => {
       poseLandmarkerRef.current?.close();
       poseLandmarkerRef.current = null;
+      poseLandmarkerPromiseRef.current = null;
     };
   }, []);
 
