@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { KeyFrameResults } from "@/features/movement-analysis/ui/KeyFrameResults";
 import type { KeyFrameResult } from "@/features/movement-analysis/model/types";
 
-const SPEEDS = [0.5, 1, 1.5, 2] as const;
+const SPEEDS = [0.5, 1] as const;
 
 function formatSec(s: number): string {
   const m = Math.floor(s / 60);
@@ -35,7 +35,7 @@ const ResultsScreen = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [speedIndex, setSpeedIndex] = useState(1);
+  const [speedIndex, setSpeedIndex] = useState(0);
   const [activeFrameId, setActiveFrameId] = useState<FrameId | null>(null);
   const [showSpeedPicker, setShowSpeedPicker] = useState(false);
 
