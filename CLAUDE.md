@@ -36,3 +36,12 @@ features/[name]/
 **Auth**: `AuthProvider` via `ClientProvider`, middleware protects `/training/*`, `/settings/*`, `/movement-analysis`
 
 **Supabase local**: `127.0.0.1:54321` (API), `:54322` (DB), `:54323` (Studio)
+
+## Database Conventions
+
+- **Exercise names**: `exercises` 테이블의 이름은 영문이어야 한다 (`Snatch`, `Power Clean`). `buildAliasMap`이 이름을 lowercase 키로 쓰기 때문에, 표기가 어긋나면 조용히 매칭에 실패하고 `prescribedKg`가 `null`로 떨어진다.
+- **Migration + seed 동기화**: `supabase/migrations/*.sql`로 종목을 추가하면 `supabase/seed.sql`에도 같은 행을 넣을 것. 안 그러면 로컬 `db reset` 결과가 forward-migrate 상태와 어긋난다.
+- **Migration 배포**: 로컬 마이그레이션 생성 후 `npx supabase db push`로 원격 DB에 반영.
+- **Weight nullability**: `SetRecord.kg`는 `number | null`. `null` = 처방을 아직 모름, `0` = 유효한 값(맨몸 운동). model 레이어에서 `?? 0`으로 기본값을 주지 말고, 렌더 경계까지 `null`을 밀어낼 것.
+
+> ⚠️ 위 규약은 현행 `exercises` 테이블 기준이다. `base_exercises`/`gym_exercises`로 어휘를 통일하려는 미구현 설계가 있다 — `docs/specs/2026-05-19-exercise-vocabulary-unification-design.md`.
