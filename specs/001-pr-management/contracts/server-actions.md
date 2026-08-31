@@ -5,7 +5,7 @@
 이 프로젝트는 별도 백엔드가 없다. 외부 인터페이스는 **Next.js 서버 액션**이며, 이것이 신뢰
 경계다. 클라이언트에서 호출 가능한 모든 진입점을 여기에 고정한다.
 
-목표 위치: `features/personal-records/api/personalRecords.ts` (현재 `actions/personalRecords.ts`)
+위치: `actions/personalRecords.ts` (현행 유지 — 이동하지 않는다)
 
 **모든 액션의 공통 전제**
 

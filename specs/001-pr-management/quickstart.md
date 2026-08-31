@@ -40,7 +40,7 @@ npm run lint
 | 테스트 | 위치 | 검증 대상 |
 |---|---|---|
 | `validatePRInput` 단위 테스트 | `features/personal-records/model/__tests__/` | contracts의 model 계약 표 전 항목 |
-| 서버 액션 테스트 | `features/personal-records/api/__tests__/` | 기존 12개 + 검증 거부 케이스 |
+| 서버 액션 테스트 | `actions/__tests__/personalRecords.test.ts` | 기존 12개 + 검증 거부 케이스 |
 
 **TDD 순서**: `validatePRInput` 테스트를 먼저 쓰고 **실패를 확인한 뒤** 구현한다. 실패를 보지
 않고 넘어가면 헌법 V 위반이다.
