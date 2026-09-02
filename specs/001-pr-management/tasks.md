@@ -45,8 +45,8 @@ Next.js 15 App Router 단일 앱. 저장소 루트 기준 경로를 쓴다.
 - [x] T002 [P] `specs/001-pr-management/data-model.md` 의 CHECK 제약 3종과 검증 규칙 표를 정수 기준으로 수정 — `pr_history_new_weight_half_kg` → `pr_history_new_weight_integer CHECK (new_weight = trunc(new_weight))`, `personal_records_weight_half_kg` → `personal_records_weight_integer CHECK (weight = trunc(weight))`, 메시지는 "무게는 1kg 단위로 입력해주세요."
 - [x] T003 [P] `specs/001-pr-management/contracts/server-actions.md` 의 model 계약 표를 정수 기준으로 수정 — `{ weight: 52.5 }` 통과 예시를 `{ weight: 100 }` 으로, `{ weight: 52.4 }` 거부 예시를 `{ weight: 52.5 }` 로 교체하고 메시지를 "무게는 1kg 단위로 입력해주세요." 로 통일
 - [x] T004 [P] `specs/001-pr-management/plan.md` 와 `specs/001-pr-management/quickstart.md` 의 0.5kg 언급을 1kg로 수정 — plan.md Summary·Constitution Re-Check의 "0.5kg 단위", quickstart 게이트 2의 `52.4`/`52.5` SQL 예시와 게이트 3 US1-4행
-- [ ] T005 로컬 개발 환경 기동 — `npx supabase status` 로 로컬 스택 확인 후 `npm run dev`. Docker Desktop이 먼저 떠 있어야 한다 (CLAUDE.md)
-- [ ] T006 `features/personal-records/model/` 및 `features/personal-records/model/__tests__/` 디렉토리 생성 — 이 feature의 순수 로직 거처 (plan.md Structure Decision)
+- [x] T005 로컬 개발 환경 기동 — `npx supabase status` 로 로컬 스택 확인 후 `npm run dev`. Docker Desktop이 먼저 떠 있어야 한다 (CLAUDE.md)
+- [x] T006 `features/personal-records/model/` 및 `features/personal-records/model/__tests__/` 디렉토리 생성 — 이 feature의 순수 로직 거처 (plan.md Structure Decision)
 
 **Checkpoint**: 설계 문서가 명세와 한 단위를 말한다. 이 상태에서만 구현을 시작한다
 
@@ -59,13 +59,13 @@ Next.js 15 App Router 단일 앱. 저장소 루트 기준 경로를 쓴다.
 **⚠️ CRITICAL**: US1~US4 어느 것도 이 단계 완료 전에 시작할 수 없다. 서버 액션·UI가 전부
 `validatePRInput` 을 호출하기 때문이다
 
-- [ ] T007 `features/personal-records/model/__tests__/validate-pr-input.test.ts` 에 `validatePRInput` 단위 테스트 작성 — contracts의 model 계약 표 전 항목: 정상 통과, 무게 `null`, 무게 `0`, 무게 음수, 정수 아닌 무게(`52.5`), 무게 `1001`, 무게 `1000`(경계 통과), 빈 `prDate`, 미래 날짜, 오늘 날짜(경계 통과), 위반 다건 동시 반환. `today` 를 인자로 주입해 시간에 의존하지 않게 한다
-- [ ] T008 `npx jest features/personal-records` 실행해 **실패를 눈으로 확인** — 헌법 V의 RED 단계. 실패를 보지 않고 T009로 넘어가면 위반이다
-- [ ] T009 `features/personal-records/model/validate-pr-input.ts` 에 `PRInputDraft`·`ValidationError`·`validatePRInput` 구현 (GREEN) — 순수 함수, I/O·React·`new Date()` 금지. 정수 판정은 `Number.isInteger(weight)`. 위반 시 첫 건에서 멈추지 않고 전부 반환
-- [ ] T010 `supabase/migrations/<timestamp>_pr_constraints.sql` 작성 — `pr_history` 에 `new_weight > 0` / `<= 1000` / `= trunc(new_weight)` 3종, `public."personal-records"` 에 `weight > 0` / `<= 1000` / `= trunc(weight)` 3종. `pr_date` 미래 방지 CHECK는 **넣지 않는다** (research.md R3: 덤프·복원 실패 위험)
-- [ ] T011 마이그레이션 적용 전 로컬 위반 데이터 확인 후 `npx supabase migration up` 실행 — quickstart "원격 배포 전 필수 확인"의 count 질의를 로컬에 먼저 돌려 0건임을 확인한다. 위반 행이 있으면 진행하지 말고 정리 방침을 사용자와 정한다. **`db reset`을 쓰지 않는다** — 로컬 Supabase는 워크트리 전체가 공유하며, DB에는 이 브랜치에 파일이 없는 마이그레이션 4개(`feat/ocr-program-input`의 `gym_exercises`, `recovered/training-hub-v1`의 `training_notes` 등)가 적용돼 있다. reset하면 그 브랜치들의 로컬 스키마가 사라진다
-- [ ] T012 `npm run generate-types` 재실행하고 `types_db.ts` 를 마이그레이션과 **같은 커밋에** 포함 — 헌법 II 스키마 동기화 규약. CHECK 제약은 컬럼 타입을 바꾸지 않으므로 산출물이 동일할 수 있으나 절차는 생략하지 않는다
-- [ ] T013 quickstart 게이트 2 수행 — `psql -h 127.0.0.1 -p 54322` 로 `pr_history` 에 무게 `0` / `52.5` / `1500` INSERT가 전부 `violates check constraint` 로 거부되고 `100` 은 통과하는지 확인. 미래 날짜가 DB를 통과하는 것은 **정상**이다
+- [x] T007 `features/personal-records/model/__tests__/validate-pr-input.test.ts` 에 `validatePRInput` 단위 테스트 작성 — contracts의 model 계약 표 전 항목: 정상 통과, 무게 `null`, 무게 `0`, 무게 음수, 정수 아닌 무게(`52.5`), 무게 `1001`, 무게 `1000`(경계 통과), 빈 `prDate`, 미래 날짜, 오늘 날짜(경계 통과), 위반 다건 동시 반환. `today` 를 인자로 주입해 시간에 의존하지 않게 한다
+- [x] T008 `npx jest features/personal-records` 실행해 **실패를 눈으로 확인** — 헌법 V의 RED 단계. 실패를 보지 않고 T009로 넘어가면 위반이다
+- [x] T009 `features/personal-records/model/validate-pr-input.ts` 에 `PRInputDraft`·`ValidationError`·`validatePRInput` 구현 (GREEN) — 순수 함수, I/O·React·`new Date()` 금지. 정수 판정은 `Number.isInteger(weight)`. 위반 시 첫 건에서 멈추지 않고 전부 반환
+- [x] T010 `supabase/migrations/<timestamp>_pr_constraints.sql` 작성 — `pr_history` 에 `new_weight > 0` / `<= 1000` / `= trunc(new_weight)` 3종, `public."personal-records"` 에 `weight > 0` / `<= 1000` / `= trunc(weight)` 3종. `pr_date` 미래 방지 CHECK는 **넣지 않는다** (research.md R3: 덤프·복원 실패 위험)
+- [x] T011 마이그레이션 적용 전 로컬 위반 데이터 확인 후 `npx supabase migration up` 실행 — quickstart "원격 배포 전 필수 확인"의 count 질의를 로컬에 먼저 돌려 0건임을 확인한다. 위반 행이 있으면 진행하지 말고 정리 방침을 사용자와 정한다. **`db reset`을 쓰지 않는다** — 로컬 Supabase는 워크트리 전체가 공유하며, DB에는 이 브랜치에 파일이 없는 마이그레이션 4개(`feat/ocr-program-input`의 `gym_exercises`, `recovered/training-hub-v1`의 `training_notes` 등)가 적용돼 있다. reset하면 그 브랜치들의 로컬 스키마가 사라진다
+- [x] T012 `npm run generate-types` 재실행 — **결과: PR 관련 타입 변경 0건**(CHECK 제약은 컬럼 타입을 바꾸지 않음). 재생성 산출물에는 다른 브랜치 테이블 4개(`base_exercises`, `gym_exercises`, `training_notes`, `training_programs`)가 딸려와 이 브랜치에 넣을 수 없으므로 `types_db.ts` 를 되돌렸다. 절차는 수행했고 결과가 무변경임을 확인. 원래 지시: `types_db.ts` 를 마이그레이션과 **같은 커밋에** 포함 — 헌법 II 스키마 동기화 규약. CHECK 제약은 컬럼 타입을 바꾸지 않으므로 산출물이 동일할 수 있으나 절차는 생략하지 않는다
+- [x] T013 quickstart 게이트 2 수행 — `psql -h 127.0.0.1 -p 54322` 로 `pr_history` 에 무게 `0` / `52.5` / `1500` INSERT가 전부 `violates check constraint` 로 거부되고 `100` 은 통과하는지 확인. 미래 날짜가 DB를 통과하는 것은 **정상**이다
 
 **Checkpoint**: 검증 계층 완성. UI를 거치지 않는 경로도 막힌다. 여기서부터 스토리 작업 가능
 
