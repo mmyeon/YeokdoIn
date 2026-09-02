@@ -16,6 +16,8 @@ module.exports = {
     '!features/programs/model/**/__tests__/**',
     'features/movement-analysis/model/**/*.ts',
     '!features/movement-analysis/model/**/__tests__/**',
+    'features/personal-records/model/**/*.ts',
+    '!features/personal-records/model/**/__tests__/**',
     'actions/personalRecords.ts',
   ],
   coverageThreshold: {
@@ -32,6 +34,12 @@ module.exports = {
       statements: 80,
     },
     'features/movement-analysis/model/': {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+    'features/personal-records/model/': {
       branches: 80,
       functions: 80,
       lines: 80,
