@@ -9,6 +9,7 @@ Weightlifting training assistant — track programs, analyze movements, manage P
 - Docker Desktop must be running before anything: `npx supabase start` → `npm run dev`
 - `npm run generate-types` after Supabase schema changes
 - PR titles and descriptions in Korean
+- **UI 문구는 한국어**. 라벨·버튼·토스트·확인창·빈 상태 안내·검증 메시지 전부. 헌법은 언어 규정을 다루지 않으므로(의도적 제외) 이 규약이 유일한 기준이다. 예외는 종목 이름 — `exercises` 테이블의 진실이 영문이므로 화면에도 영문으로 나온다
 - Commit prefix convention: `[feat]`, `[fix]`, `[refactor]`, etc.
 
 ## Domain Reference

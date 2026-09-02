@@ -4,19 +4,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 
-import { Pill } from "@/components/ui/pill";
 import RecordAddDialog from "@/components/PersonalRecords/RecordAddDialog";
 import { ROUTES } from "@/routes";
 import { usePersonalRecords } from "@/hooks/usePersonalRecords";
 import { PersonalRecordInfo } from "@/types/personalRecords";
-
-const RECENT_THRESHOLD_DAYS = 14;
-
-function isRecent(prDate: string | null): boolean {
-  if (!prDate) return false;
-  const diffMs = Date.now() - new Date(prDate).getTime();
-  return diffMs >= 0 && diffMs < RECENT_THRESHOLD_DAYS * 24 * 60 * 60 * 1000;
-}
 
 function formatShortDate(prDate: string | null): string {
   if (!prDate) return "";
@@ -43,24 +34,24 @@ function PersonalRecordsPage() {
         <button
           type="button"
           onClick={handleBack}
-          aria-label="Back"
+          aria-label="뒤로"
           className="-ml-1 flex items-center gap-1 rounded-md px-2 py-1.5 text-yd-text-muted text-[14px] font-medium hover:bg-yd-elevated"
         >
           <ChevronLeft className="size-4" aria-hidden />
-          Settings
+          설정
         </button>
         <RecordAddDialog />
       </div>
 
       <header className="px-5">
         <h1 className="text-h1">PR</h1>
-        <p className="mt-1 text-caption text-yd-text-muted">Most recent</p>
+        <p className="mt-1 text-caption text-yd-text-muted">최근 기록순</p>
       </header>
 
       <section className="px-4">
         {isLoading ? (
           <div className="flex justify-center py-10 text-[13px] text-yd-text-muted">
-            Loading...
+            불러오는 중...
           </div>
         ) : records.length === 0 ? (
           <EmptyState />
@@ -82,9 +73,9 @@ function EmptyState() {
   return (
     <div className="flex flex-col items-center gap-3 rounded-md border border-dashed border-yd-line px-4 py-10 text-center">
       <p className="text-[13px] text-yd-text-muted leading-[1.6]">
-        No personal records saved.
+        저장된 PR이 없습니다.
         <br />
-        Use the + button to add one.
+        + 버튼으로 첫 기록을 추가해보세요.
       </p>
       <Plus className="size-4 text-yd-text-muted" aria-hidden />
     </div>
@@ -96,7 +87,6 @@ interface RecordRowProps {
 }
 
 function RecordRow({ record }: RecordRowProps) {
-  const recent = isRecent(record.prDate);
   const dateLabel = formatShortDate(record.prDate);
 
   return (
@@ -108,14 +98,7 @@ function RecordRow({ record }: RecordRowProps) {
         <span className="text-[14px] font-semibold truncate">
           {record.exerciseName}
         </span>
-        <span className="flex items-center gap-1.5 text-[10px] text-yd-text-muted">
-          {dateLabel && <span>{dateLabel}</span>}
-          {recent && (
-            <Pill size="sm" tone="primary" variant="outlined">
-              Recent
-            </Pill>
-          )}
-        </span>
+        <span className="text-[10px] text-yd-text-muted">{dateLabel}</span>
       </div>
 
       <div className="flex items-baseline gap-1 text-yd-text">

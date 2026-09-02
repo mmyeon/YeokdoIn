@@ -46,7 +46,7 @@ function messageFor(
 
 export default function PRHistoryEntryEditor({
   initial,
-  submitLabel = "Save",
+  submitLabel = "저장",
   isPending,
   onSubmit,
   onCancel,
@@ -83,7 +83,7 @@ export default function PRHistoryEntryEditor({
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1">
-          <Label htmlFor="pr-weight">Weight (kg)</Label>
+          <Label htmlFor="pr-weight">무게 (kg)</Label>
           <Input
             id="pr-weight"
             type="number"
@@ -99,7 +99,7 @@ export default function PRHistoryEntryEditor({
               setTouched((prev) => ({ ...prev, weight: true }));
             }}
             onBlur={() => setTouched((prev) => ({ ...prev, weight: true }))}
-            placeholder="e.g. 52"
+            placeholder="예: 52"
           />
           {weightError && (
             <p id="pr-weight-error" className="text-xs text-destructive">
@@ -108,7 +108,7 @@ export default function PRHistoryEntryEditor({
           )}
         </div>
         <div className="space-y-1">
-          <Label htmlFor="pr-date">Date</Label>
+          <Label htmlFor="pr-date">날짜</Label>
           <Input
             id="pr-date"
             type="date"
@@ -131,25 +131,25 @@ export default function PRHistoryEntryEditor({
       </div>
 
       <div className="space-y-1">
-        <Label htmlFor="pr-note">Note (optional)</Label>
+        <Label htmlFor="pr-note">메모 (선택)</Label>
         <Textarea
           id="pr-note"
           rows={2}
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          placeholder="e.g. clean only, failed jerk"
+          placeholder="예: 클린만 성공, 저크 실패"
         />
       </div>
 
       <div className="flex justify-end gap-2">
         {onCancel && (
           <Button variant="ghost" size="sm" onClick={onCancel}>
-            <X className="h-4 w-4 mr-1" /> Cancel
+            <X className="h-4 w-4 mr-1" /> 취소
           </Button>
         )}
         <Button size="sm" disabled={!canSubmit} onClick={handleSubmit}>
           <Save className="h-4 w-4 mr-1" />
-          {isPending ? "Saving..." : submitLabel}
+          {isPending ? "저장 중..." : submitLabel}
         </Button>
       </div>
     </div>

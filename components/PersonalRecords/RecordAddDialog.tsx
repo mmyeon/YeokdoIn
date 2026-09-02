@@ -23,11 +23,11 @@ const RecordAddDialog = () => {
 
   const addMutation = useAddPRHistoryEntry(
     () => {
-      toast.success("Personal record added.");
+      toast.success("PR을 등록했습니다.");
       setOpen(false);
       setExerciseId(0);
     },
-    () => toast.error("Failed to add personal record.")
+    () => toast.error("PR 등록에 실패했습니다.")
   );
 
   function handleToggleDialog(nextOpen: boolean) {
@@ -44,19 +44,19 @@ const RecordAddDialog = () => {
           className="gap-1 px-2 text-yd-primary font-semibold"
         >
           <Plus className="size-3.5" aria-hidden />
-          Add
+          추가
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add Record</DialogTitle>
+          <DialogTitle>PR 등록</DialogTitle>
           <DialogDescription>
-            Enter exercise, weight, date, and optional note.
+            종목과 무게, 날짜를 입력하세요. 메모는 선택입니다.
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-[auto_1fr] items-center gap-3">
-          <Label htmlFor="exercise">Exercise</Label>
+          <Label htmlFor="exercise">종목</Label>
           <WorkoutSelect
             selectedId={exerciseId || undefined}
             onSelect={(id) => setExerciseId(id)}
@@ -64,11 +64,11 @@ const RecordAddDialog = () => {
         </div>
 
         <PRHistoryEntryEditor
-          submitLabel="Save"
+          submitLabel="저장"
           isPending={addMutation.isPending}
           onSubmit={(draft) => {
             if (!exerciseId) {
-              toast.error("Please select an exercise.");
+              toast.error("종목을 선택해주세요.");
               return;
             }
             addMutation.mutate({

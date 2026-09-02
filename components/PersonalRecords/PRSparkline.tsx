@@ -21,7 +21,7 @@ function PRSparkline({
   if (points.length < 2) {
     return (
       <div className="flex h-[90px] items-center justify-center rounded-md border border-dashed border-yd-line text-[11px] text-yd-text-muted">
-        Graph appears with 2 or more records.
+        기록이 2건 이상이면 그래프가 나타납니다.
       </div>
     );
   }
