@@ -63,7 +63,7 @@ Next.js 15 App Router 단일 앱. 저장소 루트 기준 경로를 쓴다.
 - [ ] T008 `npx jest features/personal-records` 실행해 **실패를 눈으로 확인** — 헌법 V의 RED 단계. 실패를 보지 않고 T009로 넘어가면 위반이다
 - [ ] T009 `features/personal-records/model/validate-pr-input.ts` 에 `PRInputDraft`·`ValidationError`·`validatePRInput` 구현 (GREEN) — 순수 함수, I/O·React·`new Date()` 금지. 정수 판정은 `Number.isInteger(weight)`. 위반 시 첫 건에서 멈추지 않고 전부 반환
 - [ ] T010 `supabase/migrations/<timestamp>_pr_constraints.sql` 작성 — `pr_history` 에 `new_weight > 0` / `<= 1000` / `= trunc(new_weight)` 3종, `public."personal-records"` 에 `weight > 0` / `<= 1000` / `= trunc(weight)` 3종. `pr_date` 미래 방지 CHECK는 **넣지 않는다** (research.md R3: 덤프·복원 실패 위험)
-- [ ] T011 마이그레이션 적용 전 로컬 위반 데이터 확인 후 `npx supabase db reset` 실행 — quickstart "원격 배포 전 필수 확인"의 count 질의를 로컬에 먼저 돌려 0건임을 확인한다. 위반 행이 있으면 진행하지 말고 정리 방침을 사용자와 정한다
+- [ ] T011 마이그레이션 적용 전 로컬 위반 데이터 확인 후 `npx supabase migration up` 실행 — quickstart "원격 배포 전 필수 확인"의 count 질의를 로컬에 먼저 돌려 0건임을 확인한다. 위반 행이 있으면 진행하지 말고 정리 방침을 사용자와 정한다. **`db reset`을 쓰지 않는다** — 로컬 Supabase는 워크트리 전체가 공유하며, DB에는 이 브랜치에 파일이 없는 마이그레이션 4개(`feat/ocr-program-input`의 `gym_exercises`, `recovered/training-hub-v1`의 `training_notes` 등)가 적용돼 있다. reset하면 그 브랜치들의 로컬 스키마가 사라진다
 - [ ] T012 `npm run generate-types` 재실행하고 `types_db.ts` 를 마이그레이션과 **같은 커밋에** 포함 — 헌법 II 스키마 동기화 규약. CHECK 제약은 컬럼 타입을 바꾸지 않으므로 산출물이 동일할 수 있으나 절차는 생략하지 않는다
 - [ ] T013 quickstart 게이트 2 수행 — `psql -h 127.0.0.1 -p 54322` 로 `pr_history` 에 무게 `0` / `52.5` / `1500` INSERT가 전부 `violates check constraint` 로 거부되고 `100` 은 통과하는지 확인. 미래 날짜가 DB를 통과하는 것은 **정상**이다
 
