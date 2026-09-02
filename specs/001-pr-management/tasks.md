@@ -92,7 +92,7 @@ Next.js 15 App Router 단일 앱. 저장소 루트 기준 경로를 쓴다.
 - [x] T019 [P] [US1] `components/PersonalRecords/RecordAddDialog.tsx` 가 `getExercises()` 결과 전체를 선택지로 제공하는지 확인 — 7개 종목으로 하드코딩된 제한이 있으면 제거한다 (FR-002, US1 시나리오 2) — **확인 결과**: `WorkoutSelect` 가 `useExercises()` 결과를 그대로 `map` 하므로 하드코딩 제한 없음. 코드 변경 없음
 - [x] T020 [P] [US1] `components/PersonalRecords/PRHistoryEntryEditor.tsx` 무게 input의 `step` 을 `1` 로, `min` 을 `1`, `max` 를 `1000` 으로 설정 — 브라우저 힌트일 뿐이므로 T016·T010의 강제 검증을 대체하지 않는다
 - [x] T021 [US1] 이미 등록된 종목으로 다시 추가 시 새 행이 생기지 않고 기존 PR이 갱신되는지 확인 — `UNIQUE (user_id, exercise_id)` 와 `recomputeCache` 가 이미 보장하므로 코드 변경 없이 quickstart 게이트 3 US1-6으로 검증한다 (FR-006) — **확인 결과**: `personal_records_user_id_exercise_id_unique` 제약이 `supabase/migrations/20250626045747_remote_schema.sql:275` 에 존재하고, `addPRHistoryEntry` 재등록 시 캐시가 UPDATE되는 단위 테스트가 이미 통과한다. 코드 변경 없음. 수동 검증은 T022에서 함께 수행
-- [ ] T022 [US1] quickstart 게이트 3 US1 시나리오 1~7 수동 실행 — 특히 3(무게 0), 4(무게 52.5), 5(미래 날짜)에서 명세 문구가 그대로 노출되는지 확인
+- [x] T022 [US1] quickstart 게이트 3 US1 시나리오 1~7 수동 실행 — 특히 3(무게 0), 4(무게 52.5), 5(미래 날짜)에서 명세 문구가 그대로 노출되는지 확인 — **완료 (2026-09-02)**. 수동 검증 중 발견해 함께 고친 것: (a) UI 문구 영어 혼재 → 한국어 통일 + `CLAUDE.md`에 규약 명시(헌법은 언어 규정을 의도적으로 제외하므로 CLAUDE.md가 유일한 기준), (b) 이력 행의 `이전무게 → 새무게` 표기가 이전 기록이 없을 때 `34 → 34`로 보이던 문제 → 해당 날짜의 무게만 표시, (c) 목록의 `Recent` 태그 제거, (d) 종목 드롭다운을 스내치/클린/저크/스쿼트/프레스/기타로 그룹화, (e) `components/ui/select.tsx` Viewport의 `h-[var(--radix-select-trigger-height)]` 제거 — 목록 영역이 한 줄 높이로 눌려 있던 기존 버그, (f) 스파크라인에 점별 무게 숫자(kg) 표시
 
 **Checkpoint**: US1 단독으로 완결된다. 여기까지가 MVP
 
@@ -153,13 +153,13 @@ Next.js 15 App Router 단일 앱. 저장소 루트 기준 경로를 쓴다.
 
 ### Tests for User Story 4 ⚠️ 먼저 작성하고 실패를 확인할 것
 
-- [ ] T037 [P] [US4] `components/PersonalRecords/__tests__/PRSparkline.test.tsx` 신규 — 기록 0건, 1건, 2건, 같은 날짜 2건, 무게가 모두 동일한 3건(`wSpan` 0 경계)에서 오류 없이 렌더되는지 (FR-017, 엣지케이스 "같은 날짜에 기록이 여러 건")
+- [ ] T037 [P] [US4] **선행 완료 있음** — 좌표·라벨 로직을 `features/personal-records/model/sparkline-plot.ts` 로 분리하고 무게 동일·날짜 동일 등 0 나눗셈 경계 테스트 8건을 `__tests__/sparkline-plot.test.ts` 에 이미 확보했다(T022 과정에서). 남은 것은 컴포넌트 렌더 테스트뿐이다. `components/PersonalRecords/__tests__/PRSparkline.test.tsx` 신규 — 기록 0건, 1건, 2건, 같은 날짜 2건, 무게가 모두 동일한 3건(`wSpan` 0 경계)에서 오류 없이 렌더되는지 (FR-017, 엣지케이스 "같은 날짜에 기록이 여러 건")
 - [ ] T038 [US4] 위 테스트 실행해 실패 또는 통과를 확인 — `PRSparkline` 은 이미 `points.length < 2` 를 처리하므로 통과할 수 있다. 그 경우 테스트는 **회귀 방지 자산**으로 남기고 T039는 건너뛴다
 
 ### Implementation for User Story 4
 
 - [ ] T039 [US4] T038에서 드러난 경계 결함만 `components/PersonalRecords/PRSparkline.tsx` 에서 수정 — 빈 그래프나 예외를 내지 않고 현재 기록만 표시 (FR-017)
-- [ ] T040 [P] [US4] `components/PersonalRecords/PRSparkline.tsx` 의 안내 문구 `"Graph appears with 2 or more records."` 를 한국어로 교체 — 화면의 나머지 사용자 문구가 한국어이고 검증 메시지도 한국어다
+- [x] T040 [P] [US4] **완료 (T022 과정에서 선행)** — `components/PersonalRecords/PRSparkline.tsx` 의 안내 문구 `"Graph appears with 2 or more records."` 를 한국어로 교체 — 화면의 나머지 사용자 문구가 한국어이고 검증 메시지도 한국어다
 - [ ] T041 [US4] `app/settings/personal-records/[id]/page.tsx` 가 `getPRHistory` 결과를 `pr_date` 기준으로 표시하고 각 기록의 무게·날짜를 보여주는지 확인 (FR-014, FR-015)
 - [ ] T042 [US4] `actions/__tests__/personalRecords.test.ts` 에 `getPRHistory` 소유자 검증 테스트 추가 — 타 사용자의 `exerciseId`/`recordId` 로 접근 시 `.eq("user_id", userId)` 가 걸려 결과가 비는지 (FR-018, SC-005)
 - [ ] T043 [US4] quickstart 게이트 3 US4 시나리오 1~5 수동 실행 — 특히 2(이력 1건), 3(이력 0건 직접 URL), 5(타인 record id URL 접근 거부)

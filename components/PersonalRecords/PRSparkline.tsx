@@ -11,7 +11,7 @@ interface PRSparklineProps {
 
 /** viewBox 단위. 좌표 계산은 이 좌표계에서 하고 화면에는 늘려 그린다. */
 const PAD = 8;
-const MIN_LABEL_GAP = 34;
+const MIN_LABEL_GAP = 42;
 
 function formatMonth(ms: number): string {
   const d = new Date(ms);
@@ -83,6 +83,9 @@ function PRSparkline({ history, width = 300, height = 70 }: PRSparklineProps) {
               style={{ left: `${(p.x / width) * 100}%`, top: `${p.y - 16}px` }}
             >
               {p.weight}
+              <span className="ml-px text-[8px] font-normal text-yd-text-muted">
+                kg
+              </span>
             </span>
           ) : null
         )}
