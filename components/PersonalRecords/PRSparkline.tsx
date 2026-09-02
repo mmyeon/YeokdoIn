@@ -1,5 +1,6 @@
 "use client";
 
+import { buildSparklinePlot } from "@/features/personal-records/model/sparkline-plot";
 import { PRHistoryEntry } from "@/types/personalRecords";
 
 interface PRSparklineProps {
@@ -8,76 +9,90 @@ interface PRSparklineProps {
   height?: number;
 }
 
-function PRSparkline({
-  history,
-  width = 300,
-  height = 70,
-}: PRSparklineProps) {
-  const points = history
+/** viewBox 단위. 좌표 계산은 이 좌표계에서 하고 화면에는 늘려 그린다. */
+const PAD = 8;
+const MIN_LABEL_GAP = 34;
+
+function formatMonth(ms: number): string {
+  const d = new Date(ms);
+  return `${d.getMonth() + 1}월`;
+}
+
+function PRSparkline({ history, width = 300, height = 70 }: PRSparklineProps) {
+  const input = history
     .map((h) => ({ t: new Date(h.prDate).getTime(), w: h.newWeight }))
     .filter((p) => Number.isFinite(p.t))
     .sort((a, b) => a.t - b.t);
 
-  if (points.length < 2) {
+  if (input.length < 2) {
     return (
-      <div className="flex h-[90px] items-center justify-center rounded-md border border-dashed border-yd-line text-[11px] text-yd-text-muted">
+      <div className="flex h-[110px] items-center justify-center rounded-md border border-dashed border-yd-line text-[11px] text-yd-text-muted">
         기록이 2건 이상이면 그래프가 나타납니다.
       </div>
     );
   }
 
-  const tMin = points[0].t;
-  const tMax = points[points.length - 1].t;
-  const wMin = Math.min(...points.map((p) => p.w));
-  const wMax = Math.max(...points.map((p) => p.w));
-  const tSpan = Math.max(1, tMax - tMin);
-  const wSpan = Math.max(1, wMax - wMin);
+  const { points, polyline } = buildSparklinePlot(input, {
+    width,
+    height,
+    pad: PAD,
+    minLabelGap: MIN_LABEL_GAP,
+  });
 
-  const pad = 8;
-  const plot = points.map((p) => ({
-    x: pad + ((p.t - tMin) / tSpan) * (width - pad * 2),
-    y: height - pad - ((p.w - wMin) / wSpan) * (height - pad * 2),
-  }));
-
-  const polyline = plot.map((p) => `${p.x},${p.y}`).join(" ");
-
-  const fmt = (ms: number) => {
-    const d = new Date(ms);
-    return d.toLocaleString('en-US', { month: 'short' });
-  };
+  const tMin = input[0].t;
+  const tMax = input[input.length - 1].t;
 
   return (
-    <div className="relative h-[90px] w-full rounded-md border border-dashed border-yd-line p-2">
-      <svg
-        viewBox={`0 0 ${width} ${height}`}
-        width="100%"
-        height="70"
-        preserveAspectRatio="none"
-        style={{ overflow: "visible" }}
-      >
-        <polyline
-          points={polyline}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          className="text-yd-primary"
-        />
-        {plot.map((p, i) => (
-          <circle
-            key={i}
-            cx={p.x}
-            cy={p.y}
-            r={3}
-            fill="currentColor"
+    <div className="relative h-[110px] w-full rounded-md border border-dashed border-yd-line p-2">
+      {/* 무게 라벨은 HTML로 얹는다. svg가 preserveAspectRatio="none"이라
+          그 안의 <text>는 가로로 늘어나 읽기 어려워진다. */}
+      <div className="relative mt-4 h-[70px] w-full">
+        <svg
+          viewBox={`0 0 ${width} ${height}`}
+          width="100%"
+          height="70"
+          preserveAspectRatio="none"
+          className="absolute inset-0"
+          style={{ overflow: "visible" }}
+          aria-hidden
+        >
+          <polyline
+            points={polyline}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
             className="text-yd-primary"
           />
-        ))}
-      </svg>
+          {points.map((p, i) => (
+            <circle
+              key={i}
+              cx={p.x}
+              cy={p.y}
+              r={3}
+              fill="currentColor"
+              className="text-yd-primary"
+            />
+          ))}
+        </svg>
+
+        {points.map((p, i) =>
+          p.showLabel ? (
+            <span
+              key={i}
+              className="absolute -translate-x-1/2 whitespace-nowrap text-[10px] font-semibold text-yd-text"
+              style={{ left: `${(p.x / width) * 100}%`, top: `${p.y - 16}px` }}
+            >
+              {p.weight}
+            </span>
+          ) : null
+        )}
+      </div>
+
       <span className="absolute bottom-1.5 left-3 text-[10px] text-yd-text-muted">
-        {fmt(tMin)}
+        {formatMonth(tMin)}
       </span>
       <span className="absolute bottom-1.5 right-3 text-[10px] text-yd-text-muted">
-        {fmt(tMax)}
+        {formatMonth(tMax)}
       </span>
     </div>
   );
