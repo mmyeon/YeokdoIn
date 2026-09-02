@@ -41,10 +41,10 @@ Next.js 15 App Router 단일 앱. 저장소 루트 기준 경로를 쓴다.
 
 **Purpose**: 명세와 설계 문서의 단위 불일치를 먼저 제거하고(헌법 I: 명세 우선), 작업 환경을 연다
 
-- [ ] T001 [P] `specs/001-pr-management/research.md` R1의 0.5kg 근거를 1kg 기준으로 교체 — CHECK 표현식을 `weight = trunc(weight)` 로, 검증표의 통과/거부 예시를 정수 기준(`100` ✅ / `52.5` ❌ / `62.25` ❌)으로 고치고, R2의 "0.5 배수 아님" 열을 "정수 아님"으로 바꾼다
-- [ ] T002 [P] `specs/001-pr-management/data-model.md` 의 CHECK 제약 3종과 검증 규칙 표를 정수 기준으로 수정 — `pr_history_new_weight_half_kg` → `pr_history_new_weight_integer CHECK (new_weight = trunc(new_weight))`, `personal_records_weight_half_kg` → `personal_records_weight_integer CHECK (weight = trunc(weight))`, 메시지는 "무게는 1kg 단위로 입력해주세요."
-- [ ] T003 [P] `specs/001-pr-management/contracts/server-actions.md` 의 model 계약 표를 정수 기준으로 수정 — `{ weight: 52.5 }` 통과 예시를 `{ weight: 100 }` 으로, `{ weight: 52.4 }` 거부 예시를 `{ weight: 52.5 }` 로 교체하고 메시지를 "무게는 1kg 단위로 입력해주세요." 로 통일
-- [ ] T004 [P] `specs/001-pr-management/plan.md` 와 `specs/001-pr-management/quickstart.md` 의 0.5kg 언급을 1kg로 수정 — plan.md Summary·Constitution Re-Check의 "0.5kg 단위", quickstart 게이트 2의 `52.4`/`52.5` SQL 예시와 게이트 3 US1-4행
+- [x] T001 [P] `specs/001-pr-management/research.md` R1의 0.5kg 근거를 1kg 기준으로 교체 — CHECK 표현식을 `weight = trunc(weight)` 로, 검증표의 통과/거부 예시를 정수 기준(`100` ✅ / `52.5` ❌ / `62.25` ❌)으로 고치고, R2의 "0.5 배수 아님" 열을 "정수 아님"으로 바꾼다
+- [x] T002 [P] `specs/001-pr-management/data-model.md` 의 CHECK 제약 3종과 검증 규칙 표를 정수 기준으로 수정 — `pr_history_new_weight_half_kg` → `pr_history_new_weight_integer CHECK (new_weight = trunc(new_weight))`, `personal_records_weight_half_kg` → `personal_records_weight_integer CHECK (weight = trunc(weight))`, 메시지는 "무게는 1kg 단위로 입력해주세요."
+- [x] T003 [P] `specs/001-pr-management/contracts/server-actions.md` 의 model 계약 표를 정수 기준으로 수정 — `{ weight: 52.5 }` 통과 예시를 `{ weight: 100 }` 으로, `{ weight: 52.4 }` 거부 예시를 `{ weight: 52.5 }` 로 교체하고 메시지를 "무게는 1kg 단위로 입력해주세요." 로 통일
+- [x] T004 [P] `specs/001-pr-management/plan.md` 와 `specs/001-pr-management/quickstart.md` 의 0.5kg 언급을 1kg로 수정 — plan.md Summary·Constitution Re-Check의 "0.5kg 단위", quickstart 게이트 2의 `52.4`/`52.5` SQL 예시와 게이트 3 US1-4행
 - [ ] T005 로컬 개발 환경 기동 — `npx supabase status` 로 로컬 스택 확인 후 `npm run dev`. Docker Desktop이 먼저 떠 있어야 한다 (CLAUDE.md)
 - [ ] T006 `features/personal-records/model/` 및 `features/personal-records/model/__tests__/` 디렉토리 생성 — 이 feature의 순수 로직 거처 (plan.md Structure Decision)
 

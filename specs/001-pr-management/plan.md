@@ -9,7 +9,7 @@
 PR 등록·수정·목록·이력조회는 **이미 구현되어 동작한다**. 따라서 이 계획은 신규 구축이 아니라
 **명세와 현행 구현의 갭을 메우는 작업**이다. 갭은 두 종류다.
 
-1. **검증이 클라이언트에만 있다** — 무게 하한, 미래 날짜, 0.5kg 단위, 무게 상한이 서버 액션과
+1. **검증이 클라이언트에만 있다** — 무게 하한, 미래 날짜, 정수 kg, 무게 상한이 서버 액션과
    DB 어디에도 없다. 브라우저를 거치지 않는 호출은 전부 통과한다. 헌법 III(시스템 경계에서 검증)
    위반이며 이번 작업의 핵심이다.
 2. **현재 PR의 날짜를 수정할 수 없다** — `updateRecordWeight`가 `pr_date`를 오늘로 강제한다.
@@ -142,7 +142,7 @@ supabase/migrations/<new>_pr_constraints.sql
 | III. Validated Inputs | ✅ PASS (해소) | model → 서버 액션 → DB CHECK 3중. 미래 날짜만 2중이며 그 근거를 research.md R3에 실측과 함께 남겼다 |
 | IV. Separation of Concerns | ✅ PASS | 신설 `model`은 순수 함수뿐이고 `today`를 주입받아 I/O가 없다. UI와 서버 액션이 같은 model을 참조하며 역방향 참조는 없다. 기존 코드는 배치 규칙(공유 사용 → 공유 디렉토리)에 부합하므로 옮기지 않는다 |
 | V. TDD | ✅ PASS | quickstart 게이트 1이 "실패를 먼저 확인"을 명시적 절차로 박아뒀다 |
-| VI. Documentation First | ✅ PASS | 0.5kg 부동소수점 안전성과 CHECK의 `current_date` 허용 여부를 **추측하지 않고 로컬 Postgres에서 실행해** 확인했다. 후자는 최초 가정이 틀렸음이 드러나 근거를 교체했다 |
+| VI. Documentation First | ✅ PASS | 정수 kg의 부동소수점 안전성과 CHECK의 `current_date` 허용 여부를 **추측하지 않고 로컬 Postgres에서 실행해** 확인했다. 후자는 최초 가정이 틀렸음이 드러나 근거를 교체했다 |
 | VII. YAGNI | ✅ PASS | 이력 편집 UI 존폐, dual-write 원자성(RPC), 자동 PR 감지를 모두 보류하고 보류 이유를 남겼다 |
 
 **게이트 결과**: PASS. Phase 0에서 위반이던 III·IV가 설계로 해소됐다.

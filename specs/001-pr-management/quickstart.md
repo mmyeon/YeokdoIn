@@ -60,7 +60,7 @@ PGPASSWORD=postgres psql -h 127.0.0.1 -p 54322 -U postgres -d postgres
 INSERT INTO pr_history (user_id, exercise_id, new_weight, pr_date, source)
   VALUES ('<uuid>', 1, 0, current_date, 'manual');       -- 무게 0
 INSERT INTO pr_history (user_id, exercise_id, new_weight, pr_date, source)
-  VALUES ('<uuid>', 1, 52.4, current_date, 'manual');    -- 0.5 단위 아님
+  VALUES ('<uuid>', 1, 100, current_date, 'manual');    -- 정수 아님
 INSERT INTO pr_history (user_id, exercise_id, new_weight, pr_date, source)
   VALUES ('<uuid>', 1, 1500, current_date, 'manual');    -- 상한 초과
 
@@ -79,7 +79,7 @@ INSERT INTO pr_history (user_id, exercise_id, new_weight, pr_date, source)
 
 ```sql
 SELECT count(*) FILTER (WHERE new_weight <= 0)                        AS bad_weight,
-       count(*) FILTER (WHERE new_weight * 2 <> trunc(new_weight * 2)) AS not_half_kg,
+       count(*) FILTER (WHERE new_weight <> trunc(new_weight))         AS not_integer,
        count(*) FILTER (WHERE new_weight > 1000)                       AS over_limit
 FROM pr_history;
 ```
@@ -99,7 +99,7 @@ FROM pr_history;
 | 1 | Add → 종목 `Snatch`, 무게 `80`, 날짜 어제 → Save | 목록에 `Snatch · 80kg · 어제 날짜` |
 | 2 | 종목 드롭다운을 연다 | 카탈로그 전체가 보인다 (7개로 제한되지 않음) |
 | 3 | 무게 `0` 입력 | 저장 불가 + "무게는 0보다 커야 합니다." |
-| 4 | 무게 `52.4` 입력 | 저장 불가 + "무게는 0.5kg 단위로 입력해주세요." |
+| 4 | 무게 `52.5` 입력 | 저장 불가 + "무게는 1kg 단위로 입력해주세요." |
 | 5 | 날짜를 내일로 입력 | 저장 불가 + "미래 날짜는 기록할 수 없습니다." |
 | 6 | 이미 있는 `Snatch`로 다시 추가 | 행이 늘지 않고 기존 PR이 갱신된다 |
 | 7 | 로그아웃 후 URL 직접 접근 | 인증 요구, 타인 데이터 미노출 |

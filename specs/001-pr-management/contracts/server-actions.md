@@ -41,10 +41,10 @@ export function validatePRInput(
 
 | 입력 | 결과 |
 |---|---|
-| `{ weight: 52.5, prDate: "2026-08-20" }`, today `2026-08-31` | `[]` |
+| `{ weight: 100, prDate: "2026-08-20" }`, today `2026-08-31` | `[]` |
 | `{ weight: 0, ... }` | `weight`: "무게는 0보다 커야 합니다." |
 | `{ weight: null, ... }` | `weight`: "무게를 입력해주세요." |
-| `{ weight: 52.4, ... }` | `weight`: "무게는 0.5kg 단위로 입력해주세요." |
+| `{ weight: 52.5, ... }` | `weight`: "무게는 1kg 단위로 입력해주세요." |
 | `{ weight: 1001, ... }` | `weight`: "무게가 너무 큽니다. 다시 확인해주세요." |
 | `{ prDate: "2026-09-01" }`, today `2026-08-31` | `prDate`: "미래 날짜는 기록할 수 없습니다." |
 | `{ prDate: "" }` | `prDate`: "날짜를 입력해주세요." |

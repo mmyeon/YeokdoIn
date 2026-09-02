@@ -48,7 +48,7 @@
 ALTER TABLE public.pr_history
   ADD CONSTRAINT pr_history_new_weight_positive   CHECK (new_weight > 0),
   ADD CONSTRAINT pr_history_new_weight_max        CHECK (new_weight <= 1000),
-  ADD CONSTRAINT pr_history_new_weight_half_kg    CHECK (new_weight * 2 = trunc(new_weight * 2));
+  ADD CONSTRAINT pr_history_new_weight_integer    CHECK (new_weight = trunc(new_weight));
 ```
 
 `previous_weight`에는 제약을 걸지 않는다. 파생 스냅샷이고 NULL이 정상 값이다.
@@ -80,11 +80,11 @@ ALTER TABLE public.pr_history
 ALTER TABLE public."personal-records"
   ADD CONSTRAINT personal_records_weight_positive CHECK (weight > 0),
   ADD CONSTRAINT personal_records_weight_max      CHECK (weight <= 1000),
-  ADD CONSTRAINT personal_records_weight_half_kg  CHECK (weight * 2 = trunc(weight * 2));
+  ADD CONSTRAINT personal_records_weight_integer  CHECK (weight = trunc(weight));
 ```
 
-`double precision`에서 이 표현식이 안전한 이유는 [research.md R1](./research.md) 참조 (0.5는 이진
-부동소수점에서 정확히 표현된다).
+`double precision`에서 이 표현식이 안전한 이유는 [research.md R1](./research.md) 참조 (정수는 이진
+부동소수점에서 2^53까지 정확히 표현되며, 상한 1000kg은 그 안쪽이다).
 
 ---
 
@@ -119,7 +119,7 @@ pr_history(u, e) 가 비면        → personal-records(u, e) 행도 삭제
 | 무게 필수 | 값이 존재하고 숫자 | "무게를 입력해주세요." | FR-008 |
 | 무게 하한 | `weight > 0` | "무게는 0보다 커야 합니다." | FR-008 |
 | 무게 상한 | `weight <= 1000` | "무게가 너무 큽니다. 다시 확인해주세요." | Edge case |
-| 0.5kg 단위 | `weight * 2 === Math.trunc(weight * 2)` | "무게는 0.5kg 단위로 입력해주세요." | FR-010 |
+| 정수 kg | `Number.isInteger(weight)` | "무게는 1kg 단위로 입력해주세요." | FR-010 |
 | 날짜 필수 | `YYYY-MM-DD` 형식 | "날짜를 입력해주세요." | FR-003 |
 | 미래 금지 | `prDate <= 오늘` | "미래 날짜는 기록할 수 없습니다." | FR-009 |
 
