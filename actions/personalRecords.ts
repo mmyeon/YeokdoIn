@@ -8,7 +8,22 @@ import {
   PRHistoryEntry,
   PRHistoryRow,
 } from "@/types/personalRecords";
+import { validatePRInput } from "@/features/personal-records/model/validate-pr-input";
 import { handleDatabaseError } from "@/utils/database";
+
+/** 오늘 날짜(`YYYY-MM-DD`). 순수 함수인 `validatePRInput`에 주입한다. */
+function todayISO(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/**
+ * 위반이 있으면 첫 메시지로 throw한다. 서버 경계에서 막는 것이 목적이므로
+ * Supabase 클라이언트를 만들기 전에 호출한다.
+ */
+function assertValidPRInput(weight: number | null, prDate: string): void {
+  const [firstError] = validatePRInput({ weight, prDate }, todayISO());
+  if (firstError) throw new Error(firstError.message);
+}
 
 export async function getUserDefaultBarbelWeight(): Promise<
   UserSettingRow["default_barbell_weight"] | null
@@ -138,6 +153,8 @@ type AddPRHistoryInput = {
  * legacy readers; pr_history is the timeline source of truth.
  */
 export async function addPRHistoryEntry(input: AddPRHistoryInput): Promise<void> {
+  assertValidPRInput(input.newWeight, input.prDate);
+
   const supabase = await supabaseServerClient();
   const userId = await requireUserId();
 

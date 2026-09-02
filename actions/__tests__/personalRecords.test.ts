@@ -168,7 +168,10 @@ function createSupabaseMock(store: Store) {
   }
 
   return {
-    from: (name: string) => buildQuery(name),
+    from: (name: string) => {
+      mockState.fromCalls.push(name);
+      return buildQuery(name);
+    },
     auth: {
       getUser: async () => ({ data: { user: { id: USER_ID } }, error: null }),
     },
@@ -176,7 +179,10 @@ function createSupabaseMock(store: Store) {
 }
 
 // Hoisted mock storage so jest.mock factory can see it.
-const mockState: { store: Store } = { store: createStore() };
+const mockState: { store: Store; fromCalls: string[] } = {
+  store: createStore(),
+  fromCalls: [],
+};
 
 jest.mock("@/features/auth/supabase/ServerClient", () => ({
   supabaseServerClient: jest.fn(async () => createSupabaseMock(mockState.store)),
@@ -194,6 +200,7 @@ import {
 
 beforeEach(() => {
   mockState.store = createStore();
+  mockState.fromCalls = [];
 });
 
 describe("addPRHistoryEntry", () => {
@@ -573,5 +580,77 @@ describe("getPRHistory", () => {
     expect(result).toHaveLength(2);
     expect(result[0].id).toBe(101);
     expect(result[1].id).toBe(100);
+  });
+});
+
+describe("addPRHistoryEntry 입력 검증", () => {
+  const validInput = {
+    exerciseId: 10,
+    newWeight: 100,
+    prDate: "2026-04-20",
+    note: null,
+  };
+
+  function tomorrowISO(): string {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().slice(0, 10);
+  }
+
+  const cases: Array<[string, Partial<typeof validInput>, string]> = [
+    ["무게 0", { newWeight: 0 }, "무게는 0보다 커야 합니다."],
+    ["음수 무게", { newWeight: -10 }, "무게는 0보다 커야 합니다."],
+    ["정수가 아닌 무게", { newWeight: 52.5 }, "무게는 1kg 단위로 입력해주세요."],
+    [
+      "상한 초과 무게",
+      { newWeight: 1001 },
+      "무게가 너무 큽니다. 다시 확인해주세요.",
+    ],
+    ["빈 날짜", { prDate: "" }, "날짜를 입력해주세요."],
+  ];
+
+  it.each(cases)("%s는 DB 접근 전에 거부한다", async (_label, patch, message) => {
+    await expect(addPRHistoryEntry({ ...validInput, ...patch })).rejects.toThrow(
+      message
+    );
+
+    expect(mockState.fromCalls).toEqual([]);
+    expect(mockState.store["pr_history"].rows).toHaveLength(0);
+    expect(mockState.store["personal-records"].rows).toHaveLength(0);
+  });
+
+  it("미래 날짜는 DB 접근 전에 거부한다", async () => {
+    await expect(
+      addPRHistoryEntry({ ...validInput, prDate: tomorrowISO() })
+    ).rejects.toThrow("미래 날짜는 기록할 수 없습니다.");
+
+    expect(mockState.fromCalls).toEqual([]);
+  });
+
+  it("경계값(1000kg, 오늘 날짜)은 통과한다", async () => {
+    const today = new Date().toISOString().slice(0, 10);
+
+    await addPRHistoryEntry({ ...validInput, newWeight: 1000, prDate: today });
+
+    expect(mockState.store["pr_history"].rows).toHaveLength(1);
+  });
+
+  it("위반이 여러 건이면 첫 번째 메시지로 실패한다", async () => {
+    await expect(
+      addPRHistoryEntry({ ...validInput, newWeight: 0, prDate: "" })
+    ).rejects.toThrow("무게는 0보다 커야 합니다.");
+
+    expect(mockState.fromCalls).toEqual([]);
+  });
+});
+
+describe("addRecord 위임 경로", () => {
+  it("addPRHistoryEntry의 검증 거부가 그대로 전파된다", async () => {
+    await expect(
+      addRecord({ exerciseId: 10, weight: 52.5, prDate: "2026-04-20" })
+    ).rejects.toThrow("무게는 1kg 단위로 입력해주세요.");
+
+    expect(mockState.fromCalls).toEqual([]);
+    expect(mockState.store["pr_history"].rows).toHaveLength(0);
   });
 });

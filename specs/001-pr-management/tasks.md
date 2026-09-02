@@ -81,17 +81,17 @@ Next.js 15 App Router 단일 앱. 저장소 루트 기준 경로를 쓴다.
 
 ### Tests for User Story 1 ⚠️ 먼저 작성하고 실패를 확인할 것
 
-- [ ] T014 [US1] `actions/__tests__/personalRecords.test.ts` 에 `addPRHistoryEntry` 검증 거부 케이스 추가 — 무게 `0`, 정수 아닌 무게, `1001`, 미래 `prDate` 각각에서 **DB 접근 전에** throw하는지. Supabase 목의 `from` 이 호출되지 않았음을 함께 단언해 "DB 접근 전 차단"을 증명한다
-- [ ] T015 [US1] 위 테스트 실행해 실패 확인 (RED)
+- [x] T014 [US1] `actions/__tests__/personalRecords.test.ts` 에 `addPRHistoryEntry` 검증 거부 케이스 추가 — 무게 `0`, 정수 아닌 무게, `1001`, 미래 `prDate` 각각에서 **DB 접근 전에** throw하는지. Supabase 목의 `from` 이 호출되지 않았음을 함께 단언해 "DB 접근 전 차단"을 증명한다
+- [x] T015 [US1] 위 테스트 실행해 실패 확인 (RED)
 
 ### Implementation for User Story 1
 
-- [ ] T016 [US1] `actions/personalRecords.ts` 의 `addPRHistoryEntry` 본문 첫 줄에서 `validatePRInput({ weight: input.newWeight, prDate: input.prDate }, todayISO())` 호출 — 위반이 있으면 첫 메시지로 throw. `supabaseServerClient()` 보다 먼저 실행한다 (FR-003, FR-004, FR-008, FR-009, FR-010)
-- [ ] T017 [US1] `actions/personalRecords.ts` 의 `addRecord` 가 `addPRHistoryEntry` 로 위임하므로 검증을 **중복 구현하지 않음**을 확인하고, 위임 경로에도 거부가 전파되는 테스트 1건 추가
-- [ ] T018 [US1] `components/PersonalRecords/PRHistoryEntryEditor.tsx` 의 인라인 `canSubmit` 조건(45행)을 `validatePRInput` 호출로 교체 — 반환된 `ValidationError[]` 가 비어야 저장 버튼 활성. 필드별 메시지를 무게·날짜 입력 아래에 노출한다 (contracts UI 계약)
-- [ ] T019 [P] [US1] `components/PersonalRecords/RecordAddDialog.tsx` 가 `getExercises()` 결과 전체를 선택지로 제공하는지 확인 — 7개 종목으로 하드코딩된 제한이 있으면 제거한다 (FR-002, US1 시나리오 2)
-- [ ] T020 [P] [US1] `components/PersonalRecords/PRHistoryEntryEditor.tsx` 무게 input의 `step` 을 `1` 로, `min` 을 `1`, `max` 를 `1000` 으로 설정 — 브라우저 힌트일 뿐이므로 T016·T010의 강제 검증을 대체하지 않는다
-- [ ] T021 [US1] 이미 등록된 종목으로 다시 추가 시 새 행이 생기지 않고 기존 PR이 갱신되는지 확인 — `UNIQUE (user_id, exercise_id)` 와 `recomputeCache` 가 이미 보장하므로 코드 변경 없이 quickstart 게이트 3 US1-6으로 검증한다 (FR-006)
+- [x] T016 [US1] `actions/personalRecords.ts` 의 `addPRHistoryEntry` 본문 첫 줄에서 `validatePRInput({ weight: input.newWeight, prDate: input.prDate }, todayISO())` 호출 — 위반이 있으면 첫 메시지로 throw. `supabaseServerClient()` 보다 먼저 실행한다 (FR-003, FR-004, FR-008, FR-009, FR-010)
+- [x] T017 [US1] `actions/personalRecords.ts` 의 `addRecord` 가 `addPRHistoryEntry` 로 위임하므로 검증을 **중복 구현하지 않음**을 확인하고, 위임 경로에도 거부가 전파되는 테스트 1건 추가
+- [x] T018 [US1] `components/PersonalRecords/PRHistoryEntryEditor.tsx` 의 인라인 `canSubmit` 조건(45행)을 `validatePRInput` 호출로 교체 — 반환된 `ValidationError[]` 가 비어야 저장 버튼 활성. 필드별 메시지를 무게·날짜 입력 아래에 노출한다 (contracts UI 계약)
+- [x] T019 [P] [US1] `components/PersonalRecords/RecordAddDialog.tsx` 가 `getExercises()` 결과 전체를 선택지로 제공하는지 확인 — 7개 종목으로 하드코딩된 제한이 있으면 제거한다 (FR-002, US1 시나리오 2) — **확인 결과**: `WorkoutSelect` 가 `useExercises()` 결과를 그대로 `map` 하므로 하드코딩 제한 없음. 코드 변경 없음
+- [x] T020 [P] [US1] `components/PersonalRecords/PRHistoryEntryEditor.tsx` 무게 input의 `step` 을 `1` 로, `min` 을 `1`, `max` 를 `1000` 으로 설정 — 브라우저 힌트일 뿐이므로 T016·T010의 강제 검증을 대체하지 않는다
+- [x] T021 [US1] 이미 등록된 종목으로 다시 추가 시 새 행이 생기지 않고 기존 PR이 갱신되는지 확인 — `UNIQUE (user_id, exercise_id)` 와 `recomputeCache` 가 이미 보장하므로 코드 변경 없이 quickstart 게이트 3 US1-6으로 검증한다 (FR-006) — **확인 결과**: `personal_records_user_id_exercise_id_unique` 제약이 `supabase/migrations/20250626045747_remote_schema.sql:275` 에 존재하고, `addPRHistoryEntry` 재등록 시 캐시가 UPDATE되는 단위 테스트가 이미 통과한다. 코드 변경 없음. 수동 검증은 T022에서 함께 수행
 - [ ] T022 [US1] quickstart 게이트 3 US1 시나리오 1~7 수동 실행 — 특히 3(무게 0), 4(무게 52.5), 5(미래 날짜)에서 명세 문구가 그대로 노출되는지 확인
 
 **Checkpoint**: US1 단독으로 완결된다. 여기까지가 MVP

@@ -4,6 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input/input";
 import { Label } from "@/components/ui/input/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  validatePRInput,
+  type ValidationError,
+} from "@/features/personal-records/model/validate-pr-input";
 import { Save, X } from "lucide-react";
 import { useState } from "react";
 
@@ -21,6 +25,10 @@ interface PRHistoryEntryEditorProps {
   onCancel?: () => void;
 }
 
+/** 무게 입력 경계. 서버 액션과 DB CHECK 제약이 같은 값을 강제한다. */
+const MIN_WEIGHT_KG = 1;
+const MAX_WEIGHT_KG = 1000;
+
 const todayISO = () => {
   const d = new Date();
   const y = d.getFullYear();
@@ -29,6 +37,13 @@ const todayISO = () => {
   return `${y}-${m}-${day}`;
 };
 
+function messageFor(
+  errors: ValidationError[],
+  field: ValidationError["field"]
+): string | null {
+  return errors.find((error) => error.field === field)?.message ?? null;
+}
+
 export default function PRHistoryEntryEditor({
   initial,
   submitLabel = "Save",
@@ -36,14 +51,24 @@ export default function PRHistoryEntryEditor({
   onSubmit,
   onCancel,
 }: PRHistoryEntryEditorProps) {
-  const [weight, setWeight] = useState<number | "">(
-    initial?.newWeight ?? ""
-  );
+  const [weight, setWeight] = useState<number | "">(initial?.newWeight ?? "");
   const [prDate, setPrDate] = useState<string>(initial?.prDate ?? todayISO());
   const [note, setNote] = useState<string>(initial?.note ?? "");
+  // 아직 건드리지 않은 필드에 "무게를 입력해주세요"를 띄우지 않기 위한 상태.
+  const [touched, setTouched] = useState<Record<ValidationError["field"], boolean>>({
+    weight: false,
+    prDate: false,
+  });
 
-  const canSubmit =
-    typeof weight === "number" && weight > 0 && prDate.length > 0 && !isPending;
+  // UI와 서버 액션이 같은 순수 함수를 부르므로 규칙이 갈라지지 않는다.
+  const errors = validatePRInput(
+    { weight: weight === "" ? null : weight, prDate },
+    todayISO()
+  );
+  const weightError = touched.weight ? messageFor(errors, "weight") : null;
+  const prDateError = touched.prDate ? messageFor(errors, "prDate") : null;
+
+  const canSubmit = errors.length === 0 && !isPending;
 
   async function handleSubmit() {
     if (!canSubmit) return;
@@ -62,13 +87,25 @@ export default function PRHistoryEntryEditor({
           <Input
             id="pr-weight"
             type="number"
+            step={1}
+            min={MIN_WEIGHT_KG}
+            max={MAX_WEIGHT_KG}
             value={weight === "" ? "" : weight}
+            aria-invalid={weightError !== null}
+            aria-describedby={weightError ? "pr-weight-error" : undefined}
             onChange={(e) => {
               const v = e.target.valueAsNumber;
               setWeight(Number.isNaN(v) ? "" : v);
+              setTouched((prev) => ({ ...prev, weight: true }));
             }}
+            onBlur={() => setTouched((prev) => ({ ...prev, weight: true }))}
             placeholder="e.g. 52"
           />
+          {weightError && (
+            <p id="pr-weight-error" className="text-xs text-destructive">
+              {weightError}
+            </p>
+          )}
         </div>
         <div className="space-y-1">
           <Label htmlFor="pr-date">Date</Label>
@@ -77,8 +114,19 @@ export default function PRHistoryEntryEditor({
             type="date"
             value={prDate}
             max={todayISO()}
-            onChange={(e) => setPrDate(e.target.value)}
+            aria-invalid={prDateError !== null}
+            aria-describedby={prDateError ? "pr-date-error" : undefined}
+            onChange={(e) => {
+              setPrDate(e.target.value);
+              setTouched((prev) => ({ ...prev, prDate: true }));
+            }}
+            onBlur={() => setTouched((prev) => ({ ...prev, prDate: true }))}
           />
+          {prDateError && (
+            <p id="pr-date-error" className="text-xs text-destructive">
+              {prDateError}
+            </p>
+          )}
         </div>
       </div>
 
