@@ -41,8 +41,8 @@ function createSupabaseMock(store: Store) {
     const filters: Array<(row: Row) => boolean> = [];
     let payload: Row | Row[] | null = null;
     let updatePayload: Row | null = null;
-    let orderColumn: string | null = null;
-    let orderAsc = true;
+    // `.order()` 는 여러 번 체이닝될 수 있고 먼저 지정한 컬럼이 우선한다.
+    const orderBy: Array<{ column: string; ascending: boolean }> = [];
 
     const api: Record<string, (...args: unknown[]) => unknown> = {};
 
@@ -54,15 +54,18 @@ function createSupabaseMock(store: Store) {
       const state = tableState(table);
       if (operation === "select") {
         let rows = applyFilters(state.rows);
-        if (orderColumn) {
+        if (orderBy.length > 0) {
           rows = [...rows].sort((a, b) => {
-            const av = a[orderColumn!] as number | string | null;
-            const bv = b[orderColumn!] as number | string | null;
-            if (av === bv) return 0;
-            if (av === null || av === undefined) return 1;
-            if (bv === null || bv === undefined) return -1;
-            if (av < bv) return orderAsc ? -1 : 1;
-            return orderAsc ? 1 : -1;
+            for (const { column, ascending } of orderBy) {
+              const av = a[column] as number | string | null;
+              const bv = b[column] as number | string | null;
+              if (av === bv) continue;
+              if (av === null || av === undefined) return 1;
+              if (bv === null || bv === undefined) return -1;
+              if (av < bv) return ascending ? -1 : 1;
+              return ascending ? 1 : -1;
+            }
+            return 0;
           });
         }
         return { data: clone(rows), error: null };
@@ -146,8 +149,12 @@ function createSupabaseMock(store: Store) {
       return api;
     };
     api.order = (col: unknown, opts: unknown) => {
-      orderColumn = col as string;
-      orderAsc = !(opts && (opts as { ascending?: boolean }).ascending === false);
+      orderBy.push({
+        column: col as string,
+        ascending: !(
+          opts && (opts as { ascending?: boolean }).ascending === false
+        ),
+      });
       return api;
     };
     api.maybeSingle = () => {
@@ -557,6 +564,87 @@ describe("getPRHistory", () => {
     expect(result).toHaveLength(2);
     expect(result[0].id).toBe(101);
     expect(result[1].id).toBe(100);
+  });
+
+  // FR-018 / SC-005: 소유자 격리. 조회 경로에 user_id 필터가 빠지면 남의 기록이
+  // 그대로 노출되므로 회귀 방지로 고정한다.
+  it("타 사용자의 exerciseId로 조회하면 결과가 비어 있다", async () => {
+    mockState.store["pr_history"].rows.push({
+      id: 300,
+      user_id: "other-user",
+      exercise_id: 10,
+      previous_weight: null,
+      new_weight: 200,
+      pr_date: "2026-04-15",
+      note: null,
+      source: "manual",
+    });
+
+    const result = await getPRHistory(10);
+
+    expect(result).toEqual([]);
+  });
+
+  it("같은 종목이라도 내 행만 반환하고 남의 행은 섞이지 않는다", async () => {
+    mockState.store["pr_history"].rows.push(
+      {
+        id: 301,
+        user_id: "other-user",
+        exercise_id: 10,
+        previous_weight: null,
+        new_weight: 200,
+        pr_date: "2026-04-25",
+        note: null,
+        source: "manual",
+      },
+      {
+        id: 302,
+        user_id: USER_ID,
+        exercise_id: 10,
+        previous_weight: null,
+        new_weight: 60,
+        pr_date: "2026-04-20",
+        note: null,
+        source: "manual",
+      }
+    );
+
+    const result = await getPRHistory(10);
+
+    expect(result.map((e) => e.id)).toEqual([302]);
+  });
+
+  // 엣지케이스(spec.md): 같은 날짜에 기록이 여러 건. pr_date만으로 정렬하면
+  // 순서가 DB 반환 순서에 좌우돼 화면이 새로고침마다 달라진다.
+  it("같은 pr_date 기록은 최근에 만들어진 것이 먼저 온다", async () => {
+    mockState.store["pr_history"].rows.push(
+      {
+        id: 400,
+        user_id: USER_ID,
+        exercise_id: 10,
+        previous_weight: null,
+        new_weight: 60,
+        pr_date: "2026-04-20",
+        note: null,
+        source: "manual",
+        created_at: "2026-04-20T01:00:00.000Z",
+      },
+      {
+        id: 401,
+        user_id: USER_ID,
+        exercise_id: 10,
+        previous_weight: 60,
+        new_weight: 62,
+        pr_date: "2026-04-20",
+        note: null,
+        source: "manual",
+        created_at: "2026-04-20T09:00:00.000Z",
+      }
+    );
+
+    const result = await getPRHistory(10);
+
+    expect(result.map((e) => e.id)).toEqual([401, 400]);
   });
 });
 

@@ -195,16 +195,34 @@ Next.js 15 App Router 단일 앱. 저장소 루트 기준 경로를 쓴다.
 
 ### Tests for User Story 4 ⚠️ 먼저 작성하고 실패를 확인할 것
 
-- [ ] T037 [P] [US4] **선행 완료 있음** — 좌표·라벨 로직을 `features/personal-records/model/sparkline-plot.ts` 로 분리하고 무게 동일·날짜 동일 등 0 나눗셈 경계 테스트 8건을 `__tests__/sparkline-plot.test.ts` 에 이미 확보했다(T022 과정에서). 남은 것은 컴포넌트 렌더 테스트뿐이다. `components/PersonalRecords/__tests__/PRSparkline.test.tsx` 신규 — 기록 0건, 1건, 2건, 같은 날짜 2건, 무게가 모두 동일한 3건(`wSpan` 0 경계)에서 오류 없이 렌더되는지 (FR-017, 엣지케이스 "같은 날짜에 기록이 여러 건")
-- [ ] T038 [US4] 위 테스트 실행해 실패 또는 통과를 확인 — `PRSparkline` 은 이미 `points.length < 2` 를 처리하므로 통과할 수 있다. 그 경우 테스트는 **회귀 방지 자산**으로 남기고 T039는 건너뛴다
+- [x] T037 [P] [US4] **선행 완료 있음** — 좌표·라벨 로직을 `features/personal-records/model/sparkline-plot.ts` 로 분리하고 무게 동일·날짜 동일 등 0 나눗셈 경계 테스트 8건을 `__tests__/sparkline-plot.test.ts` 에 이미 확보했다(T022 과정에서). 남은 것은 컴포넌트 렌더 테스트뿐이다. `components/PersonalRecords/__tests__/PRSparkline.test.tsx` 신규 — 기록 0건, 1건, 2건, 같은 날짜 2건, 무게가 모두 동일한 3건(`wSpan` 0 경계)에서 오류 없이 렌더되는지 (FR-017, 엣지케이스 "같은 날짜에 기록이 여러 건")
+- [x] T038 [US4] 위 테스트 실행해 실패 또는 통과를 확인 — `PRSparkline` 은 이미 `points.length < 2` 를 처리하므로 통과할 수 있다. 그 경우 테스트는 **회귀 방지 자산**으로 남기고 T039는 건너뛴다
 
 ### Implementation for User Story 4
 
-- [ ] T039 [US4] T038에서 드러난 경계 결함만 `components/PersonalRecords/PRSparkline.tsx` 에서 수정 — 빈 그래프나 예외를 내지 않고 현재 기록만 표시 (FR-017)
+- [~] T039 [US4] **건너뜀 (T038 8건 전부 통과 — 경계 결함 없음)** T038에서 드러난 경계 결함만 `components/PersonalRecords/PRSparkline.tsx` 에서 수정 — 빈 그래프나 예외를 내지 않고 현재 기록만 표시 (FR-017)
 - [x] T040 [P] [US4] **완료 (T022 과정에서 선행)** — `components/PersonalRecords/PRSparkline.tsx` 의 안내 문구 `"Graph appears with 2 or more records."` 를 한국어로 교체 — 화면의 나머지 사용자 문구가 한국어이고 검증 메시지도 한국어다
-- [ ] T041 [US4] `app/settings/personal-records/[id]/page.tsx` 가 `getPRHistory` 결과를 `pr_date` 기준으로 표시하고 각 기록의 무게·날짜를 보여주는지 확인 (FR-014, FR-015)
-- [ ] T042 [US4] `actions/__tests__/personalRecords.test.ts` 에 `getPRHistory` 소유자 검증 테스트 추가 — 타 사용자의 `exerciseId`/`recordId` 로 접근 시 `.eq("user_id", userId)` 가 걸려 결과가 비는지 (FR-018, SC-005)
+- [x] T041 [US4] `app/settings/personal-records/[id]/page.tsx` 가 `getPRHistory` 결과를 `pr_date` 기준으로 표시하고 각 기록의 무게·날짜를 보여주는지 확인 (FR-014, FR-015)
+- [x] T042 [US4] `actions/__tests__/personalRecords.test.ts` 에 `getPRHistory` 소유자 검증 테스트 추가 — 타 사용자의 `exerciseId`/`recordId` 로 접근 시 `.eq("user_id", userId)` 가 걸려 결과가 비는지 (FR-018, SC-005)
 - [ ] T043 [US4] quickstart 게이트 3 US4 시나리오 1~5 수동 실행 — 특히 2(이력 1건), 3(이력 0건 직접 URL), 5(타인 record id URL 접근 거부)
+
+### 이 Phase에서 한 판단 (2026-09-08)
+
+- **컴포넌트 테스트 환경을 이 Phase에서 처음 열었다.** 저장소에 `.test.tsx` 가 하나도 없었고
+  jest는 `testEnvironment: 'node'` 로만 돌고 있었다. T037을 위해 `jest-environment-jsdom` 을
+  devDependency로 추가하고, `jest.config.js` 에 `components/**/__tests__/**/*.test.tsx`
+  경로와 ts-jest transform(`jsx: 'react-jsx'`)을 더했다. 프로젝트 `tsconfig` 의 `jsx` 는
+  Next가 쓰는 `"preserve"` 라 그대로면 테스트에서 JSX를 실행할 수 없다. 환경은 파일 상단
+  docblock(`@jest-environment jsdom`)으로 파일 단위 지정 — 기존 node 테스트에 영향 없다.
+- **T039를 건너뛴 근거**: T038의 8건이 첫 실행에서 전부 통과했다. `PRSparkline` 은 이미
+  `points.length < 2` 를 처리하고 `buildSparklinePlot` 이 `tSpan`/`wSpan` 하한 1로 0 나눗셈을
+  막는다. 고칠 결함이 없어 테스트만 회귀 방지 자산으로 남겼다.
+- **T041에서 결함 1건을 찾아 고쳤다.** `getPRHistory` 가 `pr_date` 단일 정렬이라 **같은 날짜
+  기록이 여러 건일 때**(spec 엣지케이스) 순서가 DB 반환 순서에 좌우돼 새로고침마다 목록이
+  달라질 수 있었다. `.order("created_at", { ascending: false })` 를 2차 정렬로 추가하고
+  테스트로 고정했다. 표시 자체(무게·날짜)는 이미 충족돼 있어 UI 변경은 없다.
+- **T042는 통과 상태로 확인됐다.** `getPRHistory` 에 `.eq("user_id", userId)` 가 이미 있어
+  타 사용자 행이 섞이지 않는다. 회귀 방지 테스트 2건으로 고정했다(FR-018, SC-005).
 
 **Checkpoint**: US1~US4 전부 독립적으로 동작한다
 

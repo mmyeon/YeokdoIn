@@ -5,7 +5,17 @@ module.exports = {
   testMatch: [
     '**/features/**/__tests__/**/*.test.ts',
     '**/actions/__tests__/**/*.test.ts',
+    // 컴포넌트 렌더 테스트. 파일 상단 docblock으로 jsdom 환경을 지정한다.
+    '**/components/**/__tests__/**/*.test.tsx',
   ],
+  transform: {
+    // tsconfig의 jsx는 Next가 쓰는 "preserve"라 ts-jest가 그대로 두면 실행할 수
+    // 없다. 테스트에서만 react-jsx로 바꿔 변환한다.
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      { tsconfig: { jsx: 'react-jsx' } },
+    ],
+  },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
   },

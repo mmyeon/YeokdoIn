@@ -160,7 +160,10 @@ export async function getPRHistory(
     .select("*")
     .eq("user_id", userId)
     .eq("exercise_id", exerciseId)
-    .order("pr_date", { ascending: false });
+    .order("pr_date", { ascending: false })
+    // 같은 날짜에 기록이 여러 건일 수 있다(spec 엣지케이스). pr_date만으로는
+    // 순서가 DB 반환 순서에 좌우돼 화면이 매번 달라지므로 created_at으로 고정한다.
+    .order("created_at", { ascending: false });
 
   if (error) handleDatabaseError(error);
 
