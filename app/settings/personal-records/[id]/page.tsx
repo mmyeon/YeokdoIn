@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Pill } from "@/components/ui/pill";
 import PRHistoryEntryEditor from "@/components/PersonalRecords/PRHistoryEntryEditor";
 import PRSparkline from "@/components/PersonalRecords/PRSparkline";
+import { resolvePRDetailViewState } from "@/features/personal-records/model/pr-detail-view-state";
 import { ROUTES } from "@/routes";
 import {
   useAddPRHistoryEntry,
@@ -45,7 +46,9 @@ function PRDetailPage() {
     }
   };
 
-  const { data: records = [], isLoading: isLoadingRecord } =
+  // `isLoading` 이 아니라 `isPending` 을 본다 — 인증 확정 전에는 쿼리가 꺼져 있고
+  // 꺼진 쿼리의 `isLoading` 은 false라 "아직 모른다"가 "없다"로 오판된다.
+  const { data: records = [], isPending: isRecordPending } =
     usePersonalRecords();
   const record = records.find((r) => r.id === recordId);
   const exerciseId = record?.exerciseId ?? null;
@@ -82,7 +85,14 @@ function PRDetailPage() {
     () => toast.error("기록 삭제에 실패했습니다.")
   );
 
-  if (!isLoadingRecord && !record) {
+  const viewState = resolvePRDetailViewState({
+    isRecordPending,
+    hasRecord: !!record,
+  });
+
+  // `record` 는 "ready"일 때만 존재한다. `!record` 를 함께 검사해 TS가 아래에서
+  // 좁혀진 타입을 쓸 수 있게 한다(런타임 의미는 viewState와 동일).
+  if (viewState !== "ready" || !record) {
     return (
       <main className="flex flex-col gap-4 max-w-md mx-auto pb-24 pt-2 px-0">
         <div className="px-4 pt-2 pb-1">
@@ -97,7 +107,9 @@ function PRDetailPage() {
           </button>
         </div>
         <div className="px-5 py-10 text-center text-[13px] text-yd-text-muted">
-          기록을 찾을 수 없습니다.
+          {viewState === "loading"
+            ? "불러오는 중..."
+            : "기록을 찾을 수 없습니다."}
         </div>
       </main>
     );
@@ -128,10 +140,10 @@ function PRDetailPage() {
       </div>
 
       <header className="px-5">
-        <h1 className="text-[26px] font-bold">{record?.exerciseName}</h1>
+        <h1 className="text-[26px] font-bold">{record.exerciseName}</h1>
         <div className="mt-1.5 flex items-baseline gap-2">
           <span className="text-[48px] font-extrabold leading-none tracking-[-1.5px]">
-            {record?.weight ?? 0}
+            {record.weight}
           </span>
           <span className="text-[16px] font-semibold text-yd-text-muted">
             kg
