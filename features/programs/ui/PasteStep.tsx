@@ -27,7 +27,7 @@ export function PasteStep({ onNext }: PasteStepProps) {
   };
 
   return (
-    <div className="flex flex-1 flex-col gap-3 px-4 pb-6">
+    <div className="flex flex-col gap-3 px-4 pb-6">
       <div>
         <h2 className="text-[20px] font-bold -tracking-[0.3px]">
           프로그램 붙여넣기
@@ -52,7 +52,8 @@ export function PasteStep({ onNext }: PasteStepProps) {
         autoCapitalize="off"
         autoComplete="off"
         className={cn(
-          'min-h-[240px] flex-1 resize-none rounded-xl border bg-yd-surface px-3.5 py-3 font-mono text-[14px] leading-[1.7] text-yd-text outline-none placeholder:text-yd-text-dim',
+          // 높이를 화면에 맞춰 고정한다. 늘리면 하단 탭바·「다음」과 겹친다.
+          'h-[38dvh] min-h-[160px] max-h-[360px] resize-none rounded-xl border bg-yd-surface px-3.5 py-3 font-mono text-[14px] leading-[1.7] text-yd-text outline-none placeholder:text-yd-text-dim',
           warned ? 'border-yd-error' : 'border-yd-line',
         )}
       />

@@ -75,7 +75,7 @@ export default function ProgramInputPage() {
   };
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md flex-col bg-yd-bg text-yd-text">
+    <main className="mx-auto flex min-h-dvh max-w-md flex-col bg-yd-bg pb-[calc(var(--tab-bar-height)+1rem)] text-yd-text">
       <header className="flex items-center gap-3 px-4 pb-1 pt-3">
         <button
           type="button"
