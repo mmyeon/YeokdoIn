@@ -100,27 +100,56 @@ Next.js 15 App Router 단일 앱. 저장소 루트 기준 경로를 쓴다.
 
 ## Phase 4: User Story 2 - PR 수정 (Priority: P1)
 
-**Goal**: 현재 PR의 **무게와 날짜를 모두** 수정한다. 현재 `updateRecordWeight` 가 `pr_date` 를
-오늘로 강제해 FR-007의 절반이 빠져 있는 것이 이 스토리의 핵심 갭이다
+**Goal**: 현재 PR의 **무게와 날짜를 모두** 수정한다.
+
+> ⚠️ **2026-09-08 정정 — 이 스토리의 전제가 틀렸다.**
+> 계획 당시 "`updateRecordWeight` 가 `pr_date` 를 오늘로 강제해 FR-007의 절반이 빠져 있다"고
+> 판단했으나, 실제로는 **`updateRecordWeight` 와 그 훅 `useUpdatePersonalRecord` 를 호출하는
+> UI가 하나도 없었다**(테스트 이름부터 `(legacy)` 였다). 화면의 실제 수정 경로는
+> `updatePRHistoryEntry` 이고 이건 처음부터 `newWeight` 와 `prDate` 를 **둘 다** 받으며,
+> `PRHistoryEntryEditor` 도 무게·날짜 입력을 이미 노출하고 있었다. 즉 **FR-007은 이미 충족돼
+> 있었다.**
+>
+> 그래서 T023·T026·T027·T029·T030·T031은 **죽은 코드에 파라미터를 더하는 작업**이라 폐기하고,
+> 죽은 `updateRecordWeight`/`useUpdatePersonalRecord`/legacy 테스트를 삭제했다. 남겨두면 다음
+> 사람도 같은 착각을 한다.
+>
+> 실제 갭은 **T028 하나** 였다 — `updatePRHistoryEntry` 에 검증이 전혀 없었다. 무게는 DB CHECK가
+> 막아주지만(메시지가 raw Postgres 에러로 노출) **미래 날짜는 R3에 따라 DB 제약이 없어 코드가
+> 유일한 방어선**이었고, 실측 결과 `pr_date = '2099-12-31'` UPDATE가 그대로 성공했다.
 
 **Independent Test**: `Back Squat 120kg` 이 등록된 계정에서 `130kg / 2026-08-25` 로 수정한 뒤
 목록과 상세에 무게와 날짜가 **둘 다** 반영되는지 확인 (spec.md US2)
 
 ### Tests for User Story 2 ⚠️ 먼저 작성하고 실패를 확인할 것
 
-- [ ] T023 [US2] `actions/__tests__/personalRecords.test.ts` 에 `updateRecordWeight` 의 `prDate` 인자 테스트 추가 — `prDate` 를 주면 그 값이 `pr_history.pr_date` 로 INSERT되고, 생략하면 종전대로 오늘이 쓰이는지
-- [ ] T024 [P] [US2] `actions/__tests__/personalRecords.test.ts` 에 `updatePRHistoryEntry` 부분 검증 테스트 추가 — `newWeight` 만 준 patch는 무게만, `prDate` 만 준 patch는 날짜만 검증하고, 주지 않은 필드의 값 때문에 거부되지 않는지
-- [ ] T025 [US2] 위 두 테스트 실행해 실패 확인 (RED)
+- [~] T023 [US2] **폐기** (위 정정 참조 — `updateRecordWeight` 는 삭제됐다) `actions/__tests__/personalRecords.test.ts` 에 `updateRecordWeight` 의 `prDate` 인자 테스트 추가 — `prDate` 를 주면 그 값이 `pr_history.pr_date` 로 INSERT되고, 생략하면 종전대로 오늘이 쓰이는지
+- [x] T024 [P] [US2] `actions/__tests__/personalRecords.test.ts` 에 `updatePRHistoryEntry` 부분 검증 테스트 추가 — `newWeight` 만 준 patch는 무게만, `prDate` 만 준 patch는 날짜만 검증하고, 주지 않은 필드의 값 때문에 거부되지 않는지
+- [x] T025 [US2] 위 두 테스트 실행해 실패 확인 (RED)
 
 ### Implementation for User Story 2
 
-- [ ] T026 [US2] `actions/personalRecords.ts:280` `updateRecordWeight` 시그니처를 `(recordId, newWeight, prDate?)` 로 확장 — `pr_history` INSERT의 `pr_date` 에 `prDate ?? new Date().toISOString().slice(0, 10)` 를 쓴다 (FR-007)
-- [ ] T027 [US2] `actions/personalRecords.ts` 의 `updateRecordWeight` 본문 첫 줄에 `validatePRInput` 호출 추가 — 검증 규칙은 `addPRHistoryEntry` 와 동일
-- [ ] T028 [US2] `actions/personalRecords.ts:175` `updatePRHistoryEntry` 에 **부분 검증** 추가 — `patch.newWeight`/`patch.prDate` 가 `undefined` 가 아닌 필드만 `validatePRInput` 결과에서 골라 검사한다. 부분 수정이므로 미제공 필드를 이유로 거부하면 안 된다 (FR-007, FR-011)
-- [ ] T029 [US2] `hooks/usePersonalRecords.ts:38` `useUpdatePersonalRecord` 가 `prDate` 를 서버 액션까지 전달하도록 mutation 인자 타입 확장 — 성공 시 `personalRecords`·`prHistory` 쿼리 무효화가 유지되는지 확인
-- [ ] T030 [US2] `app/settings/personal-records/[id]/page.tsx` 의 현재 PR 수정 흐름에 날짜 입력을 노출하고 T029의 훅에 전달 — 수정이 3번 이하 조작(선택 → 값 변경 → 저장)으로 끝나야 한다 (SC-002)
-- [ ] T031 [US2] 저장 실패 시 기존 값이 손상되지 않고 실패가 토스트로 알려지는지 확인 — 서버 액션이 예외를 던지고 React Query `onError` 가 이를 받는 경로를 점검한다 (FR-011)
-- [ ] T032 [US2] quickstart 게이트 3 US2 시나리오 1~3 수동 실행 — 특히 1(무게+날짜 동시 반영)과 3(DevTools Offline에서 실패 토스트)
+- [~] T026 [US2] **폐기** `actions/personalRecords.ts:280` `updateRecordWeight` 시그니처를 `(recordId, newWeight, prDate?)` 로 확장 — `pr_history` INSERT의 `pr_date` 에 `prDate ?? new Date().toISOString().slice(0, 10)` 를 쓴다 (FR-007)
+- [~] T027 [US2] **폐기** `actions/personalRecords.ts` 의 `updateRecordWeight` 본문 첫 줄에 `validatePRInput` 호출 추가 — 검증 규칙은 `addPRHistoryEntry` 와 동일
+- [x] T028 [US2] `actions/personalRecords.ts:175` `updatePRHistoryEntry` 에 **부분 검증** 추가 — `patch.newWeight`/`patch.prDate` 가 `undefined` 가 아닌 필드만 `validatePRInput` 결과에서 골라 검사한다. 부분 수정이므로 미제공 필드를 이유로 거부하면 안 된다 (FR-007, FR-011)
+- [~] T029 [US2] **폐기** `hooks/usePersonalRecords.ts:38` `useUpdatePersonalRecord` 가 `prDate` 를 서버 액션까지 전달하도록 mutation 인자 타입 확장 — 성공 시 `personalRecords`·`prHistory` 쿼리 무효화가 유지되는지 확인
+- [~] T030 [US2] **폐기** — 날짜 입력은 이미 노출돼 있었다 `app/settings/personal-records/[id]/page.tsx` 의 현재 PR 수정 흐름에 날짜 입력을 노출하고 T029의 훅에 전달 — 수정이 3번 이하 조작(선택 → 값 변경 → 저장)으로 끝나야 한다 (SC-002)
+- [~] T031 [US2] **폐기** — `onError` → 토스트 경로가 이미 있다 저장 실패 시 기존 값이 손상되지 않고 실패가 토스트로 알려지는지 확인 — 서버 액션이 예외를 던지고 React Query `onError` 가 이를 받는 경로를 점검한다 (FR-011)
+- [ ] T032 [US2] quickstart 게이트 3 US2 시나리오 1~3 수동 실행 (범위 축소 — 1·2는 기존 동작 확인, 3만 실질 검증) — 특히 1(무게+날짜 동시 반영)과 3(DevTools Offline에서 실패 토스트)
+
+### 이 Phase에서 발견해 함께 고친 것
+
+- **타임존 버그 (T016이 만든 것)**: UI는 `getFullYear/getMonth/getDate`(로컬), 서버는
+  `toISOString()`(UTC)으로 "오늘"을 계산해 기준이 갈렸다. KST 00:00~09:00 사이엔 UTC가 아직
+  전날이라, 사용자가 오늘 날짜로 등록하면 **UI는 통과시키고 서버가 "미래 날짜"로 거부**했다.
+  새벽 훈련 기록이 매일 9시간 동안 막히는 문제였다.
+- **결정**: `pr_date` 는 시각이 아니라 **사용자 달력의 날짜**다. 따라서 판정 기준은 사용자
+  로컬 날짜여야 하고 UI는 지금 그대로 둔다(브라우저 타임존을 쓰므로 이미 위치 기반이다).
+  서버는 요청자의 타임존을 알 수 없으므로 **"지구 어디서도 미래일 수 없는 날짜"만 거부**한다 —
+  상한은 UTC+14(키리바시). `features/personal-records/model/pr-date-bounds.ts`.
+  클라이언트가 자기 타임존을 보내게 하지 않은 이유: 그 값을 서버가 믿으면 서버 검증이
+  클라이언트 검증과 같아진다. 대가로 API 직접 호출 시 "내일" 날짜는 서버가 못 막지만,
+  FR-009의 목적인 오타 방어(연도·월 실수)는 그대로 걸린다.
 
 **Checkpoint**: US1과 US2가 각각 독립적으로 동작한다. P1 완료
 
@@ -207,10 +236,10 @@ Next.js 15 App Router 단일 앱. 저장소 루트 기준 경로를 쓴다.
 
 | 파일 | 만지는 태스크 | 비고 |
 |---|---|---|
-| `actions/personalRecords.ts` | T016, T017, T026, T027, T028 | 같은 파일 — 순차 |
-| `actions/__tests__/personalRecords.test.ts` | T014, T017, T023, T024, T042 | 같은 파일 — 순차 |
+| `actions/personalRecords.ts` | T016, T017, T028 | 같은 파일 — 순차 (T026·T027 폐기) |
+| `actions/__tests__/personalRecords.test.ts` | T014, T017, T024, T042 | 같은 파일 — 순차 (T023 폐기) |
 | `components/PersonalRecords/PRHistoryEntryEditor.tsx` | T018, T020 | 같은 파일 — 순차 |
-| `app/settings/personal-records/[id]/page.tsx` | T030, T041 | 같은 파일 — 순차 |
+| `app/settings/personal-records/[id]/page.tsx` | T041 | T030 폐기로 충돌 해소 |
 | `components/PersonalRecords/PRSparkline.tsx` | T039, T040 | 같은 파일 — 순차 |
 
 ### Parallel Opportunities
