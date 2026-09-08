@@ -28,8 +28,8 @@ feature 기반 3계층. `features/programs/{model,api,ui}`, 화면은 `app/train
 
 **Purpose**: 스키마 확장과 타입 동기화
 
-- [ ] T001 `supabase/migrations/<timestamp>_programs_text_lines.sql` 작성 — `lines text[]`, `source_text text`, `updated_at timestamptz NOT NULL DEFAULT now()` 추가, `parsed_data`의 NOT NULL 해제, `programs_content_shape` CHECK 제약, `updated_at` 갱신 트리거. DDL 전문은 data-model.md 참조. **`DROP COLUMN` 사용 금지**(헌법 Guardrails)
-- [ ] T002 로컬 DB에 마이그레이션 적용 후 `npm run generate-types`로 `types_db.ts` 재생성 — 마이그레이션과 생성 타입을 같은 커밋에 포함(헌법 II). 원격 `db push`는 이 단계에서 하지 않는다
+- [X] T001 `supabase/migrations/<timestamp>_programs_text_lines.sql` 작성 — `lines text[]`, `source_text text`, `updated_at timestamptz NOT NULL DEFAULT now()` 추가, `parsed_data`의 NOT NULL 해제, `programs_content_shape` CHECK 제약, `updated_at` 갱신 트리거. DDL 전문은 data-model.md 참조. **`DROP COLUMN` 사용 금지**(헌법 Guardrails)
+- [X] T002 로컬 DB에 마이그레이션 적용 후 `npm run generate-types`로 `types_db.ts` 재생성 — 마이그레이션과 생성 타입을 같은 커밋에 포함(헌법 II). 원격 `db push`는 이 단계에서 하지 않는다
 
 **Checkpoint**: `ProgramRow`에 `lines`, `source_text`, `updated_at`이 포함되고 `parsed_data`가 nullable이 된다
 
