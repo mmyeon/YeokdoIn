@@ -23,7 +23,9 @@ ALTER TABLE "public"."programs"
 
 ALTER TABLE "public"."programs"
     ADD CONSTRAINT "programs_content_shape" CHECK (
-        ("lines" IS NOT NULL AND array_length("lines", 1) >= 1 AND "parsed_data" IS NULL)
+        -- cardinality 를 쓴다. 빈 배열에서 array_length 는 NULL 을 돌려주고,
+        -- NULL >= 1 은 NULL 이라 CHECK 가 통과해 버린다.
+        ("lines" IS NOT NULL AND cardinality("lines") >= 1 AND "parsed_data" IS NULL)
         OR ("lines" IS NULL AND "parsed_data" IS NOT NULL)
     );
 

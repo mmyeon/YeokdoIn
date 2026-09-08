@@ -9,11 +9,9 @@ import {
   deleteProgram,
   listPrograms,
   getProgram,
-  saveProgram,
   saveTextProgram,
   updateTextProgram,
   type ProgramRow,
-  type SaveProgramInput,
   type SaveTextProgramInput,
   type UpdateTextProgramInput,
 } from '@/features/programs/api/programs';
@@ -29,28 +27,6 @@ export function usePrograms() {
       return rows ?? [];
     },
     enabled: !!user,
-  });
-}
-
-interface SaveProgramHookOptions {
-  onSuccess?: (row: ProgramRow) => void;
-  onError?: (error: Error) => void;
-}
-
-export function useSaveProgram({
-  onSuccess,
-  onError,
-}: SaveProgramHookOptions = {}) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (input: SaveProgramInput) => saveProgram(input),
-    onSuccess: (row) => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROGRAMS] });
-      onSuccess?.(row);
-    },
-    onError: (error: Error) => {
-      onError?.(error);
-    },
   });
 }
 

@@ -130,14 +130,14 @@ feature 기반 3계층. `features/programs/{model,api,ui}`, 화면은 `app/train
 
 **Purpose**: 대체된 폼 입력 제거와 품질 게이트
 
-- [ ] T036 [P] 폼 UI 제거 — `features/programs/ui/`의 `ProgramForm.tsx`, `BlockEditor.tsx`, `BigStepper.tsx`, `ChipGroup.tsx`, `MovementCombobox.tsx`, `MovementPickerSheet.tsx`, `PctChip.tsx`, `StepLabel.tsx` (research.md R4)
-- [ ] T037 `features/programs/model/update.ts`와 `features/programs/model/__tests__/update.test.ts` 제거 — 폼 전용 모듈
-- [ ] T038 `features/programs/api/programs.ts`의 `saveProgram`·`SaveProgramInput`과 `hooks/usePrograms.ts`의 `useSaveProgram` 제거
-- [ ] T039 레거시 경로 회귀 확인 — `features/programs/model/serialize.ts`와 그 테스트를 남기고, 기존 구조화 프로그램의 목록 표시와 러너 진입이 그대로인지 검증 (quickstart.md 6절)
-- [ ] T040 [P] `app/training/program-input/page.tsx`에서 20줄 이상 입력의 「다음」 응답이 1초 이내인지 확인 (SC-002, SC-003)
+- [X] T036 [P] 폼 UI 제거 — `features/programs/ui/`의 `ProgramForm.tsx`, `BlockEditor.tsx`, `BigStepper.tsx`, `ChipGroup.tsx`, `MovementCombobox.tsx`, `MovementPickerSheet.tsx`, `PctChip.tsx`, `StepLabel.tsx` (research.md R4)
+- [X] T037 `features/programs/model/update.ts`와 `features/programs/model/__tests__/update.test.ts` 제거 — 폼 전용 모듈
+- [X] T038 `features/programs/api/programs.ts`의 `saveProgram`·`SaveProgramInput`과 `hooks/usePrograms.ts`의 `useSaveProgram` 제거
+- [X] T039 레거시 경로 회귀 확인 — `features/programs/model/serialize.ts`와 그 테스트를 남기고, 기존 구조화 프로그램의 목록 표시와 러너 진입이 그대로인지 검증 (quickstart.md 6절)
+- [X] T040 [P] `app/training/program-input/page.tsx`에서 20줄 이상 입력의 「다음」 응답이 1초 이내인지 확인 (SC-002, SC-003)
 - [ ] T041 quickstart.md의 수동 검증 1~7절 전 항목 수행
-- [ ] T042 `npm run test`, `npm run type-check`, `npm run build` 전부 통과 확인 — `features/programs/model/` 커버리지 임계 80% 포함 (헌법 Quality Gates)
-- [ ] T043 [P] `docs/specs/README.md` 인덱스에 본 기능의 구현 완료 상태 반영
+- [X] T042 `npm run test`, `npm run type-check`, `npm run build` 전부 통과 확인 — `features/programs/model/` 커버리지 임계 80% 포함 (헌법 Quality Gates)
+- [X] T043 [P] `docs/specs/README.md` 인덱스에 본 기능의 구현 완료 상태 반영
 
 ---
 
