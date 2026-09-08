@@ -7,6 +7,7 @@ module.exports = {
     '**/actions/__tests__/**/*.test.ts',
     // 컴포넌트 렌더 테스트. 파일 상단 docblock으로 jsdom 환경을 지정한다.
     '**/components/**/__tests__/**/*.test.tsx',
+    '**/hooks/__tests__/**/*.test.tsx',
   ],
   transform: {
     // tsconfig의 jsx는 Next가 쓰는 "preserve"라 ts-jest가 그대로 두면 실행할 수
