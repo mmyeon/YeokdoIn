@@ -28,12 +28,17 @@ lines IS NULL       → 레거시 구조화 프로그램 (읽기 전용)
 
 | 제약 | 근거 |
 | --- | --- |
-| `lines`가 `NULL`이 아니면 길이 1 이상 | FR-032 — 빈 프로그램 저장 거부 |
+| `lines`가 `NULL`이 아니면 길이 1 이상 (`cardinality`로 검사) | FR-032 — 빈 프로그램 저장 거부 |
 | `lines`가 `NULL`이 아니면 `parsed_data`는 `NULL` | 한 행이 두 형태를 갖지 않는다 |
 | `lines`가 `NULL`이면 `parsed_data`는 NOT NULL | 레거시 행의 내용 보장 |
 
 `CHECK` 제약으로 DB에 고정한다. 애플리케이션 검증(Zod)과 이중이지만, DB 제약은
 잘못된 행이 생기는 것 자체를 막으므로 유지한다.
+
+**길이 검사에 `array_length`를 쓰지 않는다.** `array_length('{}', 1)`은 `0`이 아니라
+`NULL`을 돌려주므로 `NULL >= 1`이 `NULL`이 되고, `CHECK`는 `FALSE`일 때만 막고 `NULL`이면
+통과시킨다. 그래서 `lines = '{}'`인 행이 제약을 뚫고 들어간다. 2026-09-08 구현 중 로컬 DB에서
+실제로 확인했다. `cardinality('{}')`는 `0`을 돌려주므로 `0 >= 1`이 `FALSE`가 되어 막힌다.
 
 ### 유지되는 것
 
@@ -55,7 +60,9 @@ ALTER TABLE "public"."programs"
 ALTER TABLE "public"."programs" ALTER COLUMN "parsed_data" DROP NOT NULL;
 
 ALTER TABLE "public"."programs" ADD CONSTRAINT "programs_content_shape" CHECK (
-    (lines IS NOT NULL AND array_length(lines, 1) >= 1 AND parsed_data IS NULL)
+    -- cardinality 를 쓴다. 빈 배열에서 array_length 는 NULL 을 돌려주고,
+    -- NULL >= 1 은 NULL 이라 CHECK 가 통과해 버린다.
+    (lines IS NOT NULL AND cardinality(lines) >= 1 AND parsed_data IS NULL)
     OR (lines IS NULL AND parsed_data IS NOT NULL)
 );
 ```
