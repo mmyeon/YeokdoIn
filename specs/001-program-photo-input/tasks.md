@@ -41,12 +41,12 @@ feature 기반 3계층. `features/programs/{model,api,ui}`, 화면은 `app/train
 
 **⚠️ CRITICAL**: 이 단계가 끝나기 전에는 어떤 사용자 스토리도 시작할 수 없다
 
-- [ ] T003 [P] `features/programs/model/text-program.ts`에 `TextProgram`, `DraftItem`, `SuspectSpan`, `SuspectRule` 타입 정의 (data-model.md의 애플리케이션 타입 절)
-- [ ] T004 [P] `features/programs/model/__tests__/text-program.test.ts` 작성 — `isTextProgram(row)`가 `lines`의 존재로 두 형태를 가르는지, `toTextProgram(row)`가 레거시 행에서 오류를 내는지. **실패 확인 후 다음 단계로**
-- [ ] T005 `features/programs/model/text-program.ts`에 `isTextProgram`, `toTextProgram` 구현 (T004를 통과시킨다)
-- [ ] T006 `features/programs/model/__tests__/library.test.ts` 작성 — 텍스트 행은 `lines` 직접 사용, 레거시 행은 `serializeProgram` 경유, 종목 필터가 항목 텍스트에 매칭, `isRunnable`이 레거시에서만 `true`. **실패 확인 후 다음 단계로**
-- [ ] T007 `features/programs/model/library.ts` 수정 — `toLibraryItem`이 두 형태를 처리하고, `matchesFilter`가 `movementNames` 대신 항목 텍스트에 매칭하며, `LibraryItem`에 `isRunnable: boolean` 추가 (research.md R4)
-- [ ] T008 `npm run type-check`를 실행해 `parsed_data` nullable 전환으로 드러난 호출부를 전부 해소 — 최소 `app/training/program-runner/[id]/page.tsx`(레거시만 진입)와 `features/programs/api/programs.ts`
+- [X] T003 [P] `features/programs/model/text-program.ts`에 `TextProgram`, `DraftItem`, `SuspectSpan`, `SuspectRule` 타입 정의 (data-model.md의 애플리케이션 타입 절)
+- [X] T004 [P] `features/programs/model/__tests__/text-program.test.ts` 작성 — `isTextProgram(row)`가 `lines`의 존재로 두 형태를 가르는지, `toTextProgram(row)`가 레거시 행에서 오류를 내는지. **실패 확인 후 다음 단계로**
+- [X] T005 `features/programs/model/text-program.ts`에 `isTextProgram`, `toTextProgram` 구현 (T004를 통과시킨다)
+- [X] T006 `features/programs/model/__tests__/library.test.ts` 작성 — 텍스트 행은 `lines` 직접 사용, 레거시 행은 `serializeProgram` 경유, 종목 필터가 항목 텍스트에 매칭, `isRunnable`이 레거시에서만 `true`. **실패 확인 후 다음 단계로**
+- [X] T007 `features/programs/model/library.ts` 수정 — `toLibraryItem`이 두 형태를 처리하고, `matchesFilter`가 `movementNames` 대신 항목 텍스트에 매칭하며, `LibraryItem`에 `isRunnable: boolean` 추가 (research.md R4)
+- [X] T008 `npm run type-check`를 실행해 `parsed_data` nullable 전환으로 드러난 호출부를 전부 해소 — 최소 `app/training/program-runner/[id]/page.tsx`(레거시만 진입)와 `features/programs/api/programs.ts`
 
 **Checkpoint**: 두 저장 형태가 타입 수준에서 구분되고 목록이 양쪽을 모두 표시한다
 
