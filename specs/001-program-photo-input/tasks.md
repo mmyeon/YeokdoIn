@@ -62,20 +62,20 @@ feature 기반 3계층. `features/programs/{model,api,ui}`, 화면은 `app/train
 
 > 먼저 작성하고 실패를 확인한 뒤 구현에 착수한다
 
-- [ ] T009 [P] [US1] `features/programs/model/__tests__/split-items.test.ts` 작성 — `\r\n`/`\r`/`\n` 동일 처리(FR-010), 빈 줄 제외(FR-007), 앞뒤 공백 제거(FR-008), 줄 내부 문자 보존(FR-008·FR-011), 순서 유지(FR-009), 예외 미발생(FR-011). 입력은 문서 2장 판1
-- [ ] T010 [P] [US1] `features/programs/model/__tests__/sanitize-items.test.ts` 작성 — 앞뒤 공백 제거·제어문자 제거·빈 항목 제외만 수행하고 그 외 변형이 없는지, 결과가 `[]`가 되는 경우(FR-028, FR-032)
+- [X] T009 [P] [US1] `features/programs/model/__tests__/split-items.test.ts` 작성 — `\r\n`/`\r`/`\n` 동일 처리(FR-010), 빈 줄 제외(FR-007), 앞뒤 공백 제거(FR-008), 줄 내부 문자 보존(FR-008·FR-011), 순서 유지(FR-009), 예외 미발생(FR-011). 입력은 문서 2장 판1
+- [X] T010 [P] [US1] `features/programs/model/__tests__/sanitize-items.test.ts` 작성 — 앞뒤 공백 제거·제어문자 제거·빈 항목 제외만 수행하고 그 외 변형이 없는지, 결과가 `[]`가 되는 경우(FR-028, FR-032)
 
 ### Implementation for User Story 1
 
-- [ ] T011 [P] [US1] `features/programs/model/split-items.ts`에 `splitIntoItems(text): string[]` 구현 — 계약은 contracts/model.md
-- [ ] T012 [P] [US1] `features/programs/model/sanitize-items.ts`에 `sanitizeItems(items): string[]` 구현 — 계약은 contracts/model.md
-- [ ] T013 [US1] `features/programs/api/programs.ts`에 `saveTextProgram` 추가 — 인증 확인, Zod 검증, `sanitizeItems` 적용, 빈 결과 거부(FR-032), `parsed_data`는 `NULL`로 INSERT (contracts/server-actions.md)
-- [ ] T014 [US1] `hooks/usePrograms.ts`에 `useSaveTextProgram` 추가 — 성공 시 `QUERY_KEYS.PROGRAMS` 무효화
-- [ ] T015 [P] [US1] `features/programs/ui/PasteStep.tsx` 신규 — textarea 입력, 분해 결과 미표시(FR-002), 공백뿐이면 진행 차단(FR-004)
-- [ ] T016 [P] [US1] `features/programs/ui/ProgramItemRow.tsx` 신규 — 불릿 한 행의 읽기 표시. 항목당 높이를 절제한다(FR-023). 편집은 US2에서 추가
-- [ ] T017 [US1] `features/programs/ui/ConfirmStep.tsx` 신규 — 항목 목록 렌더, 전체 항목 수 표시(FR-025), 저장 실행. 항목 텍스트를 재구성하지 않는다(FR-026)
-- [ ] T018 [US1] `app/training/program-input/page.tsx` 교체 — 입력→확인 단방향 2단계 호스트. 되돌아가기 경로를 만들지 않는다(FR-001, FR-006). 확인 단계 진입 시점의 텍스트를 `sourceText`로 고정한다(FR-031)
-- [ ] T019 [US1] `features/programs/ui/ProgramSavedSheet.tsx` 수정 — 러너 이동을 제거하고 목록 또는 저장본 상세로 이동
+- [X] T011 [P] [US1] `features/programs/model/split-items.ts`에 `splitIntoItems(text): string[]` 구현 — 계약은 contracts/model.md
+- [X] T012 [P] [US1] `features/programs/model/sanitize-items.ts`에 `sanitizeItems(items): string[]` 구현 — 계약은 contracts/model.md
+- [X] T013 [US1] `features/programs/api/programs.ts`에 `saveTextProgram` 추가 — 인증 확인, Zod 검증, `sanitizeItems` 적용, 빈 결과 거부(FR-032), `parsed_data`는 `NULL`로 INSERT (contracts/server-actions.md)
+- [X] T014 [US1] `hooks/usePrograms.ts`에 `useSaveTextProgram` 추가 — 성공 시 `QUERY_KEYS.PROGRAMS` 무효화
+- [X] T015 [P] [US1] `features/programs/ui/PasteStep.tsx` 신규 — textarea 입력, 분해 결과 미표시(FR-002), 공백뿐이면 진행 차단(FR-004)
+- [X] T016 [P] [US1] `features/programs/ui/ProgramItemRow.tsx` 신규 — 불릿 한 행의 읽기 표시. 항목당 높이를 절제한다(FR-023). 편집은 US2에서 추가
+- [X] T017 [US1] `features/programs/ui/ConfirmStep.tsx` 신규 — 항목 목록 렌더, 전체 항목 수 표시(FR-025), 저장 실행. 항목 텍스트를 재구성하지 않는다(FR-026)
+- [X] T018 [US1] `app/training/program-input/page.tsx` 교체 — 입력→확인 단방향 2단계 호스트. 되돌아가기 경로를 만들지 않는다(FR-001, FR-006). 확인 단계 진입 시점의 텍스트를 `sourceText`로 고정한다(FR-031)
+- [X] T019 [US1] `features/programs/ui/ProgramSavedSheet.tsx` 수정 — 러너 이동을 제거하고 목록 또는 저장본 상세로 이동
 
 **Checkpoint**: US1만으로 등록·저장·재조회가 완결된다. 여기서 멈추고 검증할 수 있다
 
