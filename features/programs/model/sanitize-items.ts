@@ -2,7 +2,6 @@
  * C0/C1 제어문자. 줄바꿈(`\n`, `\r`)과 탭(`\t`)도 여기에 포함된다.
  * 항목은 한 줄이므로 제거 대상이다.
  */
-// eslint-disable-next-line no-control-regex
 const CONTROL_CHARS = /[\u0000-\u001F\u007F-\u009F]/g;
 
 /**

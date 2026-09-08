@@ -89,18 +89,18 @@ feature 기반 3계층. `features/programs/{model,api,ui}`, 화면은 `app/train
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T020 [P] [US2] `features/programs/model/__tests__/suspect-spans.test.ts` 작성 — 문서 4.2의 규칙 4종 각각에 대한 검출 케이스와, 문서 3장의 정상 표기(`80~90%`, `70%(1+2)x1`, `c.d.l`, `×`/`x` 혼용, 줄 끝 쉼표)가 검출되지 않는 케이스. **실패 확인 후 다음 단계로**
-- [ ] T021 [US2] 같은 파일에 SC-005 골든 케이스 추가 — `docs/gym-program-notation.md` 2장 원문 6판 39줄 전량을 입력해 4.1의 3건(`2xl`, `1xl`, `3x2. 105%`) 외 검출이 0건임을 단정
+- [X] T020 [P] [US2] `features/programs/model/__tests__/suspect-spans.test.ts` 작성 — 문서 4.2의 규칙 4종 각각에 대한 검출 케이스와, 문서 3장의 정상 표기(`80~90%`, `70%(1+2)x1`, `c.d.l`, `×`/`x` 혼용, 줄 끝 쉼표)가 검출되지 않는 케이스. **실패 확인 후 다음 단계로**
+- [X] T021 [US2] 같은 파일에 SC-005 골든 케이스 추가 — `docs/gym-program-notation.md` 2장 원문 6판 39줄 전량을 입력해 4.1의 3건(`2xl`, `1xl`, `3x2. 105%`) 외 검출이 0건임을 단정
 
 ### Implementation for User Story 2
 
-- [ ] T022 [US2] `features/programs/model/suspect-spans.ts`에 `findSuspectSpans(line): SuspectSpan[]` 구현 — 구간 비중첩·`start` 오름차순, 표기 규약 적합성은 검사하지 않음(FR-013). 계약은 contracts/model.md
-- [ ] T023 [P] [US2] `features/programs/ui/SuspectText.tsx` 신규 — 구간 하이라이트 전용. 자동 수정하지 않는다(FR-014)
-- [ ] T024 [US2] `features/programs/ui/ProgramItemRow.tsx` 확장 — 인라인 편집 진입(FR-024), 항목 추가·삭제(FR-018), 병합·분할(FR-019). 한 항목 편집이 다른 항목에 영향을 주지 않아야 한다(FR-017)
-- [ ] T025 [US2] `features/programs/ui/ConfirmStep.tsx` 수정 — 편집마다 `findSuspectSpans` 재계산(FR-016), 표시가 남아 있어도 저장 허용(FR-014), 항목이 0개면 저장 거부(FR-032)
-- [ ] T026 [P] [US2] `PasteStep.tsx`와 `ProgramItemRow.tsx`의 입력 요소에 `spellCheck={false}`, `autoCorrect="off"`, `autoCapitalize="off"`, `autoComplete="off"` 지정 (FR-015, research.md R6)
-- [ ] T027 [US2] `app/training/program-input/page.tsx`에 확인 단계 이탈 경고 추가 — `beforeunload`와 앱 내 네비게이션 가로채기. 이탈은 등록 폐기로 취급한다(FR-006)
-- [ ] T028 [US2] 저장 실패 시 편집 상태를 유지한 채 재시도 가능하게 처리 — `ConfirmStep.tsx`의 오류 경로 (FR-020, FR-036, SC-008)
+- [X] T022 [US2] `features/programs/model/suspect-spans.ts`에 `findSuspectSpans(line): SuspectSpan[]` 구현 — 구간 비중첩·`start` 오름차순, 표기 규약 적합성은 검사하지 않음(FR-013). 계약은 contracts/model.md
+- [X] T023 [P] [US2] `features/programs/ui/SuspectText.tsx` 신규 — 구간 하이라이트 전용. 자동 수정하지 않는다(FR-014)
+- [X] T024 [US2] `features/programs/ui/ProgramItemRow.tsx` 확장 — 인라인 편집 진입(FR-024), 항목 추가·삭제(FR-018), 병합·분할(FR-019). 한 항목 편집이 다른 항목에 영향을 주지 않아야 한다(FR-017)
+- [X] T025 [US2] `features/programs/ui/ConfirmStep.tsx` 수정 — 편집마다 `findSuspectSpans` 재계산(FR-016), 표시가 남아 있어도 저장 허용(FR-014), 항목이 0개면 저장 거부(FR-032)
+- [X] T026 [P] [US2] `PasteStep.tsx`와 `ProgramItemRow.tsx`의 입력 요소에 `spellCheck={false}`, `autoCorrect="off"`, `autoCapitalize="off"`, `autoComplete="off"` 지정 (FR-015, research.md R6)
+- [X] T027 [US2] `app/training/program-input/page.tsx`에 확인 단계 이탈 경고 추가 — `beforeunload`와 앱 내 네비게이션 가로채기. 이탈은 등록 폐기로 취급한다(FR-006)
+- [X] T028 [US2] 저장 실패 시 편집 상태를 유지한 채 재시도 가능하게 처리 — `ConfirmStep.tsx`의 오류 경로 (FR-020, FR-036, SC-008)
 
 **Checkpoint**: US1 + US2로 등록 흐름이 완결된다
 
