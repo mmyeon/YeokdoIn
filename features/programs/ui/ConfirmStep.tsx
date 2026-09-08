@@ -49,7 +49,8 @@ export function ConfirmStep({
         <div>
           <h2 className="text-[20px] font-bold -tracking-[0.3px]">확인</h2>
           <p className="mt-1 text-[12px] text-yd-text-muted">
-            잘못 인식된 곳이 표시됩니다. 고치지 않고 저장해도 됩니다.
+            숫자 자리에 문자가 들어온 곳을 표시했습니다. 저장 전에 확인해
+            주세요.
           </p>
         </div>
         <span className="shrink-0 font-mono text-[12px] text-yd-text-muted">
