@@ -163,10 +163,23 @@ Next.js 15 App Router 단일 앱. 저장소 루트 기준 경로를 쓴다.
 **Independent Test**: 3개 종목만 등록된 계정으로 목록을 열어 등록 3개가 값·날짜와 함께
 표시되고 미등록 종목과 시각적으로 구분되는지 확인 (spec.md US3)
 
-- [ ] T033 [US3] `app/settings/personal-records/page.tsx` 에서 `usePersonalRecords()` 와 `useExercises()` 를 함께 읽어, 카탈로그 종목 중 PR이 없는 것을 **미등록 상태로 렌더**한다 — 등록된 항목은 무게·날짜, 미등록 항목은 빈 값과 등록 유도 표시 (FR-012)
-- [ ] T034 [US3] 미등록 종목 행을 탭하면 해당 종목이 선택된 상태로 등록 흐름(`RecordAddDialog`)이 열리도록 연결 — 첫 등록까지 30초 이내 도달 (SC-001)
-- [ ] T035 [P] [US3] `app/settings/personal-records/page.tsx` 의 PR 0건 상태에서 빈 상태 안내와 첫 등록 경로가 제공되는지 확인·보강 (US3 시나리오 2)
+- [x] T033 [US3] `app/settings/personal-records/page.tsx` 에서 `usePersonalRecords()` 와 `useExercises()` 를 함께 읽어, 카탈로그 종목 중 PR이 없는 것을 **미등록 상태로 렌더**한다 — 등록된 항목은 무게·날짜, 미등록 항목은 빈 값과 등록 유도 표시 (FR-012)
+- [x] T034 [US3] 미등록 종목 행을 탭하면 해당 종목이 선택된 상태로 등록 흐름(`RecordAddDialog`)이 열리도록 연결 — 첫 등록까지 30초 이내 도달 (SC-001)
+- [x] T035 [P] [US3] `app/settings/personal-records/page.tsx` 의 PR 0건 상태에서 빈 상태 안내와 첫 등록 경로가 제공되는지 확인·보강 (US3 시나리오 2)
 - [ ] T036 [US3] quickstart 게이트 3 US3 시나리오 1~2 수동 실행
+
+### 이 Phase의 설계 판단 (2026-09-08)
+
+- **카테고리 그룹을 목록에도 적용했다.** FR-012는 "등록/미등록 구분"까지만 요구하고
+  그룹핑은 요구하지 않아 처음엔 평면 목록으로 가려 했으나(YAGNI), 카탈로그 17종목을
+  전부 깔면 목록이 길어져 사용자가 그룹을 요청했다. 드롭다운에서 쓰던
+  `groupExercisesByCategory` 를 그대로 재사용하므로 분류 규칙이 두 화면에서 갈라지지 않는다.
+- **`RecordAddDialog` 를 제어형으로 바꿨다.** 자기 안에 `open`/`exerciseId` 상태와 트리거
+  버튼을 들고 있어서 외부에서 종목을 미리 지정할 수 없었다. 이제 페이지가 상태를 소유하고,
+  프리셋이 바뀌면 `key` 로 remount 해 내부 상태를 새로 만든다 (controlled/uncontrolled 혼용 회피).
+- **병합 로직은 `features/personal-records/model/build-record-rows.ts` 로 분리**했다.
+  카탈로그에 없는 종목의 기록(종목이 지워졌는데 기록만 남은 경우)은 이름을 못 붙이므로
+  화면을 깨뜨리는 대신 조용히 뺀다 — 테스트로 고정.
 
 **Checkpoint**: US1~US3이 각각 독립적으로 동작한다
 
