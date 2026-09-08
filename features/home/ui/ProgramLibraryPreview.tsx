@@ -9,6 +9,8 @@ export interface ProgramLibraryItem {
   meta: string;
   pct: number;
   active: boolean;
+  /** 레거시 구조화 프로그램만 러너로 진입할 수 있다. */
+  isRunnable: boolean;
 }
 
 interface ProgramLibraryPreviewProps {
@@ -21,7 +23,11 @@ export function ProgramLibraryPreview({ items }: ProgramLibraryPreviewProps) {
       {items.map((p) => (
         <Link
           key={p.id}
-          href={ROUTES.TRAINING.PROGRAM_RUNNER(p.id)}
+          href={
+            p.isRunnable
+              ? ROUTES.TRAINING.PROGRAM_RUNNER(p.id)
+              : ROUTES.TRAINING.PROGRAM_DETAIL(p.id)
+          }
           className="flex items-center gap-3 rounded-xl border border-[var(--yd-line)] bg-[var(--yd-surface)] px-3.5 py-3"
         >
           <div className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--yd-line)] bg-[var(--yd-elevated)]">

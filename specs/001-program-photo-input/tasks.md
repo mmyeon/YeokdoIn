@@ -114,13 +114,13 @@ feature 기반 3계층. `features/programs/{model,api,ui}`, 화면은 `app/train
 
 ### Implementation for User Story 3
 
-- [ ] T029 [US3] `features/programs/api/programs.ts`에 `updateTextProgram` 추가 — 기존 행 갱신, `source_text` 미변경, 레거시 행 호출 시 오류 (contracts/server-actions.md, FR-021)
-- [ ] T030 [US3] `hooks/usePrograms.ts`에 `useUpdateTextProgram` 추가 — 성공 시 목록과 상세 쿼리 무효화
-- [ ] T031 [US3] `app/training/programs/[id]/page.tsx` 신규 — 저장본 열람과 항목 수정. `ProgramItemRow`와 `SuspectText`를 재사용한다
-- [ ] T032 [P] [US3] `features/programs/ui/ProgramCard.tsx` 수정 — `isRunnable`인 행에서만 러너 링크를 노출하고, 텍스트 프로그램은 상세로 이동 (research.md R4)
-- [ ] T033 [P] [US3] `features/home/ui/ProgramLibraryPreview.tsx` 수정 — 러너 링크에 동일 기준 적용
-- [ ] T034 [P] [US3] `features/programs/ui/ProgramList.tsx` 수정 — 러너 링크에 동일 기준 적용
-- [ ] T035 [US3] `routes.ts`에 프로그램 상세 경로 추가하고 목록 카드에서 진입을 연결
+- [X] T029 [US3] `features/programs/api/programs.ts`에 `updateTextProgram` 추가 — 기존 행 갱신, `source_text` 미변경, 레거시 행 호출 시 오류 (contracts/server-actions.md, FR-021)
+- [X] T030 [US3] `hooks/usePrograms.ts`에 `useUpdateTextProgram` 추가 — 성공 시 목록과 상세 쿼리 무효화
+- [X] T031 [US3] `app/training/programs/[id]/page.tsx` 신규 — 저장본 열람과 항목 수정. `ProgramItemRow`와 `SuspectText`를 재사용한다
+- [X] T032 [P] [US3] `features/programs/ui/ProgramCard.tsx` 수정 — `isRunnable`인 행에서만 러너 링크를 노출하고, 텍스트 프로그램은 상세로 이동 (research.md R4)
+- [X] T033 [P] [US3] `features/home/ui/ProgramLibraryPreview.tsx` 수정 — 러너 링크에 동일 기준 적용
+- [X] T034 [P] [US3] `features/programs/ui/ProgramList.tsx` 수정 — 러너 링크에 동일 기준 적용
+- [X] T035 [US3] `routes.ts`에 프로그램 상세 경로 추가하고 목록 카드에서 진입을 연결
 
 **Checkpoint**: 세 스토리가 모두 독립적으로 동작한다
 

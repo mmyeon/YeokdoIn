@@ -7,9 +7,7 @@ import { Play, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ROUTES } from '@/routes';
 import { useDeleteProgram, usePrograms } from '@/hooks/usePrograms';
-import type { ProgramRow } from '@/features/programs/api/programs';
-import type { Program } from '@/features/notation/model/types';
-import { serializeProgram } from '@/features/programs/model/serialize';
+import { toLibraryItem } from '@/features/programs/model/library';
 
 function formatDate(iso: string): string {
   const date = new Date(iso);
@@ -18,13 +16,6 @@ function formatDate(iso: string): string {
     month: 'long',
     day: 'numeric',
   }).format(date);
-}
-
-function toBullets(row: ProgramRow): string[] {
-  return serializeProgram(row.parsed_data as unknown as Program)
-    .split('\n')
-    .map((l) => l.trim())
-    .filter((l) => l.length > 0);
 }
 
 export function ProgramList() {
@@ -52,15 +43,15 @@ export function ProgramList() {
 
   return (
     <div className="space-y-3">
-      {programs.map((row) => (
-        <Card key={row.id} className="border-l-4 border-l-blue-500">
+      {programs.map(toLibraryItem).map((item) => (
+        <Card key={item.id} className="border-l-4 border-l-blue-500">
           <CardContent className="flex items-center justify-between gap-3 py-3">
             <div className="min-w-0 flex-1">
               <p className="text-xs text-muted-foreground">
-                {formatDate(row.created_at)}
+                {formatDate(item.createdAt)}
               </p>
               <ul className="mt-1 list-disc space-y-0.5 pl-5 text-sm">
-                {toBullets(row).map((line, i) => (
+                {item.lines.map((line, i) => (
                   <li key={i} className="break-words">
                     {line}
                   </li>
@@ -72,11 +63,17 @@ export function ProgramList() {
                 asChild
                 variant="secondary"
                 size="sm"
-                aria-label="Run program"
+                aria-label={item.isRunnable ? '프로그램 실행' : '프로그램 열기'}
               >
-                <Link href={ROUTES.TRAINING.PROGRAM_RUNNER(row.id)}>
-                  <Play className="h-4 w-4 mr-1" />
-                  Start
+                <Link
+                  href={
+                    item.isRunnable
+                      ? ROUTES.TRAINING.PROGRAM_RUNNER(item.id)
+                      : ROUTES.TRAINING.PROGRAM_DETAIL(item.id)
+                  }
+                >
+                  {item.isRunnable && <Play className="h-4 w-4 mr-1" />}
+                  {item.isRunnable ? 'Start' : '열기'}
                 </Link>
               </Button>
               <Button
@@ -85,7 +82,7 @@ export function ProgramList() {
                 className="text-destructive"
                 onClick={() => {
                   if (confirm('Delete this program?')) {
-                    remove(row.id);
+                    remove(item.id);
                   }
                 }}
                 aria-label="Delete program"
