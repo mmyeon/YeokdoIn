@@ -5,6 +5,12 @@ import { PRHistoryEntry } from "@/types/personalRecords";
 
 interface PRSparklineProps {
   history: ReadonlyArray<PRHistoryEntry>;
+  /**
+   * 이력 조회가 끝나지 않았으면 true. 조회 중에는 `history` 가 빈 배열로 오는데
+   * 그대로 그리면 '기록이 2건 이상이면…' 빈 상태가 먼저 번쩍이고 나서 그래프가
+   * 그려진다. 다 그려진 뒤에 한 번만 보여준다.
+   */
+  isLoading?: boolean;
   width?: number;
   height?: number;
 }
@@ -18,18 +24,32 @@ function formatMonth(ms: number): string {
   return `${d.getMonth() + 1}월`;
 }
 
-function PRSparkline({ history, width = 300, height = 70 }: PRSparklineProps) {
+/** 그래프·빈 상태·로딩이 같은 높이를 차지해야 전환할 때 레이아웃이 튀지 않는다. */
+function SparklineFrame({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex h-[110px] items-center justify-center rounded-md border border-dashed border-yd-line text-[11px] text-yd-text-muted">
+      {children}
+    </div>
+  );
+}
+
+function PRSparkline({
+  history,
+  isLoading = false,
+  width = 300,
+  height = 70,
+}: PRSparklineProps) {
+  if (isLoading) {
+    return <SparklineFrame>불러오는 중...</SparklineFrame>;
+  }
+
   const input = history
     .map((h) => ({ t: new Date(h.prDate).getTime(), w: h.newWeight }))
     .filter((p) => Number.isFinite(p.t))
     .sort((a, b) => a.t - b.t);
 
   if (input.length < 2) {
-    return (
-      <div className="flex h-[110px] items-center justify-center rounded-md border border-dashed border-yd-line text-[11px] text-yd-text-muted">
-        기록이 2건 이상이면 그래프가 나타납니다.
-      </div>
-    );
+    return <SparklineFrame>기록이 2건 이상이면 그래프가 나타납니다.</SparklineFrame>;
   }
 
   const { points, polyline } = buildSparklinePlot(input, {

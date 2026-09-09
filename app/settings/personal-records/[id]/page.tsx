@@ -53,7 +53,10 @@ function PRDetailPage() {
   const record = records.find((r) => r.id === recordId);
   const exerciseId = record?.exerciseId ?? null;
 
-  const { data: history = [], isLoading: isLoadingHistory } =
+  // 여기도 `isLoading` 이 아니라 `isPending` 이다 — `usePRHistory` 는
+  // `enabled: exerciseId !== null` 이라 종목이 정해지기 전엔 쿼리가 꺼져 있고,
+  // 꺼진 쿼리의 `isLoading` 은 false다.
+  const { data: history = [], isPending: isHistoryPending } =
     usePRHistory(exerciseId);
 
   const [isAdding, setIsAdding] = useState(false);
@@ -157,7 +160,7 @@ function PRDetailPage() {
       </header>
 
       <section className="px-4">
-        <PRSparkline history={history} />
+        <PRSparkline history={history} isLoading={isHistoryPending} />
       </section>
 
       {isAdding && exerciseId !== null && (
@@ -187,7 +190,7 @@ function PRDetailPage() {
       </section>
 
       <section className="px-4">
-        {isLoadingHistory ? (
+        {isHistoryPending ? (
           <div className="flex justify-center py-10 text-[13px] text-yd-text-muted">
             불러오는 중...
           </div>
