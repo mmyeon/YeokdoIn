@@ -33,6 +33,18 @@ describe('findSuspectSpans — 검출 (docs/gym-program-notation.md 4.2)', () =>
     expect(marked('S. Pull up 100% 3x2. 105% 3x2')).toEqual(['.']);
   });
 
+  it('괄호 밖의 + 를 덩어리째 검출한다', () => {
+    expect(marked('S.Balance & OHS 70% 2+1×4')).toEqual(['2+1']);
+  });
+
+  it('여는 괄호만 남은 경우도 검출한다', () => {
+    expect(marked('S.Balance & OHS 70% (2+1×4')).toEqual(['2+1']);
+  });
+
+  it('닫는 괄호만 남은 경우도 검출한다', () => {
+    expect(marked('S.Balance & OHS 70% 2+1)×4')).toEqual(['2+1']);
+  });
+
   it('한 줄에 여러 건이면 start 오름차순으로 겹치지 않게 돌려준다', () => {
     const line = 'Back Squat 80% 4x2,85% 3x2,90% 2xl,95% 1xl';
     const spans = findSuspectSpans(line);
@@ -45,6 +57,7 @@ describe('findSuspectSpans — 검출 (docs/gym-program-notation.md 4.2)', () =>
   it('규칙 이름을 함께 돌려준다', () => {
     expect(findSuspectSpans('90% 2xl')[0].rule).toBe('digit-slot-letter');
     expect(findSuspectSpans('3x2. 105%')[0].rule).toBe('period-separator');
+    expect(findSuspectSpans('70% 2+1×4')[0].rule).toBe('unbracketed-plus');
   });
 });
 
@@ -63,6 +76,7 @@ describe('findSuspectSpans — 정상 표기는 검출하지 않는다 (문서 3
 
   it('괄호 복합 렙을 검출하지 않는다', () => {
     expect(marked('Squat Clean & FSQ 70% (1+2)x3,75%(1+2)x1,')).toEqual([]);
+    expect(marked('s.balance & ohs 80~90% (3+2)×3')).toEqual([]);
   });
 
   it('괄호 modifier 를 검출하지 않는다', () => {
@@ -78,10 +92,6 @@ describe('findSuspectSpans — 정상 표기는 검출하지 않는다 (문서 3
 
   it('줄 끝 쉼표를 검출하지 않는다', () => {
     expect(marked('80% (1+2)x1, 85%(1+1)x3')).toEqual([]);
-  });
-
-  it('괄호 없는 복합 렙을 검출하지 않는다', () => {
-    expect(marked('S.Balance & OHS 70% 2+1×4')).toEqual([]);
   });
 
   it('빈 문자열에서 아무것도 검출하지 않는다', () => {
@@ -152,7 +162,7 @@ describe('findSuspectSpans — SC-005 골든 케이스', () => {
     expect(BOARDS).toHaveLength(40);
   });
 
-  it('4.1의 3건 외 검출이 0건이다', () => {
+  it('4.1의 4건 외 검출이 0건이다', () => {
     const detected = BOARDS.flatMap((line) =>
       findSuspectSpans(line).map((s) => ({
         line,
@@ -162,6 +172,7 @@ describe('findSuspectSpans — SC-005 골든 케이스', () => {
 
     expect(detected).toEqual([
       { line: 'S.Pull up 100% 3x2. 105% 3x2', text: '.' },
+      { line: 'S.Balance & OHS 70% 2+1×4', text: '2+1' },
       { line: 'Back Squat 80% 4x2,85% 3x2,90% 2xl,95% 1xl', text: 'l' },
       { line: 'Back Squat 80% 4x2,85% 3x2,90% 2xl,95% 1xl', text: 'l' },
     ]);

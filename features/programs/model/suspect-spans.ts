@@ -20,6 +20,11 @@ const DIGIT = /[0-9]/;
  * 판정 조건이 「숫자 뒤」이므로 종목명의 마침표(`c.d.l`, `S. Pull up`)와
  * 충돌하지 않는다.
  */
+/**
+ * `+` 와 그것이 속한 덩어리. 숫자가 붙어 있지 않으면 `+` 한 글자만 잡는다.
+ */
+const PLUS_RUN = /[0-9]*\+[0-9+]*/g;
+
 const PERIOD_SEPARATOR = /(?<=[0-9])\.(?=\s*[0-9]+(?:~[0-9]+)?\s*%)/g;
 
 interface Candidate {
@@ -76,6 +81,56 @@ function collectDigitSlotLetters(line: string): Candidate[] {
   return found;
 }
 
+/**
+ * 짝이 맞는 괄호 쌍 안에 있는 문자 위치. 짝이 깨진 괄호는 세지 않는다 —
+ * 짝이 안 맞는 것 자체가 이미 유실 신호이므로 「괄호 안」으로 봐주지 않는다.
+ */
+function bracketedOffsets(line: string): Set<number> {
+  const open: number[] = [];
+  const inside = new Set<number>();
+
+  for (let i = 0; i < line.length; i += 1) {
+    if (line[i] === '(') {
+      open.push(i);
+    } else if (line[i] === ')') {
+      const start = open.pop();
+      if (start === undefined) continue;
+      for (let j = start + 1; j < i; j += 1) inside.add(j);
+    }
+  }
+
+  return inside;
+}
+
+/**
+ * 괄호 밖의 `+`.
+ *
+ * 문서 3.6 에서 `+` 는 항상 괄호 안에 온다고 확정했으므로, 괄호 밖의 `+` 는
+ * 표기가 아니라 괄호 유실이다. 복합 렙(`(2+2)×3`)과 충돌하지 않는다 —
+ * 판정 조건이 「괄호 밖」이기 때문이다.
+ *
+ * 구간은 `+` 한 글자가 아니라 숫자와 `+` 로 이어진 덩어리 전체다.
+ * 고쳐야 할 것이 `+` 자체가 아니라 `2+1` → `(2+1)` 이기 때문이다.
+ */
+function collectUnbracketedPluses(line: string): Candidate[] {
+  const inside = bracketedOffsets(line);
+  const found: Candidate[] = [];
+
+  for (const run of line.matchAll(PLUS_RUN)) {
+    const runStart = run.index;
+    const runEnd = runStart + run[0].length;
+
+    const hasOutside = [...run[0]].some(
+      (char, offset) => char === '+' && !inside.has(runStart + offset),
+    );
+    if (!hasOutside) continue;
+
+    found.push({ start: runStart, end: runEnd, rule: 'unbracketed-plus' });
+  }
+
+  return found;
+}
+
 function collectPeriodSeparators(line: string): Candidate[] {
   return [...line.matchAll(PERIOD_SEPARATOR)].map((match) => ({
     start: match.index,
@@ -97,6 +152,7 @@ export function findSuspectSpans(line: string): SuspectSpan[] {
   const candidates = [
     ...collectDigitSlotLetters(line),
     ...collectPeriodSeparators(line),
+    ...collectUnbracketedPluses(line),
   ].sort((a, b) => a.start - b.start || a.end - b.end);
 
   const spans: SuspectSpan[] = [];

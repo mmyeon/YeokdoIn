@@ -34,7 +34,9 @@ export type SuspectRule =
   /** 곱셈 기호 뒤, % 앞, 숫자 사이의 문자 */
   | 'digit-slot-letter'
   /** 숫자 뒤 마침표 다음에 강도가 이어짐 */
-  | 'period-separator';
+  | 'period-separator'
+  /** 괄호 밖의 `+` — 복합 렙의 괄호가 유실됨 */
+  | 'unbracketed-plus';
 
 /**
  * 행이 텍스트 프로그램인지 판별한다.
