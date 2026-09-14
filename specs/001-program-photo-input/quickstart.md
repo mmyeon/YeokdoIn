@@ -20,8 +20,8 @@ npm run build
 
 ### 골든 케이스 — SC-005
 
-`docs/gym-program-notation.md` 2장의 칠판 원문 6판(39줄)을 `findSuspectSpans`에 전량 입력하는
-테스트가 있어야 한다. 기대: 4.1의 3건(`2xl`, `1xl`, `3x2. 105%`) 외 검출 0건.
+`docs/gym-program-notation.md` 2장의 칠판 원문 6판(40줄)을 `findSuspectSpans`에 전량 입력하는
+테스트가 있어야 한다. 기대: 4.1의 4건(`2xl`, `1xl`, `3x2. 105%`, `2+1`) 외 검출 0건.
 계약은 [contracts/model.md](./contracts/model.md) 참조.
 
 ## 수동 검증

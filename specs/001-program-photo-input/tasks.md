@@ -90,7 +90,7 @@ feature 기반 3계층. `features/programs/{model,api,ui}`, 화면은 `app/train
 ### Tests for User Story 2 ⚠️
 
 - [X] T020 [P] [US2] `features/programs/model/__tests__/suspect-spans.test.ts` 작성 — 문서 4.2의 규칙 4종 각각에 대한 검출 케이스와, 문서 3장의 정상 표기(`80~90%`, `70%(1+2)x1`, `c.d.l`, `×`/`x` 혼용, 줄 끝 쉼표)가 검출되지 않는 케이스. **실패 확인 후 다음 단계로**
-- [X] T021 [US2] 같은 파일에 SC-005 골든 케이스 추가 — `docs/gym-program-notation.md` 2장 원문 6판 39줄 전량을 입력해 4.1의 3건(`2xl`, `1xl`, `3x2. 105%`) 외 검출이 0건임을 단정
+- [X] T021 [US2] 같은 파일에 SC-005 골든 케이스 추가 — `docs/gym-program-notation.md` 2장 원문 6판 40줄 전량을 입력해 4.1의 4건(`2xl`, `1xl`, `3x2. 105%`, `2+1`) 외 검출이 0건임을 단정
 
 ### Implementation for User Story 2
 

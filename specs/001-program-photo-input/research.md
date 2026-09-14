@@ -111,4 +111,4 @@ Technical Context에 `NEEDS CLARIFICATION` 없음. 아래는 코드베이스 조
 `testEnvironment: node`이므로, 순수 함수로 두면 그대로 대상이 된다.
 `features/programs/model/` 커버리지 임계 80%가 이미 걸려 있다.
 
-**SC-005 검증**: 원문 6판 39줄을 `suspect-spans`에 넣어 4.1의 3건 외 검출이 0인지 단정한다.
+**SC-005 검증**: 원문 6판 40줄을 `suspect-spans`에 넣어 4.1의 4건 외 검출이 0인지 단정한다.
