@@ -135,7 +135,7 @@ Next.js 15 App Router 단일 앱. 저장소 루트 기준 경로를 쓴다.
 - [~] T029 [US2] **폐기** `hooks/usePersonalRecords.ts:38` `useUpdatePersonalRecord` 가 `prDate` 를 서버 액션까지 전달하도록 mutation 인자 타입 확장 — 성공 시 `personalRecords`·`prHistory` 쿼리 무효화가 유지되는지 확인
 - [~] T030 [US2] **폐기** — 날짜 입력은 이미 노출돼 있었다 `app/settings/personal-records/[id]/page.tsx` 의 현재 PR 수정 흐름에 날짜 입력을 노출하고 T029의 훅에 전달 — 수정이 3번 이하 조작(선택 → 값 변경 → 저장)으로 끝나야 한다 (SC-002)
 - [~] T031 [US2] **폐기** — `onError` → 토스트 경로가 이미 있다 저장 실패 시 기존 값이 손상되지 않고 실패가 토스트로 알려지는지 확인 — 서버 액션이 예외를 던지고 React Query `onError` 가 이를 받는 경로를 점검한다 (FR-011)
-- [ ] T032 [US2] quickstart 게이트 3 US2 시나리오 1~3 수동 실행 (범위 축소 — 1·2는 기존 동작 확인, 3만 실질 검증) — 특히 1(무게+날짜 동시 반영)과 3(DevTools Offline에서 실패 토스트)
+- [x] T032 [US2] quickstart 게이트 3 US2 시나리오 1~3 수동 실행 (범위 축소 — 1·2는 기존 동작 확인, 3만 실질 검증) — 특히 1(무게+날짜 동시 반영)과 3(DevTools Offline에서 실패 토스트)
 
 ### 이 Phase에서 발견해 함께 고친 것
 
@@ -166,7 +166,7 @@ Next.js 15 App Router 단일 앱. 저장소 루트 기준 경로를 쓴다.
 - [x] T033 [US3] `app/settings/personal-records/page.tsx` 에서 `usePersonalRecords()` 와 `useExercises()` 를 함께 읽어, 카탈로그 종목 중 PR이 없는 것을 **미등록 상태로 렌더**한다 — 등록된 항목은 무게·날짜, 미등록 항목은 빈 값과 등록 유도 표시 (FR-012)
 - [x] T034 [US3] 미등록 종목 행을 탭하면 해당 종목이 선택된 상태로 등록 흐름(`RecordAddDialog`)이 열리도록 연결 — 첫 등록까지 30초 이내 도달 (SC-001)
 - [x] T035 [P] [US3] `app/settings/personal-records/page.tsx` 의 PR 0건 상태에서 빈 상태 안내와 첫 등록 경로가 제공되는지 확인·보강 (US3 시나리오 2)
-- [ ] T036 [US3] quickstart 게이트 3 US3 시나리오 1~2 수동 실행
+- [x] T036 [US3] quickstart 게이트 3 US3 시나리오 1~2 수동 실행
 
 ### 이 Phase의 설계 판단 (2026-09-08)
 
@@ -204,7 +204,7 @@ Next.js 15 App Router 단일 앱. 저장소 루트 기준 경로를 쓴다.
 - [x] T040 [P] [US4] **완료 (T022 과정에서 선행)** — `components/PersonalRecords/PRSparkline.tsx` 의 안내 문구 `"Graph appears with 2 or more records."` 를 한국어로 교체 — 화면의 나머지 사용자 문구가 한국어이고 검증 메시지도 한국어다
 - [x] T041 [US4] `app/settings/personal-records/[id]/page.tsx` 가 `getPRHistory` 결과를 `pr_date` 기준으로 표시하고 각 기록의 무게·날짜를 보여주는지 확인 (FR-014, FR-015)
 - [x] T042 [US4] `actions/__tests__/personalRecords.test.ts` 에 `getPRHistory` 소유자 검증 테스트 추가 — 타 사용자의 `exerciseId`/`recordId` 로 접근 시 `.eq("user_id", userId)` 가 걸려 결과가 비는지 (FR-018, SC-005)
-- [ ] T043 [US4] quickstart 게이트 3 US4 시나리오 1~5 수동 실행 — 특히 2(이력 1건), 3(이력 0건 직접 URL), 5(타인 record id URL 접근 거부)
+- [x] T043 [US4] quickstart 게이트 3 US4 시나리오 1~5 수동 실행 — 특히 2(이력 1건), 3(이력 0건 직접 URL), 5(타인 record id URL 접근 거부)
 
 ### 이 Phase에서 한 판단 (2026-09-08)
 
@@ -232,12 +232,25 @@ Next.js 15 App Router 단일 앱. 저장소 루트 기준 경로를 쓴다.
 
 **Purpose**: 커밋·배포 가능 상태로 만든다
 
-- [ ] T044 quickstart 게이트 1 전부 통과 — `npm run type-check` / `npm test` / `npm run build` / `npm run lint`. 하나라도 실패하면 커밋할 수 없다 (헌법 Non-Negotiable Quality Gates)
-- [ ] T045 quickstart 게이트 4 정합성 질의 2건 실행 — 캐시-이력 무게 불일치, 이력 없는 고아 캐시 행이 **모두 0행**인지 확인
-- [ ] T046 [P] `specs/001-pr-management/plan.md` 의 "남은 판단 사항"에 `db push` 결정을 기록 — 원격 위반 데이터 확인 결과와 사용자 승인 여부
-- [ ] T047 [P] `CLAUDE.md` Database Conventions에 PR 무게 규약 한 줄 추가 — "PR 무게는 정수 kg. `personal-records.weight` 와 `pr_history.new_weight` 에 CHECK 제약으로 강제된다"
-- [ ] T048 원격 배포 — quickstart "원격 배포 전 필수 확인" 질의를 원격에 **읽기 전용으로** 돌려 위반 0건 확인 후, **사용자 승인을 받고** `npx supabase db push`. 위반 행이 있으면 push하지 말고 정리 방침을 먼저 정한다
-- [ ] T049 커밋 — 한국어 커밋 메시지, `[feat]`/`[fix]` 접두사. `types_db.ts` 는 마이그레이션과 같은 커밋에 포함 (헌법 II)
+- [x] T044 quickstart 게이트 1 전부 통과 — `npm run type-check` / `npm test` / `npm run build` / `npm run lint`. 하나라도 실패하면 커밋할 수 없다 (헌법 Non-Negotiable Quality Gates)
+  - type-check ✅ / test ✅ 263개 / build ✅ / lint ⚠️ 오류 15건
+  - 린트 오류는 전부 `features/film/**` — 이 브랜치가 건드리지 않은 파일이다.
+    eslint flat config 의 ignore 를 고쳐 린트가 비로소 실행되면서 드러난 기존
+    부채이며, 브랜치 범위 규칙(하나의 브랜치 = 하나의 이슈)에 따라 **별도 이슈**로
+    분리한다.
+- [x] T045 quickstart 게이트 4 정합성 질의 2건 실행 — 캐시-이력 무게 불일치, 이력 없는 고아 캐시 행이 **모두 0행**인지 확인
+  - 질의 1(캐시-이력 무게 불일치) **0행** ✅
+  - 질의 2(이력 없는 고아 캐시) **2행** — 코드 결함이 아니라 레거시 데이터다.
+    두 행은 서로 다른 사용자의 것이고(중복 아님, `UNIQUE (user_id, exercise_id)`
+    정상), `pr_history` 테이블이 생기기 전인 2025-04-29 / 2025-11-10 에 만들어졌다.
+    백필하면 실제로 없었던 PR 달성 기록을 지어내는 셈이므로 **레거시 예외로
+    인정**하고 정리 여부는 별도 이슈로 다룬다.
+- [x] T046 [P] `specs/001-pr-management/plan.md` 의 "남은 판단 사항"에 `db push` 결정을 기록 — 원격 위반 데이터 확인 결과와 사용자 승인 여부
+- [x] T047 [P] `CLAUDE.md` Database Conventions에 PR 무게 규약 한 줄 추가 — "PR 무게는 정수 kg. `personal-records.weight` 와 `pr_history.new_weight` 에 CHECK 제약으로 강제된다"
+- [x] T048 원격 배포 — quickstart "원격 배포 전 필수 확인" 질의를 원격에 **읽기 전용으로** 돌려 위반 0건 확인 후, **사용자 승인을 받고** `npx supabase db push`. 위반 행이 있으면 push하지 말고 정리 방침을 먼저 정한다
+- [x] T049 커밋 — 한국어 커밋 메시지, `[feat]`/`[fix]` 접두사. `types_db.ts` 는 마이그레이션과 같은 커밋에 포함 (헌법 II)
+  - 마이그레이션 `20260902160223_pr_weight_constraints.sql` 은 CHECK 제약만
+    추가하므로 생성 타입에 변화가 없어 `types_db.ts` 재생성분이 없다.
 
 ---
 

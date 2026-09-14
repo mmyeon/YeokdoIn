@@ -150,3 +150,16 @@ supabase/migrations/<new>_pr_constraints.sql
 **남은 판단 사항** (tasks 단계에서 확정)
 
 1. `db push` 시점 — 원격 위반 데이터 확인 후 사용자 승인 필요
+   → **2026-09-14 완료.** 원격에 읽기 전용 질의를 먼저 돌려 위반 0건을 확인하고
+   사용자 승인을 받은 뒤 `npx supabase db push` 했다. 적용된 제약 6개는 원격에서
+   `pg_constraint` 로 직접 검증했다.
+
+   | 테이블 | 전체 | NULL | ≤0 | >1000 | 소수점 |
+   |---|---|---|---|---|---|
+   | `pr_history` (new_weight) | 2 | 0 | 0 | 0 | 0 |
+   | `personal-records` (weight) | 3 | 0 | 0 | 0 | 0 |
+
+   push 과정에서 **마이그레이션 이력 드리프트**가 드러나 먼저 해소해야 했다 —
+   원격 `schema_migrations` 에는 적용됨으로 기록됐으나 git 에 파일이 없는
+   마이그레이션이 3개 있어 CLI가 push 를 거부했다. 원격 `statements` 원문에서
+   복원해 별도 PR(#27)로 머지한 뒤 push 했다.
