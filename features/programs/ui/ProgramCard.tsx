@@ -59,14 +59,24 @@ export function ProgramCard({ item, onDelete }: ProgramCardProps) {
           </ul>
         )}
 
-        <Link
-          href={ROUTES.TRAINING.PROGRAM_RUNNER(item.id)}
-          aria-label={`Run ${dateLabel} program`}
-          className="mt-1 flex h-11 items-center justify-center gap-2 rounded-[10px] bg-yd-primary text-yd-on-primary"
-        >
-          <Play className="size-3.5 fill-current" />
-          <span className="text-[14px] font-bold -tracking-[0.2px]">Start</span>
-        </Link>
+        {item.isRunnable ? (
+          <Link
+            href={ROUTES.TRAINING.PROGRAM_RUNNER(item.id)}
+            aria-label={`${dateLabel} 프로그램 실행`}
+            className="mt-1 flex h-11 items-center justify-center gap-2 rounded-[10px] bg-yd-primary text-yd-on-primary"
+          >
+            <Play className="size-3.5 fill-current" />
+            <span className="text-[14px] font-bold -tracking-[0.2px]">Start</span>
+          </Link>
+        ) : (
+          <Link
+            href={ROUTES.TRAINING.PROGRAM_DETAIL(item.id)}
+            aria-label={`${dateLabel} 프로그램 열기`}
+            className="mt-1 flex h-11 items-center justify-center gap-2 rounded-[10px] border border-yd-line text-yd-text"
+          >
+            <span className="text-[14px] font-bold -tracking-[0.2px]">열기</span>
+          </Link>
+        )}
       </div>
       {menuOpen && (
         <div

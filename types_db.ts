@@ -188,22 +188,31 @@ export type Database = {
         Row: {
           created_at: string
           id: number
-          parsed_data: Json
+          lines: string[] | null
+          parsed_data: Json | null
+          source_text: string | null
           title: string | null
+          updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: number
-          parsed_data: Json
+          lines?: string[] | null
+          parsed_data?: Json | null
+          source_text?: string | null
           title?: string | null
+          updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
           id?: number
-          parsed_data?: Json
+          lines?: string[] | null
+          parsed_data?: Json | null
+          source_text?: string | null
           title?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

@@ -9,7 +9,8 @@
 
 | 문서 | 날짜 | 상태 | 요지 |
 | --- | --- | --- | --- |
-| [program-text-paste-design](./2026-07-24-program-text-paste-design.md) | 07-24 | ✅ **확정 · 구현 대기** | 붙여넣은 날것 텍스트를 세트별 불렛으로 렌더. 해석 0, 원문만 저장 |
+| [001-program-photo-input](../../specs/001-program-photo-input/spec.md) | 09-08 | ✅ **구현됨** | 화이트보드 프로그램 입력. 붙여넣기 → 줄 단위 확인 → 텍스트 그대로 저장. `programs.lines`/`source_text` 추가, 폼 입력 대체, 레거시 구조화 프로그램은 읽기 전용 |
+| [program-text-paste-design](./2026-07-24-program-text-paste-design.md) | 07-24 | ❌ **대체됨** | 붙여넣은 날것 텍스트를 세트별 불렛으로 렌더. → `specs/001-program-photo-input/spec.md` 로 대체 (2026-09-02) |
 | [exercise-vocabulary-unification-design](./2026-05-19-exercise-vocabulary-unification-design.md) | 05-19 | ⚠️ **유효 · 미구현** | 수동입력(Catalyst `exercises`)과 OCR(`base_exercises`) 어휘 이원화 해소 |
 | [gym-exercise-ocr-parsing-design](./2026-05-18-gym-exercise-ocr-parsing-design.md) | 05-18 | ⚠️ **부분 유효** | `base_exercises`/`gym_exercises` 어휘 설계와 modifier 4분류는 살아있음. OCR 전제만 무효 |
 | [gym-exercise-ocr-implementation](./2026-05-19-gym-exercise-ocr-implementation.md) | 05-19 | ⚠️ **구현됨 · main에 없음** | 위 설계의 실행 계획. `feat/ocr-program-input` 브랜치에만 반영 |

@@ -40,23 +40,23 @@ export function ProgramSavedSheet({ savedId, onDismiss }: ProgramSavedSheetProps
           id="saved-sheet-title"
           className="mb-4 text-center text-[17px] font-bold text-yd-text"
         >
-          Program saved!
+          저장했습니다
         </p>
         <div className="flex flex-col gap-3">
           <button
             type="button"
             autoFocus
-            onClick={() => router.push(ROUTES.TRAINING.PROGRAM_RUNNER(savedId))}
+            onClick={() => router.push(ROUTES.TRAINING.PROGRAM_DETAIL(savedId))}
             className="flex h-[52px] w-full items-center justify-center rounded-2xl bg-yd-primary text-[15px] font-extrabold text-yd-on-primary shadow-[0_8px_24px_var(--yd-primary-soft)]"
           >
-            Start Workout Now →
+            저장본 보기 →
           </button>
           <button
             type="button"
             onClick={() => router.push(ROUTES.TRAINING.PROGRAMS)}
             className="flex h-[48px] w-full items-center justify-center rounded-2xl border border-yd-line text-[14px] font-semibold text-yd-text"
           >
-            Back to Library
+            목록으로
           </button>
         </div>
       </div>
