@@ -8,7 +8,49 @@ import {
   PRHistoryEntry,
   PRHistoryRow,
 } from "@/types/personalRecords";
+import { maxAcceptablePRDate } from "@/features/personal-records/model/pr-date-bounds";
+import { validatePRInput } from "@/features/personal-records/model/validate-pr-input";
 import { handleDatabaseError } from "@/utils/database";
+
+/**
+ * 위반이 있으면 첫 메시지로 throw한다. 서버 경계에서 막는 것이 목적이므로
+ * Supabase 클라이언트를 만들기 전에 호출한다.
+ *
+ * 날짜 상한은 UTC 오늘이 아니라 `maxAcceptablePRDate` 다. 서버는 요청자의
+ * 타임존을 모르므로 "지구 어디서도 미래일 수 없는 날짜"만 거부한다.
+ */
+function assertValidPRInput(weight: number | null, prDate: string): void {
+  const [firstError] = validatePRInput(
+    { weight, prDate },
+    maxAcceptablePRDate(Date.now())
+  );
+  if (firstError) throw new Error(firstError.message);
+}
+
+/**
+ * patch 방식의 부분 수정용. 제공된 필드의 위반만 골라낸다 — 무게만 수정하는
+ * 요청을 "날짜를 안 줬다"는 이유로 거부하면 안 된다.
+ */
+function assertValidPRPatch(patch: {
+  newWeight?: number;
+  prDate?: string;
+}): void {
+  const provided: Array<"weight" | "prDate"> = [];
+  if (patch.newWeight !== undefined) provided.push("weight");
+  if (patch.prDate !== undefined) provided.push("prDate");
+  if (provided.length === 0) return;
+
+  // 주지 않은 필드는 검증을 통과하는 더미 값으로 채운 뒤 결과에서 걸러낸다.
+  const errors = validatePRInput(
+    {
+      weight: patch.newWeight ?? 1,
+      prDate: patch.prDate ?? "1970-01-01",
+    },
+    maxAcceptablePRDate(Date.now())
+  ).filter((error) => provided.includes(error.field));
+
+  if (errors[0]) throw new Error(errors[0].message);
+}
 
 export async function getUserDefaultBarbelWeight(): Promise<
   UserSettingRow["default_barbell_weight"] | null
@@ -118,7 +160,10 @@ export async function getPRHistory(
     .select("*")
     .eq("user_id", userId)
     .eq("exercise_id", exerciseId)
-    .order("pr_date", { ascending: false });
+    .order("pr_date", { ascending: false })
+    // 같은 날짜에 기록이 여러 건일 수 있다(spec 엣지케이스). pr_date만으로는
+    // 순서가 DB 반환 순서에 좌우돼 화면이 매번 달라지므로 created_at으로 고정한다.
+    .order("created_at", { ascending: false });
 
   if (error) handleDatabaseError(error);
 
@@ -138,6 +183,8 @@ type AddPRHistoryInput = {
  * legacy readers; pr_history is the timeline source of truth.
  */
 export async function addPRHistoryEntry(input: AddPRHistoryInput): Promise<void> {
+  assertValidPRInput(input.newWeight, input.prDate);
+
   const supabase = await supabaseServerClient();
   const userId = await requireUserId();
 
@@ -176,6 +223,8 @@ export async function updatePRHistoryEntry(
   id: number,
   patch: UpdatePRHistoryInput
 ): Promise<void> {
+  assertValidPRPatch(patch);
+
   const supabase = await supabaseServerClient();
   const userId = await requireUserId();
 
@@ -275,36 +324,6 @@ async function recomputeCache(
     { onConflict: "user_id, exercise_id" }
   );
   if (upsertErr) handleDatabaseError(upsertErr);
-}
-
-export async function updateRecordWeight(
-  recordId: PersonalRecordInfo["id"],
-  newWeight: PersonalRecordInfo["weight"]
-): Promise<void> {
-  const supabase = await supabaseServerClient();
-  const userId = await requireUserId();
-
-  const { data: record, error: recordError } = await supabase
-    .from("personal-records")
-    .select("exercise_id, weight")
-    .eq("id", recordId)
-    .eq("user_id", userId)
-    .maybeSingle();
-  if (recordError) handleDatabaseError(recordError);
-  if (!record) throw new Error("수정할 기록을 찾을 수 없습니다.");
-
-  const { error: historyError } = await supabase.from("pr_history").insert({
-    user_id: userId,
-    exercise_id: record.exercise_id,
-    previous_weight: record.weight,
-    new_weight: newWeight,
-    pr_date: new Date().toISOString().slice(0, 10),
-    note: null,
-    source: "manual",
-  });
-  if (historyError) handleDatabaseError(historyError);
-
-  await recomputeCache(record.exercise_id, userId);
 }
 
 export async function deleteRecord(

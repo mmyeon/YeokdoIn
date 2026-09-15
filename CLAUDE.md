@@ -9,6 +9,7 @@ Weightlifting training assistant — track programs, analyze movements, manage P
 - Docker Desktop must be running before anything: `npx supabase start` → `npm run dev`
 - `npm run generate-types` after Supabase schema changes
 - PR titles and descriptions in Korean
+- **UI 문구는 한국어**. 라벨·버튼·토스트·확인창·빈 상태 안내·검증 메시지 전부. 헌법은 언어 규정을 다루지 않으므로(의도적 제외) 이 규약이 유일한 기준이다. 예외는 종목 이름 — `exercises` 테이블의 진실이 영문이므로 화면에도 영문으로 나온다
 - Commit prefix convention: `[feat]`, `[fix]`, `[refactor]`, etc.
 
 ## Domain Reference
@@ -43,5 +44,6 @@ features/[name]/
 - **Migration + seed 동기화**: `supabase/migrations/*.sql`로 종목을 추가하면 `supabase/seed.sql`에도 같은 행을 넣을 것. 안 그러면 로컬 `db reset` 결과가 forward-migrate 상태와 어긋난다.
 - **Migration 배포**: 로컬 마이그레이션 생성 후 `npx supabase db push`로 원격 DB에 반영.
 - **Weight nullability**: `SetRecord.kg`는 `number | null`. `null` = 처방을 아직 모름, `0` = 유효한 값(맨몸 운동). model 레이어에서 `?? 0`으로 기본값을 주지 말고, 렌더 경계까지 `null`을 밀어낼 것.
+- **PR 무게는 정수 kg**: `personal-records.weight` 와 `pr_history.new_weight` 에 CHECK 제약(`> 0`, `<= 1000`, `= trunc(...)`)으로 강제된다. 대회 무게가 1kg 단위이고 PR은 1RM 성격의 단일 최고 무게이기 때문. 0.5kg을 허용하려면 명세(`specs/001-pr-management/spec.md` FR-010)부터 고칠 것.
 
 > ⚠️ 위 규약은 현행 `exercises` 테이블 기준이다. `base_exercises`/`gym_exercises`로 어휘를 통일하려는 미구현 설계가 있다 — `docs/specs/2026-05-19-exercise-vocabulary-unification-design.md`.

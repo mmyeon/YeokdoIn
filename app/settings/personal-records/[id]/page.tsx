@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Pill } from "@/components/ui/pill";
 import PRHistoryEntryEditor from "@/components/PersonalRecords/PRHistoryEntryEditor";
 import PRSparkline from "@/components/PersonalRecords/PRSparkline";
+import { resolvePRDetailViewState } from "@/features/personal-records/model/pr-detail-view-state";
 import { ROUTES } from "@/routes";
 import {
   useAddPRHistoryEntry,
@@ -45,12 +46,17 @@ function PRDetailPage() {
     }
   };
 
-  const { data: records = [], isLoading: isLoadingRecord } =
+  // `isLoading` 이 아니라 `isPending` 을 본다 — 인증 확정 전에는 쿼리가 꺼져 있고
+  // 꺼진 쿼리의 `isLoading` 은 false라 "아직 모른다"가 "없다"로 오판된다.
+  const { data: records = [], isPending: isRecordPending } =
     usePersonalRecords();
   const record = records.find((r) => r.id === recordId);
   const exerciseId = record?.exerciseId ?? null;
 
-  const { data: history = [], isLoading: isLoadingHistory } =
+  // 여기도 `isLoading` 이 아니라 `isPending` 이다 — `usePRHistory` 는
+  // `enabled: exerciseId !== null` 이라 종목이 정해지기 전엔 쿼리가 꺼져 있고,
+  // 꺼진 쿼리의 `isLoading` 은 false다.
+  const { data: history = [], isPending: isHistoryPending } =
     usePRHistory(exerciseId);
 
   const [isAdding, setIsAdding] = useState(false);
@@ -63,33 +69,40 @@ function PRDetailPage() {
 
   const addMutation = useAddPRHistoryEntry(
     () => {
-      toast.success("Record added.");
+      toast.success("기록을 추가했습니다.");
       resetMode();
     },
-    () => toast.error("Failed to add record.")
+    () => toast.error("기록 추가에 실패했습니다.")
   );
 
   const updateMutation = useUpdatePRHistoryEntry(
     () => {
-      toast.success("Record updated.");
+      toast.success("기록을 수정했습니다.");
       resetMode();
     },
-    () => toast.error("Failed to update record.")
+    () => toast.error("기록 수정에 실패했습니다.")
   );
 
   const deleteMutation = useDeletePRHistoryEntry(
-    () => toast.success("Record deleted."),
-    () => toast.error("Failed to delete record.")
+    () => toast.success("기록을 삭제했습니다."),
+    () => toast.error("기록 삭제에 실패했습니다.")
   );
 
-  if (!isLoadingRecord && !record) {
+  const viewState = resolvePRDetailViewState({
+    isRecordPending,
+    hasRecord: !!record,
+  });
+
+  // `record` 는 "ready"일 때만 존재한다. `!record` 를 함께 검사해 TS가 아래에서
+  // 좁혀진 타입을 쓸 수 있게 한다(런타임 의미는 viewState와 동일).
+  if (viewState !== "ready" || !record) {
     return (
       <main className="flex flex-col gap-4 max-w-md mx-auto pb-24 pt-2 px-0">
         <div className="px-4 pt-2 pb-1">
           <button
             type="button"
             onClick={handleBack}
-            aria-label="Back"
+            aria-label="뒤로"
             className="-ml-1 flex items-center gap-1 rounded-md px-2 py-1.5 text-yd-text-muted text-[14px] font-medium hover:bg-yd-elevated"
           >
             <ChevronLeft className="size-4" aria-hidden />
@@ -97,7 +110,9 @@ function PRDetailPage() {
           </button>
         </div>
         <div className="px-5 py-10 text-center text-[13px] text-yd-text-muted">
-          Record not found.
+          {viewState === "loading"
+            ? "불러오는 중..."
+            : "기록을 찾을 수 없습니다."}
         </div>
       </main>
     );
@@ -109,7 +124,7 @@ function PRDetailPage() {
         <button
           type="button"
           onClick={handleBack}
-          aria-label="Back"
+          aria-label="뒤로"
           className="-ml-1 flex items-center gap-1 rounded-md px-2 py-1.5 text-yd-text-muted text-[14px] font-medium hover:bg-yd-elevated"
         >
           <ChevronLeft className="size-4" aria-hidden />
@@ -122,37 +137,37 @@ function PRDetailPage() {
             className="flex items-center gap-1 px-2 py-1 text-yd-primary text-[14px] font-semibold"
           >
             <Plus className="size-3.5" aria-hidden />
-            Add
+            추가
           </button>
         )}
       </div>
 
       <header className="px-5">
-        <h1 className="text-[26px] font-bold">{record?.exerciseName}</h1>
+        <h1 className="text-[26px] font-bold">{record.exerciseName}</h1>
         <div className="mt-1.5 flex items-baseline gap-2">
           <span className="text-[48px] font-extrabold leading-none tracking-[-1.5px]">
-            {record?.weight ?? 0}
+            {record.weight}
           </span>
           <span className="text-[16px] font-semibold text-yd-text-muted">
             kg
           </span>
           <span className="ml-2">
             <Pill size="sm" tone="primary" variant="outlined">
-              Current
+              현재 PR
             </Pill>
           </span>
         </div>
       </header>
 
       <section className="px-4">
-        <PRSparkline history={history} />
+        <PRSparkline history={history} isLoading={isHistoryPending} />
       </section>
 
       {isAdding && exerciseId !== null && (
         <section className="px-4">
           <div className="rounded-md border border-yd-line p-3">
             <PRHistoryEntryEditor
-              submitLabel="Add"
+              submitLabel="추가"
               isPending={addMutation.isPending}
               onSubmit={(draft) => {
                 addMutation.mutate({
@@ -169,24 +184,23 @@ function PRDetailPage() {
       )}
 
       <section className="px-5 pt-1">
-        <h2 className="text-caption uppercase tracking-[0.08em] text-yd-text-muted">
-          History
+        <h2 className="text-caption tracking-[0.08em] text-yd-text-muted">
+          기록
         </h2>
       </section>
 
       <section className="px-4">
-        {isLoadingHistory ? (
+        {isHistoryPending ? (
           <div className="flex justify-center py-10 text-[13px] text-yd-text-muted">
-            Loading...
+            불러오는 중...
           </div>
         ) : history.length === 0 ? (
           <div className="flex justify-center rounded-md border border-dashed border-yd-line px-4 py-8 text-[13px] text-yd-text-muted">
-            No records yet.
+            아직 기록이 없습니다.
           </div>
         ) : (
           <ul className="flex flex-col gap-1.5">
-            {history.map((entry, i) => {
-              const prev = history[i + 1];
+            {history.map((entry) => {
               const isEditing = editingId === entry.id;
               return (
                 <li key={entry.id}>
@@ -198,7 +212,7 @@ function PRDetailPage() {
                           prDate: entry.prDate,
                           note: entry.note,
                         }}
-                        submitLabel="Edit"
+                        submitLabel="수정"
                         isPending={updateMutation.isPending}
                         onSubmit={(draft) => {
                           updateMutation.mutate({
@@ -216,10 +230,9 @@ function PRDetailPage() {
                   ) : (
                     <HistoryRow
                       entry={entry}
-                      prevWeight={prev?.newWeight ?? null}
                       onEdit={() => setEditingId(entry.id)}
                       onDelete={() => {
-                        if (!window.confirm("Delete this record?")) return;
+                        if (!window.confirm("이 기록을 삭제할까요?")) return;
                         deleteMutation.mutate(entry.id);
                       }}
                       isDeleting={deleteMutation.isPending}
@@ -237,27 +250,13 @@ function PRDetailPage() {
 
 interface HistoryRowProps {
   entry: PRHistoryEntry;
-  prevWeight: number | null;
   onEdit: () => void;
   onDelete: () => void;
   isDeleting: boolean;
 }
 
-function HistoryRow({
-  entry,
-  prevWeight,
-  onEdit,
-  onDelete,
-  isDeleting,
-}: HistoryRowProps) {
+function HistoryRow({ entry, onEdit, onDelete, isDeleting }: HistoryRowProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const delta = prevWeight !== null ? entry.newWeight - prevWeight : null;
-  const deltaLabel =
-    delta === null
-      ? null
-      : `${delta > 0 ? "+" : ""}${delta === 0 ? "±0" : delta}`;
-
-  const fromLabel = prevWeight ?? entry.newWeight;
 
   return (
     <div
@@ -271,20 +270,15 @@ function HistoryRow({
             {formatHistoryDate(entry.prDate)}
           </span>
           <span className="text-[13px] font-semibold">
-            {fromLabel} → {entry.newWeight} kg
+            {entry.newWeight} kg
           </span>
-          {deltaLabel && (
-            <span className="text-[11px] font-semibold text-yd-primary">
-              ({deltaLabel})
-            </span>
-          )}
         </div>
 
         <div className="relative">
           <button
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
-            aria-label="Record menu"
+            aria-label="기록 메뉴"
             className="flex size-6 items-center justify-center rounded-full text-yd-text-muted hover:bg-yd-elevated"
           >
             <MoreHorizontal className="size-4" />
@@ -300,7 +294,7 @@ function HistoryRow({
                 }}
               >
                 <Pencil className="size-3.5" aria-hidden />
-                Edit
+                수정
               </button>
               <button
                 type="button"
@@ -312,7 +306,7 @@ function HistoryRow({
                 }}
               >
                 <Trash2 className="size-3.5" aria-hidden />
-                Delete
+                삭제
               </button>
             </div>
           )}
