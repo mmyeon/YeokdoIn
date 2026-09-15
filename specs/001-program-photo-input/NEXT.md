@@ -141,9 +141,11 @@ tasks.md 에서 유일하게 안 끝난 항목.
 자동 검증은 이미 끝냈다: 40줄 분해+검출 0ms(SC-002·SC-003), DB 제약 4종,
 `updated_at` 트리거, 갱신 시 `source_text` 불변.
 
-### N10. 원격 DB 반영
+### ~~N10. 원격 DB 반영~~ — 2026-09-15 완료
 
-`npx supabase db push` 는 **사용자 승인 후** 별도로 수행한다(헌법 Guardrails). 아직 안 했다.
+`20260908120000_programs_text_lines` 를 Studio 에서 직접 실행해 원격 DB 에 적용했고,
+`supabase_migrations.schema_migrations` 에도 기록했다. `lines` / `source_text` / `updated_at`
+확인 완료. (`npx supabase db push` 대신 수동 실행)
 
 ---
 
