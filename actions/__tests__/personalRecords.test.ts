@@ -41,8 +41,8 @@ function createSupabaseMock(store: Store) {
     const filters: Array<(row: Row) => boolean> = [];
     let payload: Row | Row[] | null = null;
     let updatePayload: Row | null = null;
-    let orderColumn: string | null = null;
-    let orderAsc = true;
+    // `.order()` 는 여러 번 체이닝될 수 있고 먼저 지정한 컬럼이 우선한다.
+    const orderBy: Array<{ column: string; ascending: boolean }> = [];
 
     const api: Record<string, (...args: unknown[]) => unknown> = {};
 
@@ -54,15 +54,18 @@ function createSupabaseMock(store: Store) {
       const state = tableState(table);
       if (operation === "select") {
         let rows = applyFilters(state.rows);
-        if (orderColumn) {
+        if (orderBy.length > 0) {
           rows = [...rows].sort((a, b) => {
-            const av = a[orderColumn!] as number | string | null;
-            const bv = b[orderColumn!] as number | string | null;
-            if (av === bv) return 0;
-            if (av === null || av === undefined) return 1;
-            if (bv === null || bv === undefined) return -1;
-            if (av < bv) return orderAsc ? -1 : 1;
-            return orderAsc ? 1 : -1;
+            for (const { column, ascending } of orderBy) {
+              const av = a[column] as number | string | null;
+              const bv = b[column] as number | string | null;
+              if (av === bv) continue;
+              if (av === null || av === undefined) return 1;
+              if (bv === null || bv === undefined) return -1;
+              if (av < bv) return ascending ? -1 : 1;
+              return ascending ? 1 : -1;
+            }
+            return 0;
           });
         }
         return { data: clone(rows), error: null };
@@ -146,8 +149,12 @@ function createSupabaseMock(store: Store) {
       return api;
     };
     api.order = (col: unknown, opts: unknown) => {
-      orderColumn = col as string;
-      orderAsc = !(opts && (opts as { ascending?: boolean }).ascending === false);
+      orderBy.push({
+        column: col as string,
+        ascending: !(
+          opts && (opts as { ascending?: boolean }).ascending === false
+        ),
+      });
       return api;
     };
     api.maybeSingle = () => {
@@ -168,7 +175,10 @@ function createSupabaseMock(store: Store) {
   }
 
   return {
-    from: (name: string) => buildQuery(name),
+    from: (name: string) => {
+      mockState.fromCalls.push(name);
+      return buildQuery(name);
+    },
     auth: {
       getUser: async () => ({ data: { user: { id: USER_ID } }, error: null }),
     },
@@ -176,7 +186,10 @@ function createSupabaseMock(store: Store) {
 }
 
 // Hoisted mock storage so jest.mock factory can see it.
-const mockState: { store: Store } = { store: createStore() };
+const mockState: { store: Store; fromCalls: string[] } = {
+  store: createStore(),
+  fromCalls: [],
+};
 
 jest.mock("@/features/auth/supabase/ServerClient", () => ({
   supabaseServerClient: jest.fn(async () => createSupabaseMock(mockState.store)),
@@ -188,12 +201,12 @@ import {
   deletePRHistoryEntry,
   getPRHistory,
   addRecord,
-  updateRecordWeight,
   deleteRecord,
 } from "@/actions/personalRecords";
 
 beforeEach(() => {
   mockState.store = createStore();
+  mockState.fromCalls = [];
 });
 
 describe("addPRHistoryEntry", () => {
@@ -460,28 +473,6 @@ describe("addRecord (legacy)", () => {
   });
 });
 
-describe("updateRecordWeight (legacy)", () => {
-  it("캐시 무게를 업데이트하고 pr_history에도 dual-write한다", async () => {
-    mockState.store["personal-records"].rows.push({
-      id: 1,
-      user_id: USER_ID,
-      exercise_id: 10,
-      weight: 48,
-      pr_date: "2026-04-10",
-    });
-
-    await updateRecordWeight(1, 55);
-
-    expect(mockState.store["personal-records"].rows[0].weight).toBe(55);
-    expect(mockState.store["pr_history"].rows).toHaveLength(1);
-    expect(mockState.store["pr_history"].rows[0]).toMatchObject({
-      previous_weight: 48,
-      new_weight: 55,
-      source: "manual",
-    });
-  });
-});
-
 describe("deleteRecord (legacy)", () => {
   it("캐시와 해당 exercise의 pr_history 전부를 삭제한다", async () => {
     mockState.store["personal-records"].rows.push({
@@ -573,5 +564,253 @@ describe("getPRHistory", () => {
     expect(result).toHaveLength(2);
     expect(result[0].id).toBe(101);
     expect(result[1].id).toBe(100);
+  });
+
+  // FR-018 / SC-005: 소유자 격리. 조회 경로에 user_id 필터가 빠지면 남의 기록이
+  // 그대로 노출되므로 회귀 방지로 고정한다.
+  it("타 사용자의 exerciseId로 조회하면 결과가 비어 있다", async () => {
+    mockState.store["pr_history"].rows.push({
+      id: 300,
+      user_id: "other-user",
+      exercise_id: 10,
+      previous_weight: null,
+      new_weight: 200,
+      pr_date: "2026-04-15",
+      note: null,
+      source: "manual",
+    });
+
+    const result = await getPRHistory(10);
+
+    expect(result).toEqual([]);
+  });
+
+  it("같은 종목이라도 내 행만 반환하고 남의 행은 섞이지 않는다", async () => {
+    mockState.store["pr_history"].rows.push(
+      {
+        id: 301,
+        user_id: "other-user",
+        exercise_id: 10,
+        previous_weight: null,
+        new_weight: 200,
+        pr_date: "2026-04-25",
+        note: null,
+        source: "manual",
+      },
+      {
+        id: 302,
+        user_id: USER_ID,
+        exercise_id: 10,
+        previous_weight: null,
+        new_weight: 60,
+        pr_date: "2026-04-20",
+        note: null,
+        source: "manual",
+      }
+    );
+
+    const result = await getPRHistory(10);
+
+    expect(result.map((e) => e.id)).toEqual([302]);
+  });
+
+  // 엣지케이스(spec.md): 같은 날짜에 기록이 여러 건. pr_date만으로 정렬하면
+  // 순서가 DB 반환 순서에 좌우돼 화면이 새로고침마다 달라진다.
+  it("같은 pr_date 기록은 최근에 만들어진 것이 먼저 온다", async () => {
+    mockState.store["pr_history"].rows.push(
+      {
+        id: 400,
+        user_id: USER_ID,
+        exercise_id: 10,
+        previous_weight: null,
+        new_weight: 60,
+        pr_date: "2026-04-20",
+        note: null,
+        source: "manual",
+        created_at: "2026-04-20T01:00:00.000Z",
+      },
+      {
+        id: 401,
+        user_id: USER_ID,
+        exercise_id: 10,
+        previous_weight: 60,
+        new_weight: 62,
+        pr_date: "2026-04-20",
+        note: null,
+        source: "manual",
+        created_at: "2026-04-20T09:00:00.000Z",
+      }
+    );
+
+    const result = await getPRHistory(10);
+
+    expect(result.map((e) => e.id)).toEqual([401, 400]);
+  });
+});
+
+describe("addPRHistoryEntry 입력 검증", () => {
+  const validInput = {
+    exerciseId: 10,
+    newWeight: 100,
+    prDate: "2026-04-20",
+    note: null,
+  };
+
+  function tomorrowISO(): string {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().slice(0, 10);
+  }
+
+  const cases: Array<[string, Partial<typeof validInput>, string]> = [
+    ["무게 0", { newWeight: 0 }, "무게는 0보다 커야 합니다."],
+    ["음수 무게", { newWeight: -10 }, "무게는 0보다 커야 합니다."],
+    ["정수가 아닌 무게", { newWeight: 52.5 }, "무게는 1kg 단위로 입력해주세요."],
+    [
+      "상한 초과 무게",
+      { newWeight: 1001 },
+      "무게가 너무 큽니다. 다시 확인해주세요.",
+    ],
+    ["빈 날짜", { prDate: "" }, "날짜를 입력해주세요."],
+  ];
+
+  it.each(cases)("%s는 DB 접근 전에 거부한다", async (_label, patch, message) => {
+    await expect(addPRHistoryEntry({ ...validInput, ...patch })).rejects.toThrow(
+      message
+    );
+
+    expect(mockState.fromCalls).toEqual([]);
+    expect(mockState.store["pr_history"].rows).toHaveLength(0);
+    expect(mockState.store["personal-records"].rows).toHaveLength(0);
+  });
+
+  it("미래 날짜는 DB 접근 전에 거부한다", async () => {
+    await expect(
+      addPRHistoryEntry({ ...validInput, prDate: tomorrowISO() })
+    ).rejects.toThrow("미래 날짜는 기록할 수 없습니다.");
+
+    expect(mockState.fromCalls).toEqual([]);
+  });
+
+  it("경계값(1000kg, 오늘 날짜)은 통과한다", async () => {
+    const today = new Date().toISOString().slice(0, 10);
+
+    await addPRHistoryEntry({ ...validInput, newWeight: 1000, prDate: today });
+
+    expect(mockState.store["pr_history"].rows).toHaveLength(1);
+  });
+
+  it("위반이 여러 건이면 첫 번째 메시지로 실패한다", async () => {
+    await expect(
+      addPRHistoryEntry({ ...validInput, newWeight: 0, prDate: "" })
+    ).rejects.toThrow("무게는 0보다 커야 합니다.");
+
+    expect(mockState.fromCalls).toEqual([]);
+  });
+});
+
+describe("addRecord 위임 경로", () => {
+  it("addPRHistoryEntry의 검증 거부가 그대로 전파된다", async () => {
+    await expect(
+      addRecord({ exerciseId: 10, weight: 52.5, prDate: "2026-04-20" })
+    ).rejects.toThrow("무게는 1kg 단위로 입력해주세요.");
+
+    expect(mockState.fromCalls).toEqual([]);
+    expect(mockState.store["pr_history"].rows).toHaveLength(0);
+  });
+});
+
+describe("updatePRHistoryEntry 부분 검증", () => {
+  const EXISTING = {
+    id: 100,
+    user_id: USER_ID,
+    exercise_id: 10,
+    previous_weight: null,
+    new_weight: 50,
+    pr_date: "2026-04-10",
+    note: null,
+    source: "manual",
+  };
+
+  function seed() {
+    mockState.store["pr_history"].rows.push({ ...EXISTING });
+    mockState.fromCalls = [];
+  }
+
+  function farFuture(): string {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() + 5);
+    return d.toISOString().slice(0, 10);
+  }
+
+  it("무게만 주면 날짜를 주지 않았다는 이유로 거부하지 않는다", async () => {
+    seed();
+
+    await updatePRHistoryEntry(100, { newWeight: 60 });
+
+    expect(mockState.store["pr_history"].rows[0].new_weight).toBe(60);
+    expect(mockState.store["pr_history"].rows[0].pr_date).toBe("2026-04-10");
+  });
+
+  it("날짜만 주면 무게를 주지 않았다는 이유로 거부하지 않는다", async () => {
+    seed();
+
+    await updatePRHistoryEntry(100, { prDate: "2026-05-01" });
+
+    expect(mockState.store["pr_history"].rows[0].pr_date).toBe("2026-05-01");
+    expect(mockState.store["pr_history"].rows[0].new_weight).toBe(50);
+  });
+
+  it("메모만 주면 무게·날짜 검증을 건너뛴다", async () => {
+    seed();
+
+    await updatePRHistoryEntry(100, { note: "허리 조심" });
+
+    expect(mockState.store["pr_history"].rows[0].note).toBe("허리 조심");
+  });
+
+  it("정수가 아닌 무게는 DB 접근 전에 거부한다", async () => {
+    seed();
+
+    await expect(
+      updatePRHistoryEntry(100, { newWeight: 52.5 })
+    ).rejects.toThrow("무게는 1kg 단위로 입력해주세요.");
+
+    expect(mockState.fromCalls).toEqual([]);
+    expect(mockState.store["pr_history"].rows[0].new_weight).toBe(50);
+  });
+
+  it("0 이하 무게는 DB 접근 전에 거부한다", async () => {
+    seed();
+
+    await expect(updatePRHistoryEntry(100, { newWeight: 0 })).rejects.toThrow(
+      "무게는 0보다 커야 합니다."
+    );
+
+    expect(mockState.fromCalls).toEqual([]);
+  });
+
+  it("먼 미래 날짜는 DB 접근 전에 거부한다", async () => {
+    seed();
+
+    await expect(
+      updatePRHistoryEntry(100, { prDate: farFuture() })
+    ).rejects.toThrow("미래 날짜는 기록할 수 없습니다.");
+
+    expect(mockState.fromCalls).toEqual([]);
+    expect(mockState.store["pr_history"].rows[0].pr_date).toBe("2026-04-10");
+  });
+
+  it("오늘 날짜는 타임존과 무관하게 통과한다", async () => {
+    seed();
+    // 사용자 로컬 기준 오늘. 서버가 UTC로 오늘을 잡으면 새벽에 거부됐다.
+    const now = new Date();
+    const localToday = `${now.getFullYear()}-${String(
+      now.getMonth() + 1
+    ).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+    await updatePRHistoryEntry(100, { prDate: localToday });
+
+    expect(mockState.store["pr_history"].rows[0].pr_date).toBe(localToday);
   });
 });

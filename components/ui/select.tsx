@@ -71,8 +71,11 @@ function SelectContent({
         <SelectPrimitive.Viewport
           className={cn(
             "p-1",
+            // 상위 Content가 이미 max-h + overflow-y-auto로 높이를 제한한다.
+            // 여기에 h-[트리거 높이]를 걸면 목록 영역이 한 줄로 눌려 항목이
+            // 거의 보이지 않는다 (그룹 라벨만 보이고 비어 보이는 원인).
             position === "popper" &&
-              "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)] scroll-my-1"
+              "w-full min-w-[var(--radix-select-trigger-width)] scroll-my-1"
           )}
         >
           {children}
