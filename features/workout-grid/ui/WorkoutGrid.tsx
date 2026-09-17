@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 
 import { ROUTES } from "@/routes";
@@ -9,6 +9,7 @@ import { buildActivityIndex } from "@/features/workout-grid/model/activity-index
 import { buildMonthLabels } from "@/features/workout-grid/model/axis-labels";
 import { buildGridWindow, WEEKS } from "@/features/workout-grid/model/grid-window";
 import { GridCell } from "./GridCell";
+import { GridDayDetail } from "./GridDayDetail";
 
 /**
  * 최근 26주 훈련 그리드.
@@ -48,14 +49,23 @@ function GridCard({ children }: { children: React.ReactNode }) {
 export function WorkoutGrid() {
   const { data: programs, isLoading, isError, refetch } = usePrograms();
 
-  const weeks = useMemo(() => {
+  const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
+
+  const { weeks, index, todayKey } = useMemo(() => {
     const timeZone = resolveTimeZone();
-    const index = buildActivityIndex(programs ?? [], timeZone);
-    return buildGridWindow(Date.now(), timeZone, index);
+    const activityIndex = buildActivityIndex(programs ?? [], timeZone);
+    // 전역 window 를 가리지 않도록 이름을 따로 둔다.
+    const gridWeeks = buildGridWindow(Date.now(), timeZone, activityIndex);
+    const today = gridWeeks.at(-1)?.find((cell) => cell?.isToday)?.dateKey;
+
+    return { weeks: gridWeeks, index: activityIndex, todayKey: today ?? "" };
   }, [programs]);
 
   const monthLabels = useMemo(() => buildMonthLabels(weeks), [weeks]);
   const isEmpty = (programs?.length ?? 0) === 0;
+
+  // 선택 전 기본값은 오늘이다. 자리를 비워두면 누를 때마다 레이아웃이 튄다(R5).
+  const shownDateKey = selectedDateKey ?? todayKey;
 
   if (isLoading) {
     // 홈의 HomeSkeleton 과 같은 톤. 빈 그리드처럼 보이면 안 된다.
@@ -88,7 +98,7 @@ export function WorkoutGrid() {
 
   return (
     <GridCard>
-      <>
+      <div>
         <div className="flex gap-[2px]">
           {/* 요일 라벨. 그리드와 같은 7행으로 나눠 높이를 맞춘다. */}
           <div
@@ -140,6 +150,8 @@ export function WorkoutGrid() {
                         dateKey={cell.dateKey}
                         state={cell.state}
                         isToday={cell.isToday}
+                        isSelected={cell.dateKey === selectedDateKey}
+                        onSelect={setSelectedDateKey}
                       />
                     ),
                   )}
@@ -148,6 +160,13 @@ export function WorkoutGrid() {
             </div>
           </div>
         </div>
+
+        {shownDateKey && (
+          <GridDayDetail
+            dateKey={shownDateKey}
+            activity={index.get(shownDateKey)}
+          />
+        )}
 
         {/* 기록이 0건이면 칸을 켜는 방법을 알려준다 (FR-009).
             오류가 아니라 아직 시작하지 않은 상태다. */}
@@ -163,7 +182,7 @@ export function WorkoutGrid() {
             그날 칸이 켜져요.
           </Link>
         )}
-      </>
+      </div>
     </GridCard>
   );
 }

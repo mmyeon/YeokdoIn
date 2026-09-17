@@ -126,9 +126,9 @@ spec.md 에 번호 붙은 user story 절이 없다(100줄 상한 규약). 아래
 **Independent Test**: 켜진 칸을 누르면 날짜와 프로그램 요약이, 꺼진 칸을 누르면 날짜와 활동
 없음이 나온다. 그 상태에서 홈을 스크롤하고 다른 버튼을 누를 수 있다.
 
-- [ ] T026 [US4] `features/workout-grid/ui/GridDayDetail.tsx` 를 만든다. 그리드 바깥 **고정 자리**에 렌더한다. Dialog·Popover 를 쓰지 않는다 — 이유는 research R5 (FR-008 의 "다른 조작을 막지 않는다", 신규 의존성 0)
-- [ ] T027 [US4] `WorkoutGrid.tsx` 에 선택 상태(`selectedDateKey`)를 두고 `GridCell` 의 클릭과 연결한다. 선택 전 기본값은 **오늘**이다 — 자리를 비워두면 선택할 때마다 레이아웃이 튄다(R5)
-- [ ] T028 [US4] 활동이 없는 날도 날짜와 활동 없음을 안내한다 (FR-008). 빈 문자열이나 미표시로 처리하지 않는다
+- [x] T026 [US4] `features/workout-grid/ui/GridDayDetail.tsx` 를 만든다. 그리드 바깥 **고정 자리**에 렌더한다. Dialog·Popover 를 쓰지 않는다 — 이유는 research R5 (FR-008 의 "다른 조작을 막지 않는다", 신규 의존성 0)
+- [x] T027 [US4] `WorkoutGrid.tsx` 에 선택 상태(`selectedDateKey`)를 두고 `GridCell` 의 클릭과 연결한다. 선택 전 기본값은 **오늘**이다 — 자리를 비워두면 선택할 때마다 레이아웃이 튄다(R5)
+- [x] T028 [US4] 활동이 없는 날도 날짜와 활동 없음을 안내한다 (FR-008). 빈 문자열이나 미표시로 처리하지 않는다
 - [ ] T029 [US4] 상세 표시 중에도 홈 세로 스크롤과 하단 탭 조작이 되는지 확인한다 (FR-008)
 
 **Checkpoint**: 네 user story 전부 동작한다.
@@ -138,10 +138,10 @@ spec.md 에 번호 붙은 user story 절이 없다(100줄 상한 규약). 아래
 ## Phase 7: Polish & Cross-Cutting
 
 - [x] T030 [P] 그리드가 읽기 전용임을 `WorkoutGrid.tsx` 상단 주석으로 못 박는다. 나중에 여기서 훈련을 기록하려는 시도를 막는 장치다 (spec: "그리드는 읽기 전용이다")
-- [ ] T031 quickstart 게이트 6 을 실행한다: `npx tsc --noEmit`, `npx jest`, `npm run build` — 셋 다 통과해야 커밋한다 (헌법 Quality Standards)
+- [x] T031 quickstart 게이트 6 을 실행한다: `npx tsc --noEmit`, `npx jest`, `npm run build` — 셋 다 통과해야 커밋한다 (헌법 Quality Standards)
 - [x] T032 ~~실기기에서 칸 터치를 확인한다~~ — **구현 전 스파이크로 완료 (2026-09-17)**. 26열에서 20회 중 13회 적중(65%), 26주 유지로 판정. 실측과 판정 근거는 plan.md 「스파이크 실측」 참조
 - [x] T034 ~~`app/spike-grass-grid/` 삭제~~ — **완료 (2026-09-17)**. 커밋된 적 없는 미추적 파일이라 히스토리에 남지 않았다
-- [ ] T033 plan.md 의 「남은 판단 사항」 1번(상세 패널 위치)에 실측 결과를 적어 닫는다
+- [x] T033 plan.md 의 「남은 판단 사항」 1번(상세 패널 위치)에 실측 결과를 적어 닫는다
 
 ---
 
