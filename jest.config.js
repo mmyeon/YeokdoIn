@@ -29,6 +29,8 @@ module.exports = {
     '!features/movement-analysis/model/**/__tests__/**',
     'features/personal-records/model/**/*.ts',
     '!features/personal-records/model/**/__tests__/**',
+    'features/workout-grid/model/**/*.ts',
+    '!features/workout-grid/model/**/__tests__/**',
     'actions/personalRecords.ts',
   ],
   coverageThreshold: {
