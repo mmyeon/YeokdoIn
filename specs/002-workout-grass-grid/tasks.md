@@ -145,6 +145,29 @@ spec.md 에 번호 붙은 user story 절이 없다(100줄 상한 규약). 아래
 
 ---
 
+## Phase 8: 상세 요약 축소 (dogfooding 후속, 2026-09-17)
+
+**Covers**: FR-008 (개정)
+
+**왜**: 구현 후 실사용에서 하루 3건인 날의 상세가 그리드보다 길어져 PR 보드와 라이브러리가
+화면 밖으로 밀렸다. 홈은 글랜스 화면이고 이 기능의 질문은 "꾸준했나"지 "그날 뭘 했나"가
+아니다. 본문은 기록 상세 화면에 이미 온전히 있다 — 근거와 재검토 트리거는 spec 결정 기록.
+
+**하지 않기로 한 것**: 내부 스크롤(세로 스크롤 화면 안의 세로 스크롤은 제스처가 충돌한다 —
+spec 이 가로 스크롤을 같은 이유로 기각했다), 접기/펼치기 토글(상세로 넘어가면 필요 없다).
+
+- [ ] T035 `activity-index.test.ts` 를 먼저 고쳐 실패를 확인한다. `DayProgram` 이 `{ id, label }`
+      이고 `label` 은 `title` → `lines` 첫 줄 순, 둘 다 없으면 `null` 이다
+- [ ] T036 `types.ts` 의 `DayProgram` 을 `{ id: number; label: string | null }` 로 바꾸고,
+      `activity-index.ts` 의 `ProgramActivitySource` 에 `id` 를 더한다
+- [ ] T037 `GridDayDetail.tsx` 를 링크 목록으로 바꾼다. 한 건당 한 줄(`truncate`), 각 줄은
+      `ROUTES.TRAINING.PROGRAM_DETAIL(id)` 로 간다. `label` 이 `null` 인 줄도 링크는 살린다 —
+      이름을 못 찾은 것이지 기록이 없는 게 아니다
+- [ ] T038 게이트 6 을 다시 실행한다. **dev 서버를 내리고 빌드한다** — 켜둔 채 `npm run build`
+      하면 `.next` 가 덮여 CSS·JS 가 404 난다
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

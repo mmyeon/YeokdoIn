@@ -10,7 +10,8 @@ DB 스키마 변경이 없다. 여기 적는 것은 **model 레이어가 만들�
 | 필드 | 타입 | 쓰임 |
 |---|---|---|
 | `created_at` | `string` (ISO timestamptz) | 활동일 판정의 유일한 소스 (FR-002) |
-| `title`, `lines` | `string \| null`, `string[] \| null` | 선택한 날 요약 (FR-008) |
+| `id` | `number` | 기록 상세 화면으로 가는 링크 (FR-008) |
+| `title`, `lines` | `string \| null`, `string[] \| null` | 요약 한 줄의 소스 (FR-008) |
 
 `updated_at` 은 쓰지 않는다 — FR-002 가 **생성 시각**을 기준으로 못 박았다. 프로그램을 나중에
 고쳤다고 칸이 다른 날로 옮겨가면 안 된다.
@@ -31,10 +32,10 @@ interface DayCell {
 /** 한 열 = 한 주. 길이는 항상 7, 창 밖 자리는 null (spec 경계: 잘린 주). */
 type WeekColumn = ReadonlyArray<DayCell | null>;
 
-/** 그날 입력한 프로그램 하나. 상세 표시용. */
+/** 그날 입력한 프로그램 하나. 요약 한 줄 + 상세로 가는 길. */
 interface DayProgram {
-  title: string | null;       // 대부분 null — 화이트보드 입력은 제목 없이 저장된다
-  lines: readonly string[];   // 빈 줄은 제거된 상태
+  id: number;
+  label: string | null;   // title → lines 첫 줄 순. 둘 다 없으면 null
 }
 
 /** 한 날의 활동 요약. FR-001 — 하루 여러 건이어도 칸은 하나. */
@@ -67,9 +68,12 @@ function buildActivityIndex(
 ```
 날짜별로 접는다. 같은 날 여러 건은 한 항목으로 합쳐지고 `count` 만 늘어난다 (FR-001).
 
-`programs` 가 **줄 전체**를 들고 있는 이유: 제목은 대부분 `null` 이고, 첫 줄만 남기면
-그 줄이 'Day 1' 같은 머리글일 때 그날 뭘 했는지에 답하지 못한다. 상세 자리는 그리드
-**아래**라 내용이 길어져도 그리드가 밀리지 않으므로 잘라낼 이유가 없다.
+`label` 이 **한 줄**인 이유: 홈은 글랜스 화면이라 기록 본문을 펼치면 하루 3건에 그리드보다
+상세가 길어진다(spec 결정 기록). 본문은 기록 상세 화면에 이미 있으므로 `id` 로 링크만 건다.
+
+`label` 의 소스는 `title`, 없으면 `lines` 의 첫 비어있지 않은 줄이다. 제목은 대부분 `null`
+이라(`saveTextProgram` 의 `title` 은 optional) 제목만 믿으면 요약이 건수로 뭉개진다.
+둘 다 없으면 `null` 이다 — 빈 문자열로 덮으면 "이름이 없다"와 "이름이 빈칸이다"가 구별되지 않는다.
 
 ```ts
 // grid-window.ts
