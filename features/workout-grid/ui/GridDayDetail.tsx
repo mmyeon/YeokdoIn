@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+
+import { ROUTES } from "@/routes";
 import type {
   DayActivity,
   DayProgram,
@@ -12,6 +15,10 @@ import type {
  * 다른 조작을 막지 않는다"고 못 박았는데 Dialog 는 정의상 이를 위반하고,
  * Popover 는 신규 의존성이 필요한 데다 10px 셀에 앵커하면 가장자리 열에서
  * 위치 보정이 계속 문제가 된다. 고정 자리는 의존성 0, 위치 계산 0 이다.
+ *
+ * **기록 한 건당 한 줄이고 본문은 펼치지 않는다.** 홈은 글랜스 화면이라 본문을
+ * 펼치면 하루 3건에 상세가 그리드보다 길어져 아래 섹션이 화면 밖으로 밀린다.
+ * 본문은 기록 상세 화면에 이미 온전히 있으므로 링크로 보낸다(spec 결정 기록).
  *
  * 선택 전에도 자리를 차지한다 — 비워두면 칸을 누를 때마다 레이아웃이 튄다.
  */
@@ -36,16 +43,25 @@ export function GridDayDetail({ dateKey, activity }: GridDayDetailProps) {
       aria-live="polite"
       className="mt-2.5 min-h-[34px] border-t border-[var(--yd-line)] pt-2.5"
     >
-      <p className="text-[11px] font-semibold text-[var(--yd-text)]">
-        {formatDate(dateKey)}
-      </p>
+      <div className="flex items-baseline justify-between gap-2">
+        <p className="text-[11px] font-semibold text-[var(--yd-text)]">
+          {formatDate(dateKey)}
+        </p>
+        {activity && (
+          <span className="shrink-0 text-[10px] text-[var(--yd-text-dim)]">
+            {activity.count}건
+          </span>
+        )}
+      </div>
 
       {activity ? (
-        <div className="mt-1 flex flex-col gap-2">
-          {activity.programs.map((program, i) => (
-            <ProgramSummary key={i} program={program} ordinal={i + 1} />
+        <ul className="mt-1 flex flex-col">
+          {activity.programs.map((program) => (
+            <li key={program.id}>
+              <ProgramRow program={program} />
+            </li>
           ))}
-        </div>
+        </ul>
       ) : (
         <p className="mt-0.5 text-[11px] text-[var(--yd-text-muted)]">
           훈련 기록 없음
@@ -56,39 +72,33 @@ export function GridDayDetail({ dateKey, activity }: GridDayDetailProps) {
 }
 
 /**
- * 프로그램 한 건을 줄 그대로 펼친다. 요약하거나 자르지 않는다 — 상세 자리는
- * 그리드 **아래**라 길어져도 그리드가 밀리지 않는다.
+ * 한 건 = 한 줄. 넘치는 글자는 말줄임으로 자른다 — 줄 수가 건수와 같아야
+ * 상세 높이가 예측 가능하고 홈이 밀리지 않는다.
  *
- * 제목이 없으면 여러 건일 때 서로를 구분할 이름이 없으므로 순번을 머리글로 쓴다.
+ * `label` 이 `null` 인 줄도 링크는 살린다. 이름을 못 찾은 것이지 기록이 없는
+ * 게 아니므로, 눌러서 본문을 확인할 길을 막으면 안 된다.
  */
-function ProgramSummary({
-  program,
-  ordinal,
-}: {
-  program: DayProgram;
-  ordinal: number;
-}) {
-  const heading = program.title ?? `프로그램 ${ordinal}`;
-
+function ProgramRow({ program }: { program: DayProgram }) {
   return (
-    <div>
-      <p className="text-[10px] font-semibold text-[var(--yd-text-muted)]">
-        {heading}
-      </p>
-      {program.lines.length > 0 ? (
-        <ul className="mt-0.5 flex flex-col gap-0.5">
-          {program.lines.map((line, i) => (
-            <li key={i} className="text-[11px] text-[var(--yd-text)]">
-              {line}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        // 칸이 켜진 이유는 기록이 있어서다. 내용이 비었어도 그 사실을 말한다.
-        <p className="mt-0.5 text-[11px] text-[var(--yd-text-dim)]">
-          입력된 내용 없음
-        </p>
-      )}
-    </div>
+    <Link
+      href={ROUTES.TRAINING.PROGRAM_DETAIL(program.id)}
+      className="flex items-center gap-1 py-[3px] text-[11px]"
+    >
+      <span
+        className={`truncate ${
+          program.label
+            ? "text-[var(--yd-text)]"
+            : "text-[var(--yd-text-dim)]"
+        }`}
+      >
+        {program.label ?? "제목 없는 기록"}
+      </span>
+      <span
+        aria-hidden
+        className="ml-auto shrink-0 text-[var(--yd-text-dim)]"
+      >
+        ›
+      </span>
+    </Link>
   );
 }

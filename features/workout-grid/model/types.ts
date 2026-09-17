@@ -23,12 +23,16 @@ export interface DayCell {
 /** 한 열 = 한 주. 길이는 항상 7, 창 밖 자리는 `null` (spec 경계: 잘린 주). */
 export type WeekColumn = ReadonlyArray<DayCell | null>;
 
-/** 그날 입력한 프로그램 하나. 선택한 날 상세에 그대로 펼친다 (FR-008). */
+/** 그날 입력한 프로그램 하나. 요약 한 줄과 상세로 가는 길이 전부다 (FR-008). */
 export interface DayProgram {
-  /** 대부분 `null` — 화이트보드 입력은 제목 없이 저장된다 */
-  title: string | null;
-  /** 빈 줄이 제거되고 앞뒤 공백이 다듬어진 상태. 없으면 빈 배열이다 */
-  lines: readonly string[];
+  /** 기록 상세 화면으로 가는 링크에 쓴다 */
+  id: number;
+  /**
+   * 요약 한 줄. `title` → `lines` 첫 줄 순으로 고른다.
+   * 둘 다 없으면 `null` — 빈 문자열로 덮으면 "이름이 없다"와 "이름이 빈칸이다"가
+   * 구별되지 않는다.
+   */
+  label: string | null;
 }
 
 /** 한 날의 활동 요약. FR-001 — 하루 여러 건이어도 칸은 하나다. */

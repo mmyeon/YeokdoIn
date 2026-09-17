@@ -1,7 +1,7 @@
 /**
  * 프로그램 기록을 **날짜별로 접은** 인덱스. 순수 함수 — I/O 도 React 도 없다.
  *
- * 읽는 필드는 `created_at`·`title`·`lines` 셋뿐이다. `updated_at` 은 쓰지 않는다 —
+ * 읽는 필드는 `id`·`created_at`·`title`·`lines` 넷뿐이다. `updated_at` 은 쓰지 않는다 —
  * FR-002 가 판정 기준을 **생성 시각**으로 못 박았고, 프로그램을 나중에 고쳤다고
  * 칸이 다른 날로 옮겨가면 안 되기 때문이다. 타입을 `ProgramRow` 전체가 아니라
  * `Pick` 으로 좁혀둔 것이 그 규칙을 컴파일러 쪽에 남기는 장치다.
@@ -18,24 +18,25 @@ import type { DayActivity, DayProgram } from './types';
 /** 이 기능이 프로그램에서 읽는 전부. */
 export type ProgramActivitySource = Pick<
   ProgramRow,
-  'created_at' | 'title' | 'lines'
+  'id' | 'created_at' | 'title' | 'lines'
 >;
 
 /**
- * 상세에 펼칠 형태로 다듬는다.
+ * 요약 한 줄로 접는다.
  *
- * 제목은 대부분 `null` 이다(`saveTextProgram` 의 `title` 이 optional 이다).
- * 그래서 첫 줄만 이름으로 남기는 방식은 쓰지 않는다 — 그 줄이 'Day 1' 같은
- * 머리글이면 "그날 뭘 했나"에 답하지 못한다. 줄 전체를 들고 가고, 무엇을
- * 보여줄지는 UI 가 정한다(FR-008).
+ * 본문을 들고 오지 않는다 — 홈은 글랜스 화면이라 기록 본문을 펼치면 하루 3건에
+ * 상세가 그리드보다 길어진다(spec 결정 기록). 본문은 기록 상세 화면에 이미
+ * 온전히 있으므로 `id` 로 링크만 건다.
  *
- * `null` 을 UI 까지 밀지 않는다: `lines` 가 없으면 빈 배열, 빈 제목은 `null` 이다.
+ * `label` 의 소스는 `title`, 없으면 `lines` 의 첫 비어있지 않은 줄이다. 제목은
+ * 대부분 `null` 이라(`saveTextProgram` 의 `title` 이 optional) 제목만 믿으면
+ * 요약이 건수로 뭉개진다.
  */
 function toDayProgram(program: ProgramActivitySource): DayProgram {
-  return {
-    title: program.title?.trim() || null,
-    lines: program.lines?.map((line) => line.trim()).filter(Boolean) ?? [],
-  };
+  const title = program.title?.trim();
+  const firstLine = program.lines?.map((line) => line.trim()).find(Boolean);
+
+  return { id: program.id, label: title || firstLine || null };
 }
 
 /**

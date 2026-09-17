@@ -156,14 +156,14 @@ spec.md 에 번호 붙은 user story 절이 없다(100줄 상한 규약). 아래
 **하지 않기로 한 것**: 내부 스크롤(세로 스크롤 화면 안의 세로 스크롤은 제스처가 충돌한다 —
 spec 이 가로 스크롤을 같은 이유로 기각했다), 접기/펼치기 토글(상세로 넘어가면 필요 없다).
 
-- [ ] T035 `activity-index.test.ts` 를 먼저 고쳐 실패를 확인한다. `DayProgram` 이 `{ id, label }`
+- [x] T035 `activity-index.test.ts` 를 먼저 고쳐 실패를 확인한다. `DayProgram` 이 `{ id, label }`
       이고 `label` 은 `title` → `lines` 첫 줄 순, 둘 다 없으면 `null` 이다
-- [ ] T036 `types.ts` 의 `DayProgram` 을 `{ id: number; label: string | null }` 로 바꾸고,
+- [x] T036 `types.ts` 의 `DayProgram` 을 `{ id: number; label: string | null }` 로 바꾸고,
       `activity-index.ts` 의 `ProgramActivitySource` 에 `id` 를 더한다
-- [ ] T037 `GridDayDetail.tsx` 를 링크 목록으로 바꾼다. 한 건당 한 줄(`truncate`), 각 줄은
+- [x] T037 `GridDayDetail.tsx` 를 링크 목록으로 바꾼다. 한 건당 한 줄(`truncate`), 각 줄은
       `ROUTES.TRAINING.PROGRAM_DETAIL(id)` 로 간다. `label` 이 `null` 인 줄도 링크는 살린다 —
       이름을 못 찾은 것이지 기록이 없는 게 아니다
-- [ ] T038 게이트 6 을 다시 실행한다. **dev 서버를 내리고 빌드한다** — 켜둔 채 `npm run build`
+- [x] T038 게이트 6 을 다시 실행한다. **dev 서버를 내리고 빌드한다** — 켜둔 채 `npm run build`
       하면 `.next` 가 덮여 CSS·JS 가 404 난다
 
 ---

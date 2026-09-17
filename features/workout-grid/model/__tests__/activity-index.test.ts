@@ -8,12 +8,15 @@ import { buildActivityIndex } from '../activity-index';
 
 const SEOUL = 'Asia/Seoul';
 
+let nextId = 1;
+
 function program(
   createdAt: string,
   title: string | null = null,
   lines: string[] | null = null,
+  id = nextId++,
 ) {
-  return { created_at: createdAt, title, lines };
+  return { id, created_at: createdAt, title, lines };
 }
 
 describe('buildActivityIndex', () => {
@@ -63,72 +66,57 @@ describe('buildActivityIndex', () => {
       SEOUL,
     );
 
-    expect(index.get('2026-09-17')?.programs.map((p) => p.title)).toEqual([
+    expect(index.get('2026-09-17')?.programs.map((p) => p.label)).toEqual([
       '아침',
       '점심',
       '저녁',
     ]);
   });
 
-  /**
-   * 제목은 대부분 null 이고, 첫 줄만 남기면 그 줄이 'Day 1' 같은 머리글일 때
-   * 그날 뭘 했는지에 답하지 못한다. 그래서 줄 전체를 들고 간다 (FR-008).
-   */
-  it('lines 를 첫 줄만이 아니라 전부 들고 간다', () => {
+  it('상세로 갈 수 있게 id 를 들고 간다', () => {
     const index = buildActivityIndex(
-      [
-        program('2026-09-17T01:00:00Z', null, [
-          'Snatch 5x3',
-          'Back Squat 5x5',
-          'Clean Pull 3x3',
-        ]),
-      ],
+      [program('2026-09-17T01:00:00Z', '세션', null, 42)],
       SEOUL,
     );
 
     expect(index.get('2026-09-17')?.programs).toEqual([
-      {
-        title: null,
-        lines: ['Snatch 5x3', 'Back Squat 5x5', 'Clean Pull 3x3'],
-      },
+      { id: 42, label: '세션' },
     ]);
   });
 
-  it('빈 줄은 제거하고 앞뒤 공백을 다듬는다', () => {
+  /**
+   * 제목은 대부분 null 이다(`saveTextProgram` 의 title 이 optional). 제목만 믿으면
+   * 요약이 "프로그램 1건"으로 뭉개져 FR-008 이 성립하지 않는다.
+   */
+  it('제목이 없으면 lines 첫 줄을 label 로 쓴다', () => {
     const index = buildActivityIndex(
-      [program('2026-09-17T01:00:00Z', null, ['', '  Snatch 5x3  ', '   '])],
+      [program('2026-09-17T01:00:00Z', null, ['Snatch 5x3', 'Back Squat 5x5'])],
       SEOUL,
     );
 
-    expect(index.get('2026-09-17')?.programs[0].lines).toEqual(['Snatch 5x3']);
+    expect(index.get('2026-09-17')?.programs[0].label).toBe('Snatch 5x3');
   });
 
-  it('lines 가 null 이면 빈 배열이 된다 — null 을 UI 까지 밀지 않는다', () => {
+  it('제목이 있으면 lines 보다 제목이 우선한다', () => {
     const index = buildActivityIndex(
-      [program('2026-09-17T01:00:00Z', '제목만', null)],
+      [program('2026-09-17T01:00:00Z', '월요일 세션', ['Snatch 5x3'])],
       SEOUL,
     );
 
-    expect(index.get('2026-09-17')?.programs[0].lines).toEqual([]);
+    expect(index.get('2026-09-17')?.programs[0].label).toBe('월요일 세션');
   });
 
-  it('제목의 앞뒤 공백을 다듬고, 빈 제목은 null 로 접는다', () => {
+  it('빈 줄은 건너뛰고 앞뒤 공백을 다듬는다', () => {
     const index = buildActivityIndex(
-      [
-        program('2026-09-17T01:00:00Z', '  월요일 세션  '),
-        program('2026-09-17T05:00:00Z', '   '),
-      ],
+      [program('2026-09-17T01:00:00Z', '  ', ['', '  Clean & Jerk  ', 'x'])],
       SEOUL,
     );
 
-    expect(index.get('2026-09-17')?.programs.map((p) => p.title)).toEqual([
-      '월요일 세션',
-      null,
-    ]);
+    expect(index.get('2026-09-17')?.programs[0].label).toBe('Clean & Jerk');
   });
 
-  it('내용이 전혀 없는 기록도 count 와 programs 에는 들어간다', () => {
-    // 칸이 켜진 이유는 기록이 있어서다. 내용이 비었다고 없던 일이 되면 안 된다.
+  it('제목도 lines 도 없으면 label 이 null 이다', () => {
+    // 빈 문자열로 덮으면 "이름이 없다"와 "이름이 빈칸이다"가 구별되지 않는다.
     const index = buildActivityIndex(
       [program('2026-09-17T01:00:00Z', null, null)],
       SEOUL,
@@ -136,7 +124,7 @@ describe('buildActivityIndex', () => {
 
     const day = index.get('2026-09-17');
     expect(day?.count).toBe(1);
-    expect(day?.programs).toEqual([{ title: null, lines: [] }]);
+    expect(day?.programs[0].label).toBeNull();
   });
 
   it('dateKey 는 키와 항목 양쪽에 같은 값으로 들어간다', () => {
