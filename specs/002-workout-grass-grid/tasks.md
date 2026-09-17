@@ -88,11 +88,11 @@ spec.md 에 번호 붙은 user story 절이 없다(100줄 상한 규약). 아래
 **Independent Test**: 흑백(Achromatopsia) 에뮬레이션에서 켜짐·꺼짐·미래가 서로 구별되고,
 월 경계와 요일을 라벨로 짚을 수 있다.
 
-- [ ] T016 [P] [US2] `features/workout-grid/model/axis-labels.ts` 에 월 경계 라벨 위치를 계산하는 순수 함수를 만들고, `__tests__/axis-labels.test.ts` 를 먼저 작성해 실패를 확인한다. 열마다 라벨을 달면 375px 에서 겹치므로 **월이 바뀌는 열에만** 단다
-- [ ] T017 [US2] `WorkoutGrid.tsx` 에 요일 라벨 열(약 14px)과 월 라벨 행을 추가한다 (FR-007). 라벨 열을 추가해도 T013 의 `1fr` 구조 덕에 스크롤이 생기지 않아야 한다 — 추가 후 게이트 3 을 다시 확인한다
-- [ ] T018 [US2] `GridCell.tsx` 에서 오늘 칸을 테두리로 구별한다 (FR-007). 색만 바꾸지 않는다
-- [ ] T019 [US2] `GridCell.tsx` 의 켜짐/꺼짐을 **채움 vs 테두리만**으로 구분하도록 확정한다 (FR-010). 색상 차이가 사라져도 명도 대비로 남아야 한다
-- [ ] T020 [US2] `GridCell.tsx` 의 `<button>` 에 `aria-label` 로 날짜와 활동 여부를 **한국어 문장**으로 싣는다 (FR-010, CLAUDE.md UI 문구 규약). 창 밖 `null` 자리는 버튼이 아니라 빈 칸으로 렌더한다
+- [x] T016 [P] [US2] `features/workout-grid/model/axis-labels.ts` 에 월 경계 라벨 위치를 계산하는 순수 함수를 만들고, `__tests__/axis-labels.test.ts` 를 먼저 작성해 실패를 확인한다. 열마다 라벨을 달면 375px 에서 겹치므로 **월이 바뀌는 열에만** 단다
+- [x] T017 [US2] `WorkoutGrid.tsx` 에 요일 라벨 열(약 14px)과 월 라벨 행을 추가한다 (FR-007). 라벨 열을 추가해도 T013 의 `1fr` 구조 덕에 스크롤이 생기지 않아야 한다 — 추가 후 게이트 3 을 다시 확인한다
+- [x] T018 [US2] `GridCell.tsx` 에서 오늘 칸을 테두리로 구별한다 (FR-007). 색만 바꾸지 않는다
+- [x] T019 [US2] `GridCell.tsx` 의 켜짐/꺼짐을 **채움 vs 테두리만**으로 구분하도록 확정한다 (FR-010). 색상 차이가 사라져도 명도 대비로 남아야 한다
+- [x] T020 [US2] `GridCell.tsx` 의 `<button>` 에 `aria-label` 로 날짜와 활동 여부를 **한국어 문장**으로 싣는다 (FR-010, CLAUDE.md UI 문구 규약). 창 밖 `null` 자리는 버튼이 아니라 빈 칸으로 렌더한다
 - [ ] T021 [US2] quickstart 게이트 4 를 라이트·다크 테마 양쪽에서 수행한다
 
 **Checkpoint**: 그리드가 색 없이도 읽힌다.
