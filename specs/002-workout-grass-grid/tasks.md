@@ -70,9 +70,9 @@ spec.md 에 번호 붙은 user story 절이 없다(100줄 상한 규약). 아래
 
 - [x] T010 [P] [US1] `features/workout-grid/model/activity-index.ts` 에 `buildActivityIndex(programs, timeZone): ReadonlyMap<string, DayActivity>` 를 구현한다. `created_at` 만 읽는다 — `updated_at` 을 쓰면 프로그램 수정 시 칸이 다른 날로 옮겨간다(FR-002). `titles` 는 생성 시각 오름차순
 - [x] T011 [US1] `features/workout-grid/model/grid-window.ts` 에 `WEEKS = 26` 과 `buildGridWindow(nowMs, timeZone, index): readonly WeekColumn[]` 를 구현한다. `nowMs` 를 주입받는다(`pr-date-bounds.ts` 방식). 창의 끝은 **오늘이 속한 주의 월요일**이고 거기서 25주를 되짚는다. 상태 판정은 data-model.md 의 4단계 순서 그대로: 창 밖 → `null`, 오늘 이후 → `'future'`, 인덱스에 있음 → `'active'`, 그 외 → `'inactive'`
-- [ ] T012 [US1] `features/workout-grid/ui/GridCell.tsx` 를 만든다. `<button type="button">` 이며 `CellState` 별 스타일만 분기한다. **계산하지 않는다**
-- [ ] T013 [US1] `features/workout-grid/ui/WorkoutGrid.tsx` 를 만든다. `usePrograms()` 를 부르고 `useMemo` 한 번으로 `buildActivityIndex` → `buildGridWindow` 를 돌린다. 타임존은 `Intl.DateTimeFormat().resolvedOptions().timeZone` 로 얻어 주입한다. 그리드는 `repeat(26, minmax(0,1fr))` + `gap: 2px` + 셀 `aspect-square` — 폭이 컨테이너에서 나와야 가로 스크롤이 **구조적으로** 불가능하다(research R4)
-- [ ] T014 [US1] `app/page.tsx` 의 `HomeHeader` 바로 아래, `IdleHero` 위에 `<WorkoutGrid />` 를 배치한다 (FR: 홈 최상단)
+- [x] T012 [US1] `features/workout-grid/ui/GridCell.tsx` 를 만든다. `<button type="button">` 이며 `CellState` 별 스타일만 분기한다. **계산하지 않는다**
+- [x] T013 [US1] `features/workout-grid/ui/WorkoutGrid.tsx` 를 만든다. `usePrograms()` 를 부르고 `useMemo` 한 번으로 `buildActivityIndex` → `buildGridWindow` 를 돌린다. 타임존은 `Intl.DateTimeFormat().resolvedOptions().timeZone` 로 얻어 주입한다. 그리드는 `repeat(26, minmax(0,1fr))` + `gap: 2px` + 셀 `aspect-square` — 폭이 컨테이너에서 나와야 가로 스크롤이 **구조적으로** 불가능하다(research R4)
+- [x] T014 [US1] `app/page.tsx` 의 `HomeHeader` 바로 아래, `IdleHero` 위에 `<WorkoutGrid />` 를 배치한다 (FR: 홈 최상단)
 - [ ] T015 [US1] 375px 에서 `scrollWidth === clientWidth` 를 개발자도구로 확인한다 (quickstart 게이트 3)
 
 **Checkpoint**: 그리드가 실제 데이터로 켜지고 꺼진다. 여기까지가 MVP 다.
@@ -137,7 +137,7 @@ spec.md 에 번호 붙은 user story 절이 없다(100줄 상한 규약). 아래
 
 ## Phase 7: Polish & Cross-Cutting
 
-- [ ] T030 [P] 그리드가 읽기 전용임을 `WorkoutGrid.tsx` 상단 주석으로 못 박는다. 나중에 여기서 훈련을 기록하려는 시도를 막는 장치다 (spec: "그리드는 읽기 전용이다")
+- [x] T030 [P] 그리드가 읽기 전용임을 `WorkoutGrid.tsx` 상단 주석으로 못 박는다. 나중에 여기서 훈련을 기록하려는 시도를 막는 장치다 (spec: "그리드는 읽기 전용이다")
 - [ ] T031 quickstart 게이트 6 을 실행한다: `npx tsc --noEmit`, `npx jest`, `npm run build` — 셋 다 통과해야 커밋한다 (헌법 Quality Standards)
 - [x] T032 ~~실기기에서 칸 터치를 확인한다~~ — **구현 전 스파이크로 완료 (2026-09-17)**. 26열에서 20회 중 13회 적중(65%), 26주 유지로 판정. 실측과 판정 근거는 plan.md 「스파이크 실측」 참조
 - [x] T034 ~~`app/spike-grass-grid/` 삭제~~ — **완료 (2026-09-17)**. 커밋된 적 없는 미추적 파일이라 히스토리에 남지 않았다
