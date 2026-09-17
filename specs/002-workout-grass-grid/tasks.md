@@ -62,14 +62,14 @@ spec.md 에 번호 붙은 user story 절이 없다(100줄 상한 규약). 아래
 
 ### Tests for User Story 1 ⚠️ 먼저 작성하고 실패를 확인할 것
 
-- [ ] T007 [P] [US1] `features/workout-grid/model/__tests__/activity-index.test.ts` — 같은 날 3건 → 항목 1개이고 `count === 3` (FR-001), 서로 다른 날은 서로 다른 항목, 빈 배열 → 빈 Map
-- [ ] T008 [P] [US1] `features/workout-grid/model/__tests__/grid-window.test.ts` — 반환 길이가 항상 26이고 **마지막 원소가 이번 주**(FR-005), 각 열의 길이가 7이고 첫 행이 월요일(research R3), 이번 주 미래 요일이 `'future'` 이며 `'inactive'` 가 아님, 첫 열의 창 밖 자리가 `null`, 26주보다 오래된 기록은 어떤 칸도 켜지 않음, `isToday` 가 정확히 한 칸에만 참
-- [ ] T009 [US1] `grid-window.test.ts` 에 **100건 대조** 케이스를 추가한다 (quickstart 게이트 2). 시드 고정 난수로 시각 100건을 만들고, 켜진 칸의 `dateKey` 집합을 `buildGridWindow` 를 쓰지 않은 독립 계산과 비교한다. 로컬 자정 직전·직후 시각을 표본에 반드시 포함한다
+- [x] T007 [P] [US1] `features/workout-grid/model/__tests__/activity-index.test.ts` — 같은 날 3건 → 항목 1개이고 `count === 3` (FR-001), 서로 다른 날은 서로 다른 항목, 빈 배열 → 빈 Map
+- [x] T008 [P] [US1] `features/workout-grid/model/__tests__/grid-window.test.ts` — 반환 길이가 항상 26이고 **마지막 원소가 이번 주**(FR-005), 각 열의 길이가 7이고 첫 행이 월요일(research R3), 이번 주 미래 요일이 `'future'` 이며 `'inactive'` 가 아님, 첫 열의 창 밖 자리가 `null`, 26주보다 오래된 기록은 어떤 칸도 켜지 않음, `isToday` 가 정확히 한 칸에만 참
+- [x] T009 [US1] `grid-window.test.ts` 에 **100건 대조** 케이스를 추가한다 (quickstart 게이트 2). 시드 고정 난수로 시각 100건을 만들고, 켜진 칸의 `dateKey` 집합을 `buildGridWindow` 를 쓰지 않은 독립 계산과 비교한다. 로컬 자정 직전·직후 시각을 표본에 반드시 포함한다
 
 ### Implementation for User Story 1
 
-- [ ] T010 [P] [US1] `features/workout-grid/model/activity-index.ts` 에 `buildActivityIndex(programs, timeZone): ReadonlyMap<string, DayActivity>` 를 구현한다. `created_at` 만 읽는다 — `updated_at` 을 쓰면 프로그램 수정 시 칸이 다른 날로 옮겨간다(FR-002). `titles` 는 생성 시각 오름차순
-- [ ] T011 [US1] `features/workout-grid/model/grid-window.ts` 에 `WEEKS = 26` 과 `buildGridWindow(nowMs, timeZone, index): readonly WeekColumn[]` 를 구현한다. `nowMs` 를 주입받는다(`pr-date-bounds.ts` 방식). 창의 끝은 **오늘이 속한 주의 월요일**이고 거기서 25주를 되짚는다. 상태 판정은 data-model.md 의 4단계 순서 그대로: 창 밖 → `null`, 오늘 이후 → `'future'`, 인덱스에 있음 → `'active'`, 그 외 → `'inactive'`
+- [x] T010 [P] [US1] `features/workout-grid/model/activity-index.ts` 에 `buildActivityIndex(programs, timeZone): ReadonlyMap<string, DayActivity>` 를 구현한다. `created_at` 만 읽는다 — `updated_at` 을 쓰면 프로그램 수정 시 칸이 다른 날로 옮겨간다(FR-002). `titles` 는 생성 시각 오름차순
+- [x] T011 [US1] `features/workout-grid/model/grid-window.ts` 에 `WEEKS = 26` 과 `buildGridWindow(nowMs, timeZone, index): readonly WeekColumn[]` 를 구현한다. `nowMs` 를 주입받는다(`pr-date-bounds.ts` 방식). 창의 끝은 **오늘이 속한 주의 월요일**이고 거기서 25주를 되짚는다. 상태 판정은 data-model.md 의 4단계 순서 그대로: 창 밖 → `null`, 오늘 이후 → `'future'`, 인덱스에 있음 → `'active'`, 그 외 → `'inactive'`
 - [ ] T012 [US1] `features/workout-grid/ui/GridCell.tsx` 를 만든다. `<button type="button">` 이며 `CellState` 별 스타일만 분기한다. **계산하지 않는다**
 - [ ] T013 [US1] `features/workout-grid/ui/WorkoutGrid.tsx` 를 만든다. `usePrograms()` 를 부르고 `useMemo` 한 번으로 `buildActivityIndex` → `buildGridWindow` 를 돌린다. 타임존은 `Intl.DateTimeFormat().resolvedOptions().timeZone` 로 얻어 주입한다. 그리드는 `repeat(26, minmax(0,1fr))` + `gap: 2px` + 셀 `aspect-square` — 폭이 컨테이너에서 나와야 가로 스크롤이 **구조적으로** 불가능하다(research R4)
 - [ ] T014 [US1] `app/page.tsx` 의 `HomeHeader` 바로 아래, `IdleHero` 위에 `<WorkoutGrid />` 를 배치한다 (FR: 홈 최상단)

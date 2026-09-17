@@ -80,8 +80,11 @@ describe('buildGridWindow', () => {
       expect(first[6]?.dateKey).toBe(shiftKey(FIRST_MONDAY, 6));
     });
 
-    it('창 밖 자리를 뺀 날 수가 176일이다 — 25주 + 오늘까지', () => {
-      expect(cells(emptyGrid())).toHaveLength(176);
+    it('창 시작부터 오늘까지가 176일이다 — 25주 + 오늘', () => {
+      const upToToday = cells(emptyGrid()).filter((c) => c.state !== 'future');
+      expect(upToToday).toHaveLength(176);
+      // 마지막 열의 남은 요일 3개(금·토·일)가 future 로 더 붙는다.
+      expect(cells(emptyGrid())).toHaveLength(179);
     });
   });
 
