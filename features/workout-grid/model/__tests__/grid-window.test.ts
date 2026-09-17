@@ -35,7 +35,7 @@ function cells(grid: readonly (readonly (DayCell | null)[])[]): DayCell[] {
 
 function gridFor(instants: readonly string[]) {
   const index = buildActivityIndex(
-    instants.map((created_at) => ({ created_at, title: null })),
+    instants.map((created_at) => ({ created_at, title: null, lines: null })),
     SEOUL,
   );
   return buildGridWindow(NOW_MS, SEOUL, index);

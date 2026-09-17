@@ -1,7 +1,7 @@
 /**
  * 프로그램 기록을 **날짜별로 접은** 인덱스. 순수 함수 — I/O 도 React 도 없다.
  *
- * 읽는 필드는 `created_at` 과 `title` 둘뿐이다. `updated_at` 은 쓰지 않는다 —
+ * 읽는 필드는 `created_at`·`title`·`lines` 셋뿐이다. `updated_at` 은 쓰지 않는다 —
  * FR-002 가 판정 기준을 **생성 시각**으로 못 박았고, 프로그램을 나중에 고쳤다고
  * 칸이 다른 날로 옮겨가면 안 되기 때문이다. 타입을 `ProgramRow` 전체가 아니라
  * `Pick` 으로 좁혀둔 것이 그 규칙을 컴파일러 쪽에 남기는 장치다.
@@ -16,7 +16,28 @@ import { localDateKey } from './local-date-key';
 import type { DayActivity } from './types';
 
 /** 이 기능이 프로그램에서 읽는 전부. */
-export type ProgramActivitySource = Pick<ProgramRow, 'created_at' | 'title'>;
+export type ProgramActivitySource = Pick<
+  ProgramRow,
+  'created_at' | 'title' | 'lines'
+>;
+
+/**
+ * 선택한 날에 보여줄 이름 하나.
+ *
+ * 화이트보드 입력은 대부분 제목 없이 저장되므로(`saveTextProgram` 의 `title` 은
+ * optional 이다) 제목만 믿으면 그날 요약이 "프로그램 1건"으로 뭉개진다. 그래서
+ * 이름을 못 찾았을 때의 대체 소스가 `lines` 첫 줄이다 — 표기법 한 줄이라도
+ * 있으면 "그날 뭘 했나"에 답한다(FR-008).
+ *
+ * 둘 다 없으면 `null` 이다. 빈 문자열을 이름 자리에 넣지 않는다.
+ */
+function displayName(program: ProgramActivitySource): string | null {
+  const title = program.title?.trim();
+  if (title) return title;
+
+  const firstLine = program.lines?.map((line) => line.trim()).find(Boolean);
+  return firstLine ?? null;
+}
 
 /**
  * @param programs 사용자의 프로그램 기록. 순서는 상관없다
@@ -38,13 +59,13 @@ export function buildActivityIndex(
   for (const program of sorted) {
     const dateKey = localDateKey(program.created_at, timeZone);
     const previous = index.get(dateKey);
-    const title = program.title?.trim();
+    const name = displayName(program);
 
     index.set(dateKey, {
       dateKey,
       count: (previous?.count ?? 0) + 1,
-      titles: title
-        ? [...(previous?.titles ?? []), title]
+      titles: name
+        ? [...(previous?.titles ?? []), name]
         : (previous?.titles ?? []),
     });
   }

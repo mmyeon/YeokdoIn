@@ -36,17 +36,22 @@ export function GridDayDetail({ dateKey, activity }: GridDayDetailProps) {
       <p className="text-[11px] font-semibold text-[var(--yd-text)]">
         {formatDate(dateKey)}
       </p>
-      <p className="mt-0.5 text-[11px] text-[var(--yd-text-muted)]">
+      <p className="mt-0.5 line-clamp-2 text-[11px] text-[var(--yd-text-muted)]">
         {activity ? summarize(activity) : "훈련 기록 없음"}
       </p>
     </div>
   );
 }
 
-/** 제목이 없는 기록도 건수에는 잡힌다 — 그 경우 건수만 말한다. */
+/**
+ * 이름이 있으면 이름을 먼저 보여준다 — 사용자가 알고 싶은 건 건수가 아니라
+ * 그날 뭘 했는지다(FR-008). 한 건뿐이면 건수는 군더더기라 뺀다.
+ *
+ * 이름을 하나도 못 찾은 경우(제목도 lines 도 없는 기록)에만 건수로 물러선다.
+ */
 function summarize(activity: DayActivity): string {
-  const count = `프로그램 ${activity.count}건`;
-  return activity.titles.length > 0
-    ? `${count} · ${activity.titles.join(", ")}`
-    : count;
+  if (activity.titles.length === 0) return `프로그램 ${activity.count}건`;
+
+  const names = activity.titles.join(", ");
+  return activity.count > 1 ? `${activity.count}건 · ${names}` : names;
 }

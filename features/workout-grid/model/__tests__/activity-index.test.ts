@@ -8,8 +8,12 @@ import { buildActivityIndex } from '../activity-index';
 
 const SEOUL = 'Asia/Seoul';
 
-function program(createdAt: string, title: string | null = null) {
-  return { created_at: createdAt, title };
+function program(
+  createdAt: string,
+  title: string | null = null,
+  lines: string[] | null = null,
+) {
+  return { created_at: createdAt, title, lines };
 }
 
 describe('buildActivityIndex', () => {
@@ -62,9 +66,44 @@ describe('buildActivityIndex', () => {
     expect(index.get('2026-09-17')?.titles).toEqual(['아침', '점심', '저녁']);
   });
 
-  it('제목 없는 기록도 count 에는 들어가지만 titles 에는 남지 않는다', () => {
+  /**
+   * 화이트보드 입력은 대부분 제목 없이 저장된다. 제목이 없다고 "프로그램 1건"만
+   * 보여주면 그날 뭘 했는지 알 수 없어 FR-008 이 요구한 요약이 성립하지 않는다.
+   * 그래서 이름의 대체 소스가 `lines` 첫 줄이다.
+   */
+  it('제목이 없으면 lines 첫 줄을 이름으로 쓴다', () => {
     const index = buildActivityIndex(
-      [program('2026-09-17T01:00:00Z', null), program('2026-09-17T05:00:00Z', '오후')],
+      [program('2026-09-17T01:00:00Z', null, ['Snatch 5x3', 'Back Squat 5x5'])],
+      SEOUL,
+    );
+
+    expect(index.get('2026-09-17')?.titles).toEqual(['Snatch 5x3']);
+  });
+
+  it('제목이 있으면 lines 보다 제목이 우선한다', () => {
+    const index = buildActivityIndex(
+      [program('2026-09-17T01:00:00Z', '월요일 세션', ['Snatch 5x3'])],
+      SEOUL,
+    );
+
+    expect(index.get('2026-09-17')?.titles).toEqual(['월요일 세션']);
+  });
+
+  it('lines 앞쪽의 빈 줄은 건너뛴다', () => {
+    const index = buildActivityIndex(
+      [program('2026-09-17T01:00:00Z', null, ['', '   ', 'Clean & Jerk'])],
+      SEOUL,
+    );
+
+    expect(index.get('2026-09-17')?.titles).toEqual(['Clean & Jerk']);
+  });
+
+  it('제목도 lines 도 없으면 count 에는 들어가지만 titles 에는 남지 않는다', () => {
+    const index = buildActivityIndex(
+      [
+        program('2026-09-17T01:00:00Z', null, null),
+        program('2026-09-17T05:00:00Z', '오후'),
+      ],
       SEOUL,
     );
 
