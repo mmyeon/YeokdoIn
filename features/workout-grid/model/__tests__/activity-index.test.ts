@@ -53,7 +53,7 @@ describe('buildActivityIndex', () => {
     expect([...index.keys()]).toEqual(['2026-09-17']);
   });
 
-  it('titles 는 생성 시각 오름차순이다', () => {
+  it('programs 는 생성 시각 오름차순이다', () => {
     const index = buildActivityIndex(
       [
         program('2026-09-17T09:00:00Z', '저녁'),
@@ -63,53 +63,80 @@ describe('buildActivityIndex', () => {
       SEOUL,
     );
 
-    expect(index.get('2026-09-17')?.titles).toEqual(['아침', '점심', '저녁']);
+    expect(index.get('2026-09-17')?.programs.map((p) => p.title)).toEqual([
+      '아침',
+      '점심',
+      '저녁',
+    ]);
   });
 
   /**
-   * 화이트보드 입력은 대부분 제목 없이 저장된다. 제목이 없다고 "프로그램 1건"만
-   * 보여주면 그날 뭘 했는지 알 수 없어 FR-008 이 요구한 요약이 성립하지 않는다.
-   * 그래서 이름의 대체 소스가 `lines` 첫 줄이다.
+   * 제목은 대부분 null 이고, 첫 줄만 남기면 그 줄이 'Day 1' 같은 머리글일 때
+   * 그날 뭘 했는지에 답하지 못한다. 그래서 줄 전체를 들고 간다 (FR-008).
    */
-  it('제목이 없으면 lines 첫 줄을 이름으로 쓴다', () => {
-    const index = buildActivityIndex(
-      [program('2026-09-17T01:00:00Z', null, ['Snatch 5x3', 'Back Squat 5x5'])],
-      SEOUL,
-    );
-
-    expect(index.get('2026-09-17')?.titles).toEqual(['Snatch 5x3']);
-  });
-
-  it('제목이 있으면 lines 보다 제목이 우선한다', () => {
-    const index = buildActivityIndex(
-      [program('2026-09-17T01:00:00Z', '월요일 세션', ['Snatch 5x3'])],
-      SEOUL,
-    );
-
-    expect(index.get('2026-09-17')?.titles).toEqual(['월요일 세션']);
-  });
-
-  it('lines 앞쪽의 빈 줄은 건너뛴다', () => {
-    const index = buildActivityIndex(
-      [program('2026-09-17T01:00:00Z', null, ['', '   ', 'Clean & Jerk'])],
-      SEOUL,
-    );
-
-    expect(index.get('2026-09-17')?.titles).toEqual(['Clean & Jerk']);
-  });
-
-  it('제목도 lines 도 없으면 count 에는 들어가지만 titles 에는 남지 않는다', () => {
+  it('lines 를 첫 줄만이 아니라 전부 들고 간다', () => {
     const index = buildActivityIndex(
       [
-        program('2026-09-17T01:00:00Z', null, null),
-        program('2026-09-17T05:00:00Z', '오후'),
+        program('2026-09-17T01:00:00Z', null, [
+          'Snatch 5x3',
+          'Back Squat 5x5',
+          'Clean Pull 3x3',
+        ]),
       ],
       SEOUL,
     );
 
+    expect(index.get('2026-09-17')?.programs).toEqual([
+      {
+        title: null,
+        lines: ['Snatch 5x3', 'Back Squat 5x5', 'Clean Pull 3x3'],
+      },
+    ]);
+  });
+
+  it('빈 줄은 제거하고 앞뒤 공백을 다듬는다', () => {
+    const index = buildActivityIndex(
+      [program('2026-09-17T01:00:00Z', null, ['', '  Snatch 5x3  ', '   '])],
+      SEOUL,
+    );
+
+    expect(index.get('2026-09-17')?.programs[0].lines).toEqual(['Snatch 5x3']);
+  });
+
+  it('lines 가 null 이면 빈 배열이 된다 — null 을 UI 까지 밀지 않는다', () => {
+    const index = buildActivityIndex(
+      [program('2026-09-17T01:00:00Z', '제목만', null)],
+      SEOUL,
+    );
+
+    expect(index.get('2026-09-17')?.programs[0].lines).toEqual([]);
+  });
+
+  it('제목의 앞뒤 공백을 다듬고, 빈 제목은 null 로 접는다', () => {
+    const index = buildActivityIndex(
+      [
+        program('2026-09-17T01:00:00Z', '  월요일 세션  '),
+        program('2026-09-17T05:00:00Z', '   '),
+      ],
+      SEOUL,
+    );
+
+    expect(index.get('2026-09-17')?.programs.map((p) => p.title)).toEqual([
+      '월요일 세션',
+      null,
+    ]);
+  });
+
+  it('내용이 전혀 없는 기록도 count 와 programs 에는 들어간다', () => {
+    // 칸이 켜진 이유는 기록이 있어서다. 내용이 비었다고 없던 일이 되면 안 된다.
+    const index = buildActivityIndex(
+      [program('2026-09-17T01:00:00Z', null, null)],
+      SEOUL,
+    );
+
     const day = index.get('2026-09-17');
-    expect(day?.count).toBe(2);
-    expect(day?.titles).toEqual(['오후']);
+    expect(day?.count).toBe(1);
+    expect(day?.programs).toEqual([{ title: null, lines: [] }]);
   });
 
   it('dateKey 는 키와 항목 양쪽에 같은 값으로 들어간다', () => {

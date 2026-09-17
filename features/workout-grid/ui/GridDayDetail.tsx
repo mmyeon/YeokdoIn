@@ -1,6 +1,9 @@
 "use client";
 
-import type { DayActivity } from "@/features/workout-grid/model/types";
+import type {
+  DayActivity,
+  DayProgram,
+} from "@/features/workout-grid/model/types";
 
 /**
  * 선택한 날의 요약. 그리드 **바깥의 고정 자리**에 렌더한다.
@@ -36,22 +39,56 @@ export function GridDayDetail({ dateKey, activity }: GridDayDetailProps) {
       <p className="text-[11px] font-semibold text-[var(--yd-text)]">
         {formatDate(dateKey)}
       </p>
-      <p className="mt-0.5 line-clamp-2 text-[11px] text-[var(--yd-text-muted)]">
-        {activity ? summarize(activity) : "훈련 기록 없음"}
-      </p>
+
+      {activity ? (
+        <div className="mt-1 flex flex-col gap-2">
+          {activity.programs.map((program, i) => (
+            <ProgramSummary key={i} program={program} ordinal={i + 1} />
+          ))}
+        </div>
+      ) : (
+        <p className="mt-0.5 text-[11px] text-[var(--yd-text-muted)]">
+          훈련 기록 없음
+        </p>
+      )}
     </div>
   );
 }
 
 /**
- * 이름이 있으면 이름을 먼저 보여준다 — 사용자가 알고 싶은 건 건수가 아니라
- * 그날 뭘 했는지다(FR-008). 한 건뿐이면 건수는 군더더기라 뺀다.
+ * 프로그램 한 건을 줄 그대로 펼친다. 요약하거나 자르지 않는다 — 상세 자리는
+ * 그리드 **아래**라 길어져도 그리드가 밀리지 않는다.
  *
- * 이름을 하나도 못 찾은 경우(제목도 lines 도 없는 기록)에만 건수로 물러선다.
+ * 제목이 없으면 여러 건일 때 서로를 구분할 이름이 없으므로 순번을 머리글로 쓴다.
  */
-function summarize(activity: DayActivity): string {
-  if (activity.titles.length === 0) return `프로그램 ${activity.count}건`;
+function ProgramSummary({
+  program,
+  ordinal,
+}: {
+  program: DayProgram;
+  ordinal: number;
+}) {
+  const heading = program.title ?? `프로그램 ${ordinal}`;
 
-  const names = activity.titles.join(", ");
-  return activity.count > 1 ? `${activity.count}건 · ${names}` : names;
+  return (
+    <div>
+      <p className="text-[10px] font-semibold text-[var(--yd-text-muted)]">
+        {heading}
+      </p>
+      {program.lines.length > 0 ? (
+        <ul className="mt-0.5 flex flex-col gap-0.5">
+          {program.lines.map((line, i) => (
+            <li key={i} className="text-[11px] text-[var(--yd-text)]">
+              {line}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        // 칸이 켜진 이유는 기록이 있어서다. 내용이 비었어도 그 사실을 말한다.
+        <p className="mt-0.5 text-[11px] text-[var(--yd-text-dim)]">
+          입력된 내용 없음
+        </p>
+      )}
+    </div>
+  );
 }

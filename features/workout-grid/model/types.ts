@@ -23,11 +23,19 @@ export interface DayCell {
 /** 한 열 = 한 주. 길이는 항상 7, 창 밖 자리는 `null` (spec 경계: 잘린 주). */
 export type WeekColumn = ReadonlyArray<DayCell | null>;
 
+/** 그날 입력한 프로그램 하나. 선택한 날 상세에 그대로 펼친다 (FR-008). */
+export interface DayProgram {
+  /** 대부분 `null` — 화이트보드 입력은 제목 없이 저장된다 */
+  title: string | null;
+  /** 빈 줄이 제거되고 앞뒤 공백이 다듬어진 상태. 없으면 빈 배열이다 */
+  lines: readonly string[];
+}
+
 /** 한 날의 활동 요약. FR-001 — 하루 여러 건이어도 칸은 하나다. */
 export interface DayActivity {
   dateKey: string;
   /** 그날 기록 건수 */
   count: number;
-  /** 표시용, 생성 시각 오름차순 */
-  titles: readonly string[];
+  /** 생성 시각 오름차순 */
+  programs: readonly DayProgram[];
 }

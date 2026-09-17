@@ -10,7 +10,7 @@ DB 스키마 변경이 없다. 여기 적는 것은 **model 레이어가 만들�
 | 필드 | 타입 | 쓰임 |
 |---|---|---|
 | `created_at` | `string` (ISO timestamptz) | 활동일 판정의 유일한 소스 (FR-002) |
-| `title`, `lines` | `string \| null`, `string[] \| null` | 선택한 날 요약 문구 (FR-008) |
+| `title`, `lines` | `string \| null`, `string[] \| null` | 선택한 날 요약 (FR-008) |
 
 `updated_at` 은 쓰지 않는다 — FR-002 가 **생성 시각**을 기준으로 못 박았다. 프로그램을 나중에
 고쳤다고 칸이 다른 날로 옮겨가면 안 된다.
@@ -31,11 +31,17 @@ interface DayCell {
 /** 한 열 = 한 주. 길이는 항상 7, 창 밖 자리는 null (spec 경계: 잘린 주). */
 type WeekColumn = ReadonlyArray<DayCell | null>;
 
+/** 그날 입력한 프로그램 하나. 상세 표시용. */
+interface DayProgram {
+  title: string | null;       // 대부분 null — 화이트보드 입력은 제목 없이 저장된다
+  lines: readonly string[];   // 빈 줄은 제거된 상태
+}
+
 /** 한 날의 활동 요약. FR-001 — 하루 여러 건이어도 칸은 하나. */
 interface DayActivity {
   dateKey: string;
-  count: number;             // 그날 기록 건수
-  titles: readonly string[]; // 표시용, 생성 시각 오름차순
+  count: number;                     // 그날 기록 건수
+  programs: readonly DayProgram[];   // 생성 시각 오름차순
 }
 ```
 
@@ -60,6 +66,10 @@ function buildActivityIndex(
 ): ReadonlyMap<string, DayActivity>;
 ```
 날짜별로 접는다. 같은 날 여러 건은 한 항목으로 합쳐지고 `count` 만 늘어난다 (FR-001).
+
+`programs` 가 **줄 전체**를 들고 있는 이유: 제목은 대부분 `null` 이고, 첫 줄만 남기면
+그 줄이 'Day 1' 같은 머리글일 때 그날 뭘 했는지에 답하지 못한다. 상세 자리는 그리드
+**아래**라 내용이 길어져도 그리드가 밀리지 않으므로 잘라낼 이유가 없다.
 
 ```ts
 // grid-window.ts

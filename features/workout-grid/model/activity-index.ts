@@ -13,7 +13,7 @@
 import type { ProgramRow } from '@/features/programs/api/programs';
 
 import { localDateKey } from './local-date-key';
-import type { DayActivity } from './types';
+import type { DayActivity, DayProgram } from './types';
 
 /** 이 기능이 프로그램에서 읽는 전부. */
 export type ProgramActivitySource = Pick<
@@ -22,21 +22,20 @@ export type ProgramActivitySource = Pick<
 >;
 
 /**
- * 선택한 날에 보여줄 이름 하나.
+ * 상세에 펼칠 형태로 다듬는다.
  *
- * 화이트보드 입력은 대부분 제목 없이 저장되므로(`saveTextProgram` 의 `title` 은
- * optional 이다) 제목만 믿으면 그날 요약이 "프로그램 1건"으로 뭉개진다. 그래서
- * 이름을 못 찾았을 때의 대체 소스가 `lines` 첫 줄이다 — 표기법 한 줄이라도
- * 있으면 "그날 뭘 했나"에 답한다(FR-008).
+ * 제목은 대부분 `null` 이다(`saveTextProgram` 의 `title` 이 optional 이다).
+ * 그래서 첫 줄만 이름으로 남기는 방식은 쓰지 않는다 — 그 줄이 'Day 1' 같은
+ * 머리글이면 "그날 뭘 했나"에 답하지 못한다. 줄 전체를 들고 가고, 무엇을
+ * 보여줄지는 UI 가 정한다(FR-008).
  *
- * 둘 다 없으면 `null` 이다. 빈 문자열을 이름 자리에 넣지 않는다.
+ * `null` 을 UI 까지 밀지 않는다: `lines` 가 없으면 빈 배열, 빈 제목은 `null` 이다.
  */
-function displayName(program: ProgramActivitySource): string | null {
-  const title = program.title?.trim();
-  if (title) return title;
-
-  const firstLine = program.lines?.map((line) => line.trim()).find(Boolean);
-  return firstLine ?? null;
+function toDayProgram(program: ProgramActivitySource): DayProgram {
+  return {
+    title: program.title?.trim() || null,
+    lines: program.lines?.map((line) => line.trim()).filter(Boolean) ?? [],
+  };
 }
 
 /**
@@ -48,7 +47,7 @@ export function buildActivityIndex(
   programs: readonly ProgramActivitySource[],
   timeZone: string,
 ): ReadonlyMap<string, DayActivity> {
-  // titles 의 순서를 정의대로 보장하려면 접기 전에 생성 시각으로 정렬해야 한다.
+  // programs 의 순서를 정의대로 보장하려면 접기 전에 생성 시각으로 정렬해야 한다.
   // 입력 배열을 건드리지 않는다.
   const sorted = [...programs].sort((a, b) =>
     a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : 0,
@@ -59,14 +58,11 @@ export function buildActivityIndex(
   for (const program of sorted) {
     const dateKey = localDateKey(program.created_at, timeZone);
     const previous = index.get(dateKey);
-    const name = displayName(program);
 
     index.set(dateKey, {
       dateKey,
       count: (previous?.count ?? 0) + 1,
-      titles: name
-        ? [...(previous?.titles ?? []), name]
-        : (previous?.titles ?? []),
+      programs: [...(previous?.programs ?? []), toDayProgram(program)],
     });
   }
 
