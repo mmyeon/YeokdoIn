@@ -31,9 +31,9 @@ spec.md 에 번호 붙은 user story 절이 없다(100줄 상한 규약). 아래
 
 ## Phase 1: Setup
 
-- [ ] T001 `git checkout -b 002-workout-grass-grid` 로 브랜치를 판다 (현재 워크트리는 `mmyeon/exercise-routine` 이며, Branch Scope Rule 상 이 이슈 전용 브랜치가 필요하다)
-- [ ] T002 [P] `features/workout-grid/model/` 과 `features/workout-grid/ui/` 디렉토리를 만든다
-- [ ] T003 [P] `jest.config.js` 의 `collectCoverageFrom` 에 `'features/workout-grid/model/**/*.ts'` 와 제외 패턴 `'!features/workout-grid/model/**/__tests__/**'` 를 추가한다
+- [x] T001 `git checkout -b 002-workout-grass-grid` 로 브랜치를 판다 (현재 워크트리는 `mmyeon/exercise-routine` 이며, Branch Scope Rule 상 이 이슈 전용 브랜치가 필요하다)
+- [x] T002 [P] `features/workout-grid/model/` 과 `features/workout-grid/ui/` 디렉토리를 만든다
+- [x] T003 [P] `jest.config.js` 의 `collectCoverageFrom` 에 `'features/workout-grid/model/**/*.ts'` 와 제외 패턴 `'!features/workout-grid/model/**/__tests__/**'` 를 추가한다
 
 ---
 
@@ -43,9 +43,9 @@ spec.md 에 번호 붙은 user story 절이 없다(100줄 상한 규약). 아래
 
 **⚠️ CRITICAL**: 이 Phase 가 끝나기 전에는 어떤 user story 도 시작할 수 없다.
 
-- [ ] T004 `features/workout-grid/model/__tests__/local-date-key.test.ts` 를 먼저 작성하고 **실패를 확인한다**. 케이스: `Asia/Seoul` 에서 `2026-09-16T15:30:00Z` → `'2026-09-17'`, `2026-09-16T14:50:00Z` → `'2026-09-16'`, 같은 입력을 `'UTC'` 로 넣으면 결과가 갈린다 (research R2 표)
-- [ ] T005 `features/workout-grid/model/local-date-key.ts` 에 `localDateKey(isoInstant: string, timeZone: string): string` 를 구현한다. `Intl.DateTimeFormat('en-CA', { timeZone, year:'numeric', month:'2-digit', day:'2-digit' })` 를 쓰고, `toISOString().slice(0,10)` 은 **항상 UTC 라서 쓸 수 없다**는 이유를 파일 상단 주석에 남긴다 (`pr-date-bounds.ts` 와 같은 서술 형식)
-- [ ] T006 `features/workout-grid/model/types.ts` 에 `CellState`·`DayCell`·`WeekColumn`·`DayActivity` 를 data-model.md 정의 그대로 선언한다. `CellState` 는 문자열 리터럴 유니온이어야 한다 — UI 분기 누락을 컴파일러가 잡는 장치다
+- [x] T004 `features/workout-grid/model/__tests__/local-date-key.test.ts` 를 먼저 작성하고 **실패를 확인한다**. 케이스: `Asia/Seoul` 에서 `2026-09-16T15:30:00Z` → `'2026-09-17'`, `2026-09-16T14:50:00Z` → `'2026-09-16'`, 같은 입력을 `'UTC'` 로 넣으면 결과가 갈린다 (research R2 표)
+- [x] T005 `features/workout-grid/model/local-date-key.ts` 에 `localDateKey(isoInstant: string, timeZone: string): string` 를 구현한다. `Intl.DateTimeFormat('en-CA', { timeZone, year:'numeric', month:'2-digit', day:'2-digit' })` 를 쓰고, `toISOString().slice(0,10)` 은 **항상 UTC 라서 쓸 수 없다**는 이유를 파일 상단 주석에 남긴다 (`pr-date-bounds.ts` 와 같은 서술 형식)
+- [x] T006 `features/workout-grid/model/types.ts` 에 `CellState`·`DayCell`·`WeekColumn`·`DayActivity` 를 data-model.md 정의 그대로 선언한다. `CellState` 는 문자열 리터럴 유니온이어야 한다 — UI 분기 누락을 컴파일러가 잡는 장치다
 
 **Checkpoint**: 타임존 판정이 테스트로 고정됐다. user story 진입 가능.
 
