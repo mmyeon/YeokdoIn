@@ -6,11 +6,13 @@
  * **열은 주, 행은 요일이고 첫 행은 월요일이다**(research R3). 마지막 열이 이번
  * 주이므로 최신 주가 오른쪽 끝에 온다(FR-005).
  *
- * 창의 범위는 `[오늘 − 25주, 오늘]` 이다. 이 정의라야 열 수가 요일과 무관하게
- * 항상 26으로 고정되고, 창의 시작이 첫 열 안에 떨어져 spec 경계의 「잘린 주」가
- * 성립한다. 첫 열에서 창 시작 이전 자리는 셀을 그리지 않고(`null`), 마지막 열의
- * 오늘 이후 자리는 `null` 이 아니라 `'future'` 다 — 아직 판정할 수 없는 날을
- * 실패(꺼짐)로 보이게 하지 않는다(FR-004, spec 경계).
+ * 창은 **주 단위로 딱 떨어진다**: `[26주 전 주의 월요일, 이번 주 일요일]` 이라
+ * 26×7 = 182칸이 전부 실제 날이고 빈 자리가 없다. 창을 `오늘 − 25주` 로 자르면
+ * 첫 열 위쪽에 그리지 않는 자리가 생기는데, 그리드는 사각형으로 읽히는 물건이라
+ * 그 구멍이 "기록이 비어 있다"로 오독된다(dogfooding, 2026-09-18).
+ *
+ * 오늘 이후 자리는 `'future'` 다 — 아직 판정할 수 없는 날을 실패(꺼짐)로
+ * 보이게 하지 않는다(FR-004, spec 경계).
  *
  * 날짜 산술은 `YYYY-MM-DD` 를 UTC 자정으로 올려 ±1일씩 옮기는 방식이다.
  * 이미 로컬 달력으로 접힌 키를 다루므로 이 공간에는 DST 도 오프셋도 없다.
@@ -42,7 +44,7 @@ function mondayBasedWeekday(dateKey: string): number {
  * @param nowMs 현재 시각 (epoch ms). 호출자가 주입한다
  * @param timeZone IANA 타임존 이름 — 날짜 경계를 정한다
  * @param index `buildActivityIndex` 의 결과
- * @returns 길이 26의 열 배열. 마지막 원소가 이번 주다
+ * @returns 길이 26의 열 배열. 마지막 원소가 이번 주이고, 모든 열이 7칸을 채운다
  */
 export function buildGridWindow(
   nowMs: number,
@@ -52,7 +54,6 @@ export function buildGridWindow(
   const todayKey = localDateKey(new Date(nowMs).toISOString(), timeZone);
   const todayMs = toUtcMs(todayKey);
 
-  const windowStartMs = todayMs - (WEEKS - 1) * DAYS_PER_WEEK * DAY_MS;
   const firstMondayMs =
     todayMs -
     (mondayBasedWeekday(todayKey) + (WEEKS - 1) * DAYS_PER_WEEK) * DAY_MS;
@@ -60,18 +61,13 @@ export function buildGridWindow(
   const columns: WeekColumn[] = [];
 
   for (let week = 0; week < WEEKS; week += 1) {
-    const column: (DayCell | null)[] = [];
+    const column: DayCell[] = [];
 
     for (let row = 0; row < DAYS_PER_WEEK; row += 1) {
       const dayMs = firstMondayMs + (week * DAYS_PER_WEEK + row) * DAY_MS;
 
       // 판정 순서는 data-model.md 그대로다. 순서를 바꾸면 이번 주 미래 요일이
-      // 꺼짐으로 떨어지거나 창 밖 자리가 칸으로 그려진다.
-      if (dayMs < windowStartMs) {
-        column.push(null);
-        continue;
-      }
-
+      // 꺼짐으로 떨어진다.
       const dateKey = toDateKey(dayMs);
       const state: CellState =
         dayMs > todayMs

@@ -15,10 +15,9 @@ export interface MonthLabel {
   label: string;
 }
 
-/** 열을 대표하는 달 = 그 열의 첫 셀이 속한 달. 창 밖 자리는 건너뛴다. */
+/** 열을 대표하는 달 = 그 열의 월요일이 속한 달. */
 function columnMonth(week: WeekColumn): string | null {
-  const first = week.find((cell) => cell !== null);
-  return first ? first.dateKey.slice(0, 7) : null;
+  return week[0]?.dateKey.slice(0, 7) ?? null;
 }
 
 export function buildMonthLabels(

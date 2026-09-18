@@ -22,15 +22,15 @@ DB 스키마 변경이 없다. 여기 적는 것은 **model 레이어가 만들�
 /** 한 칸의 상태. FR-004 — 중간 단계는 없다. */
 type CellState = 'active' | 'inactive' | 'future';
 
-/** 창 안의 하루. 창 밖 요일 자리는 셀 자체가 없다(`null`). */
+/** 그리드 한 칸 = 하루. 창이 주 단위로 떨어져서 빈 자리는 없다. */
 interface DayCell {
   dateKey: string;      // 'YYYY-MM-DD', 사용자 로컬 달력 기준
   state: CellState;
   isToday: boolean;     // FR-007
 }
 
-/** 한 열 = 한 주. 길이는 항상 7, 창 밖 자리는 null (spec 경계: 잘린 주). */
-type WeekColumn = ReadonlyArray<DayCell | null>;
+/** 한 열 = 한 주. 길이는 항상 7이고 모든 자리가 실제 날이다. */
+type WeekColumn = readonly DayCell[];
 
 /** 그날 입력한 프로그램 하나. 요약 한 줄 + 상세로 가는 길. */
 interface DayProgram {
@@ -92,10 +92,12 @@ function buildGridWindow(
 
 한 자리의 상태는 이 순서로 정해진다.
 
-1. 26주 창 밖 → **셀 없음** (`null`). 첫 열의 이번 주 이전 요일이 여기 해당한다.
-2. `dateKey > 오늘` → `'future'`. 이번 주 남은 요일이다. **꺼짐이 아니다** (spec 경계).
-3. `index.has(dateKey)` → `'active'`.
-4. 그 외 → `'inactive'`.
+1. `dateKey > 오늘` → `'future'`. 이번 주 남은 요일이다. **꺼짐이 아니다** (spec 경계).
+2. `index.has(dateKey)` → `'active'`.
+3. 그 외 → `'inactive'`.
+
+창이 26주 전 주의 월요일부터 이번 주 일요일까지라 26×7 = 182칸이 전부 실제 날이다.
+"셀 없음" 분기는 없다 (spec 경계: 창의 경계).
 
 `isToday` 는 `dateKey === localDateKey(now, timeZone)` 이며 상태와 독립이다 — 오늘은
 `'active'` 일 수도 `'inactive'` 일 수도 있다.
@@ -103,5 +105,5 @@ function buildGridWindow(
 ## 경계 밖
 
 - 그리드는 **쓰기 경로가 없다**. 훈련을 기록·수정하지 않는다.
-- 26주 이전 기록은 `buildActivityIndex` 에는 들어오지만 창에 걸리지 않아 그려지지 않는다.
+- 창보다 오래된 기록은 `buildActivityIndex` 에는 들어오지만 창에 걸리지 않아 그려지지 않는다.
   인덱스에서 미리 잘라내지 않는 이유는, 자르는 기준이 곧 창 계산과 같은 일의 중복이기 때문이다.

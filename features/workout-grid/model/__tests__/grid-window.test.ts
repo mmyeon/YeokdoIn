@@ -5,16 +5,16 @@ import type { DayCell } from '../types';
 
 /**
  * 창 계산의 기준 시각을 고정한다.
- * 2026-09-17 은 **목요일**이라 첫 열·마지막 열이 모두 잘린다 — 잘린 주(spec 경계)를
- * 실제로 밟는 날짜여야 이 테스트가 의미가 있다. 월요일을 고르면 null 자리가 0개다.
+ * 2026-09-17 은 **목요일**이라 첫 열의 앞부분과 마지막 열의 뒷부분이 오늘에서
+ * 멀리 떨어진다. 월요일을 고르면 그 경계를 밟지 않아 테스트가 무뎌진다.
  */
 const NOW_MS = Date.parse('2026-09-17T05:00:00Z'); // 서울 14:00
 const SEOUL = 'Asia/Seoul';
 
 const TODAY = '2026-09-17'; // 목
 const THIS_MONDAY = '2026-09-14';
-const WINDOW_START = '2026-03-26'; // 오늘로부터 25주 전 (같은 요일)
-const FIRST_MONDAY = '2026-03-23';
+const FIRST_MONDAY = '2026-03-23'; // 창의 시작 = 26주 전 주의 월요일
+const LAST_SUNDAY = '2026-09-20'; // 창의 끝 = 이번 주 일요일
 
 const DAY_MS = 86_400_000;
 
@@ -29,8 +29,9 @@ function emptyGrid() {
   return buildGridWindow(NOW_MS, SEOUL, new Map());
 }
 
-function cells(grid: readonly (readonly (DayCell | null)[])[]): DayCell[] {
-  return grid.flat().filter((c): c is DayCell => c !== null);
+/** 창에는 빈 자리가 없다 — 26×7 이 전부 실제 날이다. */
+function cells(grid: readonly (readonly DayCell[])[]): readonly DayCell[] {
+  return grid.flat();
 }
 
 function gridFor(instants: readonly string[]) {
@@ -76,20 +77,22 @@ describe('buildGridWindow', () => {
       }
     });
 
-    it('첫 열의 창 시작 이전 자리는 셀이 없다 (spec 경계: 잘린 주)', () => {
+    it('첫 열도 월요일부터 7칸을 전부 채운다 — 빈 자리가 없다', () => {
       const first = emptyGrid()[0];
-      expect(first[0]).toBeNull(); // 3/23 월
-      expect(first[1]).toBeNull(); // 3/24 화
-      expect(first[2]).toBeNull(); // 3/25 수
-      expect(first[3]?.dateKey).toBe(WINDOW_START); // 3/26 목 = 창의 시작
-      expect(first[6]?.dateKey).toBe(shiftKey(FIRST_MONDAY, 6));
+      expect(first[0].dateKey).toBe(FIRST_MONDAY); // 3/23 월
+      expect(first[6].dateKey).toBe(shiftKey(FIRST_MONDAY, 6)); // 3/29 일
+      expect(first.every((cell) => cell !== null)).toBe(true);
     });
 
-    it('창 시작부터 오늘까지가 176일이다 — 25주 + 오늘', () => {
+    it('26×7 = 182칸이 전부 실제 날이다 — 그린 자리에 빈 칸이 없다', () => {
+      expect(cells(emptyGrid())).toHaveLength(182);
+      expect(cells(emptyGrid()).at(-1)?.dateKey).toBe(LAST_SUNDAY);
+    });
+
+    it('창 시작부터 오늘까지가 179일이다 — 나머지 3칸은 future 다', () => {
       const upToToday = cells(emptyGrid()).filter((c) => c.state !== 'future');
-      expect(upToToday).toHaveLength(176);
-      // 마지막 열의 남은 요일 3개(금·토·일)가 future 로 더 붙는다.
-      expect(cells(emptyGrid())).toHaveLength(179);
+      expect(upToToday).toHaveLength(179);
+      expect(upToToday[0].dateKey).toBe(FIRST_MONDAY);
     });
   });
 
@@ -115,19 +118,19 @@ describe('buildGridWindow', () => {
     });
 
     it('26주보다 오래된 기록은 어떤 칸도 켜지 않는다', () => {
-      // 창 시작 하루 전 — 첫 열 안이지만 창 밖이라 셀 자체가 없다
-      const justOutside = gridFor([`${shiftKey(WINDOW_START, -1)}T01:00:00Z`]);
+      // 창 시작 하루 전 — 그리드에 자리가 없는 날이다
+      const justOutside = gridFor([`${shiftKey(FIRST_MONDAY, -1)}T01:00:00Z`]);
       expect(cells(justOutside).some((c) => c.state === 'active')).toBe(false);
 
       const longAgo = gridFor(['2024-01-02T01:00:00Z']);
       expect(cells(longAgo).some((c) => c.state === 'active')).toBe(false);
     });
 
-    it('창의 첫날 기록은 켜진다 — 경계를 한 칸 잘라먹지 않는다', () => {
-      const grid = gridFor([`${WINDOW_START}T01:00:00Z`]);
+    it('창의 첫날(첫 열 월요일) 기록은 켜진다 — 경계를 한 칸 잘라먹지 않는다', () => {
+      const grid = gridFor([`${FIRST_MONDAY}T01:00:00Z`]);
       const active = cells(grid).filter((c) => c.state === 'active');
 
-      expect(active.map((c) => c.dateKey)).toEqual([WINDOW_START]);
+      expect(active.map((c) => c.dateKey)).toEqual([FIRST_MONDAY]);
     });
 
     it('오늘 기록은 오늘 칸을 켠다', () => {
@@ -184,8 +187,8 @@ describe('buildGridWindow', () => {
       const instants: string[] = [
         '2026-09-16T14:59:59Z', // 서울 9/16 23:59:59
         '2026-09-16T15:00:00Z', // 서울 9/17 00:00:00
-        `${WINDOW_START}T15:00:00Z`, // 창 시작일의 로컬 자정 직후
-        `${shiftKey(WINDOW_START, -1)}T14:59:59Z`, // 창 시작 전날 로컬 자정 직전
+        `${FIRST_MONDAY}T15:00:00Z`, // 창 시작일의 로컬 자정 직후
+        `${shiftKey(FIRST_MONDAY, -1)}T14:59:59Z`, // 창 시작 전날 로컬 자정 직전
       ];
 
       // 창의 한참 앞뒤까지 퍼뜨린다 — 창 밖 기록이 섞여야 대조가 의미 있다.
@@ -196,12 +199,12 @@ describe('buildGridWindow', () => {
         );
       }
 
-      // 독립 계산: 각 시각을 로컬 날짜로 접고, 창 [WINDOW_START, TODAY] 에
+      // 독립 계산: 각 시각을 로컬 날짜로 접고, 창 [FIRST_MONDAY, TODAY] 에
       // 드는 것만 남긴다. buildGridWindow 를 쓰지 않는다.
       const expected = new Set(
         instants
           .map((iso) => localDateKey(iso, SEOUL))
-          .filter((key) => key >= WINDOW_START && key <= TODAY),
+          .filter((key) => key >= FIRST_MONDAY && key <= TODAY),
       );
 
       const actual = new Set(

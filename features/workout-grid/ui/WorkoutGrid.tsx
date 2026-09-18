@@ -56,7 +56,7 @@ export function WorkoutGrid() {
     const activityIndex = buildActivityIndex(programs ?? [], timeZone);
     // 전역 window 를 가리지 않도록 이름을 따로 둔다.
     const gridWeeks = buildGridWindow(Date.now(), timeZone, activityIndex);
-    const today = gridWeeks.at(-1)?.find((cell) => cell?.isToday)?.dateKey;
+    const today = gridWeeks.at(-1)?.find((cell) => cell.isToday)?.dateKey;
 
     return { weeks: gridWeeks, index: activityIndex, todayKey: today ?? "" };
   }, [programs]);
@@ -140,21 +140,16 @@ export function WorkoutGrid() {
             >
               {weeks.map((week, weekIndex) => (
                 <div key={weekIndex} className="grid grid-rows-7 gap-[2px]">
-                  {week.map((cell, dayIndex) =>
-                    cell === null ? (
-                      // 창 밖 자리는 버튼이 아니라 빈 칸이다 (spec 경계: 잘린 주).
-                      <div key={dayIndex} className="aspect-square w-full" />
-                    ) : (
-                      <GridCell
-                        key={cell.dateKey}
-                        dateKey={cell.dateKey}
-                        state={cell.state}
-                        isToday={cell.isToday}
-                        isSelected={cell.dateKey === selectedDateKey}
-                        onSelect={setSelectedDateKey}
-                      />
-                    ),
-                  )}
+                  {week.map((cell) => (
+                    <GridCell
+                      key={cell.dateKey}
+                      dateKey={cell.dateKey}
+                      state={cell.state}
+                      isToday={cell.isToday}
+                      isSelected={cell.dateKey === selectedDateKey}
+                      onSelect={setSelectedDateKey}
+                    />
+                  ))}
                 </div>
               ))}
             </div>

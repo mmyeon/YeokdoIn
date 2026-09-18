@@ -22,8 +22,8 @@ describe('buildMonthLabels', () => {
     const result = labels();
 
     for (const { weekIndex, label } of result) {
-      const first = weeks[weekIndex].find((c) => c !== null);
-      expect(label).toBe(`${Number(first!.dateKey.slice(5, 7))}월`);
+      const first = weeks[weekIndex][0];
+      expect(label).toBe(`${Number(first.dateKey.slice(5, 7))}월`);
     }
   });
 

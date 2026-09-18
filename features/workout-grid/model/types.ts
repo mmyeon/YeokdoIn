@@ -11,7 +11,7 @@
  */
 export type CellState = 'active' | 'inactive' | 'future';
 
-/** 창 안의 하루. 창 밖 요일 자리는 셀 자체가 없다(`null`). */
+/** 그리드 한 칸 = 하루. 창이 주 단위로 떨어져서 빈 자리는 없다. */
 export interface DayCell {
   /** `YYYY-MM-DD`, 사용자 로컬 달력 기준 */
   dateKey: string;
@@ -20,8 +20,8 @@ export interface DayCell {
   isToday: boolean;
 }
 
-/** 한 열 = 한 주. 길이는 항상 7, 창 밖 자리는 `null` (spec 경계: 잘린 주). */
-export type WeekColumn = ReadonlyArray<DayCell | null>;
+/** 한 열 = 한 주. 길이는 항상 7이고 모든 자리가 실제 날이다. */
+export type WeekColumn = readonly DayCell[];
 
 /** 그날 입력한 프로그램 하나. 요약 한 줄과 상세로 가는 길이 전부다 (FR-008). */
 export interface DayProgram {
