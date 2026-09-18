@@ -28,3 +28,23 @@ export function localDateKey(isoInstant: string, timeZone: string): string {
     day: '2-digit',
   }).format(new Date(isoInstant));
 }
+
+/**
+ * 두 시각이 **같은 날**에 속하는지. 그리드의 "오늘"이 언제 갱신돼야 하는지를
+ * 정하는 판정이다 — 시각이 흘렀다고 다시 그릴 일이 아니라, 날이 바뀌어야
+ * 다시 그린다.
+ *
+ * @param aMs 비교할 시각 (epoch ms)
+ * @param bMs 비교할 시각 (epoch ms)
+ * @param timeZone IANA 타임존 이름
+ */
+export function isSameLocalDay(
+  aMs: number,
+  bMs: number,
+  timeZone: string,
+): boolean {
+  return (
+    localDateKey(new Date(aMs).toISOString(), timeZone) ===
+    localDateKey(new Date(bMs).toISOString(), timeZone)
+  );
+}

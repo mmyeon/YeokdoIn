@@ -1,4 +1,4 @@
-import { localDateKey } from '../local-date-key';
+import { isSameLocalDay, localDateKey } from '../local-date-key';
 
 /**
  * 이 함수의 존재 이유는 "서버는 요청자의 타임존을 모른다"는 것 하나다.
@@ -47,5 +47,32 @@ describe('localDateKey', () => {
     expect(localDateKey('2026-01-05T03:00:00Z', 'Asia/Seoul')).toBe(
       '2026-01-05',
     );
+  });
+});
+
+/**
+ * 그리드가 "오늘"을 다시 계산할지 정하는 판정. 하루가 지났는데 같은 날이라고
+ * 답하면 어제 칸에 오늘 표시가 남는다.
+ */
+describe('isSameLocalDay', () => {
+  const SEOUL = 'Asia/Seoul';
+  const noon = Date.parse('2026-09-17T03:00:00Z'); // 서울 12:00
+
+  it('같은 날의 다른 시각은 같은 날이다', () => {
+    expect(isSameLocalDay(noon, noon + 6 * 3_600_000, SEOUL)).toBe(true);
+  });
+
+  it('로컬 자정을 넘기면 다른 날이다', () => {
+    // 서울 12:00 → 다음 날 00:30
+    const afterMidnight = Date.parse('2026-09-17T15:30:00Z');
+    expect(isSameLocalDay(noon, afterMidnight, SEOUL)).toBe(false);
+  });
+
+  it('판정 기준은 UTC 가 아니라 주어진 타임존이다', () => {
+    // 두 시각은 UTC 로는 같은 날(09-17)이지만 서울로는 17일과 18일이다
+    const a = Date.parse('2026-09-17T03:00:00Z');
+    const b = Date.parse('2026-09-17T16:00:00Z');
+    expect(isSameLocalDay(a, b, 'UTC')).toBe(true);
+    expect(isSameLocalDay(a, b, SEOUL)).toBe(false);
   });
 });

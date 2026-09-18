@@ -10,6 +10,7 @@ import { buildMonthLabels } from "@/features/workout-grid/model/axis-labels";
 import { buildGridWindow, WEEKS } from "@/features/workout-grid/model/grid-window";
 import { GridCell } from "./GridCell";
 import { GridDayDetail } from "./GridDayDetail";
+import { useDayTick } from "./useDayTick";
 
 /**
  * 최근 26주 훈련 그리드.
@@ -51,15 +52,19 @@ export function WorkoutGrid() {
 
   const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
 
+  // 타임존은 세션 내내 같다. 매 렌더 Intl 을 다시 열 이유가 없다.
+  const timeZone = useMemo(resolveTimeZone, []);
+  // "지금"을 렌더 중에 읽으면 안 된다 — useDayTick 의 주석 참조.
+  const nowMs = useDayTick(timeZone);
+
   const { weeks, index, todayKey } = useMemo(() => {
-    const timeZone = resolveTimeZone();
     const activityIndex = buildActivityIndex(programs ?? [], timeZone);
     // 전역 window 를 가리지 않도록 이름을 따로 둔다.
-    const gridWeeks = buildGridWindow(Date.now(), timeZone, activityIndex);
+    const gridWeeks = buildGridWindow(nowMs, timeZone, activityIndex);
     const today = gridWeeks.at(-1)?.find((cell) => cell.isToday)?.dateKey;
 
     return { weeks: gridWeeks, index: activityIndex, todayKey: today ?? "" };
-  }, [programs]);
+  }, [programs, nowMs, timeZone]);
 
   const monthLabels = useMemo(() => buildMonthLabels(weeks), [weeks]);
   const isEmpty = (programs?.length ?? 0) === 0;
