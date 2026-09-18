@@ -73,7 +73,7 @@ spec.md 에 번호 붙은 user story 절이 없다(100줄 상한 규약). 아래
 - [x] T012 [US1] `features/workout-grid/ui/GridCell.tsx` 를 만든다. `<button type="button">` 이며 `CellState` 별 스타일만 분기한다. **계산하지 않는다**
 - [x] T013 [US1] `features/workout-grid/ui/WorkoutGrid.tsx` 를 만든다. `usePrograms()` 를 부르고 `useMemo` 한 번으로 `buildActivityIndex` → `buildGridWindow` 를 돌린다. 타임존은 `Intl.DateTimeFormat().resolvedOptions().timeZone` 로 얻어 주입한다. 그리드는 `repeat(26, minmax(0,1fr))` + `gap: 2px` + 셀 `aspect-square` — 폭이 컨테이너에서 나와야 가로 스크롤이 **구조적으로** 불가능하다(research R4)
 - [x] T014 [US1] `app/page.tsx` 의 `HomeHeader` 바로 아래, `IdleHero` 위에 `<WorkoutGrid />` 를 배치한다 (FR: 홈 최상단)
-- [ ] T015 [US1] 375px 에서 `scrollWidth === clientWidth` 를 개발자도구로 확인한다 (quickstart 게이트 3)
+- [x] T015 [US1] 375px 에서 `scrollWidth === clientWidth` 를 개발자도구로 확인한다 (quickstart 게이트 3)
 
 **Checkpoint**: 그리드가 실제 데이터로 켜지고 꺼진다. 여기까지가 MVP 다.
 
@@ -93,7 +93,7 @@ spec.md 에 번호 붙은 user story 절이 없다(100줄 상한 규약). 아래
 - [x] T018 [US2] `GridCell.tsx` 에서 오늘 칸을 테두리로 구별한다 (FR-007). 색만 바꾸지 않는다
 - [x] T019 [US2] `GridCell.tsx` 의 켜짐/꺼짐을 **채움 vs 테두리만**으로 구분하도록 확정한다 (FR-010). 색상 차이가 사라져도 명도 대비로 남아야 한다
 - [x] T020 [US2] `GridCell.tsx` 의 `<button>` 에 `aria-label` 로 날짜와 활동 여부를 **한국어 문장**으로 싣는다 (FR-010, CLAUDE.md UI 문구 규약). 창 밖 `null` 자리는 버튼이 아니라 빈 칸으로 렌더한다
-- [ ] T021 [US2] quickstart 게이트 4 를 라이트·다크 테마 양쪽에서 수행한다
+- [x] T021 [US2] quickstart 게이트 4 를 라이트·다크 테마 양쪽에서 수행한다
 
 **Checkpoint**: 그리드가 색 없이도 읽힌다.
 
@@ -111,7 +111,7 @@ spec.md 에 번호 붙은 user story 절이 없다(100줄 상한 규약). 아래
 - [x] T022 [US3] `WorkoutGrid.tsx` 에서 `usePrograms()` 의 `isLoading` 분기를 추가한다. 홈의 기존 `HomeSkeleton` 톤과 맞춘다
 - [x] T023 [US3] 기록 0건일 때 빈 그리드와 함께 **칸을 켜는 방법**(프로그램 입력하러 가기)을 안내한다 (FR-009). 오류처럼 보이면 안 된다
 - [x] T024 [US3] `isError` 일 때 오류 안내와 `refetch()` 재시도 버튼을 렌더한다 (FR-009). **빈 그리드로 위장하지 않는다** — 이 분기가 빈 상태와 같은 화면을 그리면 안 된다
-- [ ] T025 [US3] quickstart 게이트 5 를 수행한다. 문구가 전부 한국어인지 함께 확인한다
+- [x] T025 [US3] quickstart 게이트 5 를 수행한다. 문구가 전부 한국어인지 함께 확인한다
 
 **Checkpoint**: 세 상태(로딩·빈·오류)가 서로 구별된다.
 
@@ -129,7 +129,7 @@ spec.md 에 번호 붙은 user story 절이 없다(100줄 상한 규약). 아래
 - [x] T026 [US4] `features/workout-grid/ui/GridDayDetail.tsx` 를 만든다. 그리드 바깥 **고정 자리**에 렌더한다. Dialog·Popover 를 쓰지 않는다 — 이유는 research R5 (FR-008 의 "다른 조작을 막지 않는다", 신규 의존성 0)
 - [x] T027 [US4] `WorkoutGrid.tsx` 에 선택 상태(`selectedDateKey`)를 두고 `GridCell` 의 클릭과 연결한다. 선택 전 기본값은 **오늘**이다 — 자리를 비워두면 선택할 때마다 레이아웃이 튄다(R5)
 - [x] T028 [US4] 활동이 없는 날도 날짜와 활동 없음을 안내한다 (FR-008). 빈 문자열이나 미표시로 처리하지 않는다
-- [ ] T029 [US4] 상세 표시 중에도 홈 세로 스크롤과 하단 탭 조작이 되는지 확인한다 (FR-008)
+- [x] T029 [US4] 상세 표시 중에도 홈 세로 스크롤과 하단 탭 조작이 되는지 확인한다 (FR-008)
 
 **Checkpoint**: 네 user story 전부 동작한다.
 
