@@ -93,9 +93,11 @@ function ProgramRow({ program }: { program: DayProgram }) {
       >
         {program.label ?? "제목 없는 기록"}
       </span>
+      {/* 화살표는 "누를 수 있다"는 유일한 신호다. dim 은 라이트 테마에서
+          배경에 묻혀 링크로 안 읽혔다 — muted 로 올린다 (dogfooding 2026-09-18). */}
       <span
         aria-hidden
-        className="ml-auto shrink-0 text-[var(--yd-text-dim)]"
+        className="ml-auto shrink-0 text-[13px] leading-none text-[var(--yd-text-muted)]"
       >
         ›
       </span>
