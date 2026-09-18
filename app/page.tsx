@@ -17,6 +17,7 @@ import {
   type ProgramLibraryItem,
 } from "@/features/home/ui/ProgramLibraryPreview";
 import { VideoAnalysisCard } from "@/features/home/ui/VideoAnalysisCard";
+import { WorkoutGrid } from "@/features/workout-grid/ui/WorkoutGrid";
 import { ROUTES } from "@/routes";
 import type { ProgramRow } from "@/features/programs/api/programs";
 import { isTextProgram } from "@/features/programs/model/text-program";
@@ -110,6 +111,10 @@ export default function Home() {
         streak={!isFirstTime ? undefined : undefined}
         isAuthenticated={!!user}
       />
+
+      {/* 홈 최상단 — 스크롤 없이 최근 26주를 먼저 보게 한다 (FR-005).
+          비로그인 상태에서는 읽을 기록이 없으므로 그리지 않는다. */}
+      {user && <WorkoutGrid />}
 
       {isLoading ? (
         <HomeSkeleton />

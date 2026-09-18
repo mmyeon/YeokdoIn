@@ -18,6 +18,22 @@ Weightlifting training assistant — track programs, analyze movements, manage P
 - 종목 이름과 약어의 진실은 DB(`base_exercises`, `gym_exercises`)에 있다. 문서나 프롬프트에 목록을 복제하지 말 것.
 - 과거 설계 문서는 `docs/specs/` 에 있다. **상태 표시를 먼저 확인할 것** — 서로 모순되는 문서가 섞여 있다. 인덱스는 `docs/specs/README.md`.
 
+## Spec Writing
+
+`specs/*/spec.md` 는 **100줄 상한**. 독자는 **6개월 뒤 이 코드베이스를 아는 개발자 한 명**이다.
+speckit 템플릿은 팀·비기술 이해관계자를 전제하므로 그대로 채우지 말 것.
+
+**판정**: 이 줄을 지우면 독자가 뭘 잘못하는가? 한 문장으로 답 못 하면 삭제한다.
+
+- 스키마·타입·RLS·테스트가 이미 강제하는 것은 쓰지 않는다. 중복이 아니라 드리프트 예약이다.
+- **안 한 것이 한 것보다 기록 가치가 높다.** 채택한 결정은 코드가 증명하지만 기각한 결정은
+  흔적이 0이라, 안 적으면 영원히 다시 논의된다. 압축할 때 마지막에 건드릴 것.
+- 리서치·비교·계산 과정은 버리고 결론만 남긴다. 예외는 다시 알아내는 데 30분 넘게 걸리는 사실.
+- 우선순위 설명, 독립 테스트 방법, 비기술 독자용 부연은 구현이 끝나면 의미가 사라진다.
+
+**골격**: 요약 / 만드는 것(FR) / 경계 / 검증 / 가정 / 결정 기록.
+speckit이 함께 만들려는 `checklists/` 는 작성 시점 도구이므로 아예 만들지 않는다.
+
 ## Codebase Style
 
 **Stack**: Next.js 15 (App Router) + React 19 + TypeScript 5 + Supabase + React Query + Jotai + shadcn/ui + MediaPipe
