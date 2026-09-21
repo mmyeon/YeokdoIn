@@ -375,7 +375,12 @@ export async function addRecord(
 export async function getExercises(): Promise<ExercisesRow[]> {
   const supabase = await supabaseServerClient();
 
-  const { data, error } = await supabase.from("exercises").select("*");
+  // 전체 카탈로그가 아니라 PR 대상 종목만. 목록의 진실은 DB 플래그에 있다.
+  const { data, error } = await supabase
+    .from("exercises")
+    .select("*")
+    .eq("is_pr_tracked", true)
+    .order("id", { ascending: true });
 
   if (error) handleDatabaseError(error);
 

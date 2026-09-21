@@ -32,7 +32,7 @@ function PersonalRecordsPage() {
 
   const isLoading = isLoadingRecords || isLoadingExercises;
 
-  // 카탈로그 전체를 깔고 등록 여부를 표시한다 (FR-012). 17종목이라 평면 목록은
+  // PR 대상 종목 전체를 깔고 등록 여부를 표시한다 (FR-012). 12종목이라 평면 목록은
   // 길어지므로 종목 드롭다운과 같은 카테고리로 묶는다.
   const groups = groupExercisesByCategory(
     buildPersonalRecordRows(exercises, records)

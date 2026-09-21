@@ -33,6 +33,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: number
+          is_pr_tracked: boolean
           name: string
           page_url: string | null
           pr_reference_id: number | null
@@ -45,6 +46,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: number
+          is_pr_tracked?: boolean
           name: string
           page_url?: string | null
           pr_reference_id?: number | null
@@ -57,6 +59,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: number
+          is_pr_tracked?: boolean
           name?: string
           page_url?: string | null
           pr_reference_id?: number | null

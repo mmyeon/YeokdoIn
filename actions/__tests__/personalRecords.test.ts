@@ -202,11 +202,28 @@ import {
   getPRHistory,
   addRecord,
   deleteRecord,
+  getExercises,
 } from "@/actions/personalRecords";
 
 beforeEach(() => {
   mockState.store = createStore();
   mockState.fromCalls = [];
+});
+
+describe("getExercises", () => {
+  it("PR 대상으로 표시된 종목만 id 순으로 반환한다", async () => {
+    mockState.store.exercises = {
+      rows: [
+        { id: 10, name: "Snatch", is_pr_tracked: true },
+        { id: 27, name: "2-Position Power Snatch", is_pr_tracked: false },
+        { id: 3, name: "Clean", is_pr_tracked: true },
+      ],
+    };
+
+    const exercises = await getExercises();
+
+    expect(exercises.map((e) => e.name)).toEqual(["Clean", "Snatch"]);
+  });
 });
 
 describe("addPRHistoryEntry", () => {
