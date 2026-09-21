@@ -17,5 +17,25 @@ INSERT INTO public.exercises (name, updated_at) VALUES
     ('Snatch Pull', now()),
     ('Clean Pull', now()),
     ('Snatch Balance', now()),
-    ('Overhead Squat', now())
+    ('Overhead Squat', now()),
+    ('Back Press', now()),
+    ('Press', now())
 ON CONFLICT DO NOTHING;
+
+-- PR 설정 화면 노출 종목. 마이그레이션 20260921120000 과 같은 목록을 유지할 것.
+UPDATE public.exercises
+SET is_pr_tracked = true
+WHERE name IN (
+    'Snatch',
+    'Clean',
+    'Jerk',
+    'Back Squat',
+    'Front Squat',
+    'Snatch Balance',
+    'Press',
+    'Back Press',
+    'Snatch Pull',
+    'Clean Pull',
+    'Push Jerk',
+    'Deadlift'
+);
