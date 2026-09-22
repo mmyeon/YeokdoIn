@@ -51,23 +51,31 @@ async function prepare(
     ?.find((r) => r.exerciseId === exerciseId);
 }
 
-/** 이력을 고치고, 현재 PR 은 고친 이력에서 계산한다. */
+/**
+ * 이력을 고치고, 현재 PR 은 고친 이력에서 계산한다. 반영했으면 true.
+ *
+ * 이력이 아직 로딩 중이면 반영하지 않는다 — 빈 목록으로 보고 계산하면 현재 PR 이
+ * 새 행 하나로 정해지고, 되돌릴 때 0건이 돼 레코드 행까지 캐시에서 빠진다.
+ */
 function applyOptimistic(
   queryClient: QueryClient,
   exerciseId: number,
   change: HistoryChange,
   base: PersonalRecordInfo | undefined
-): void {
-  const history = applyHistoryChange(
-    queryClient.getQueryData<PRHistoryEntry[]>(historyKey(exerciseId)) ?? [],
-    change
+): boolean {
+  const cached = queryClient.getQueryData<PRHistoryEntry[]>(
+    historyKey(exerciseId)
   );
+  if (!cached) return false;
+
+  const history = applyHistoryChange(cached, change);
   queryClient.setQueryData(historyKey(exerciseId), history);
 
-  if (!base) return;
+  if (!base) return true;
   queryClient.setQueryData<PersonalRecordInfo[]>(recordsKey, (records = []) =>
     applyCurrentPR(records, base, deriveCurrentPR(history))
   );
+  return true;
 }
 
 /**
@@ -213,7 +221,7 @@ export const useOptimisticAddPRHistory = (
       if (exerciseId === null) return undefined;
       const base = await prepare(queryClient, exerciseId);
       const tempId = -Date.now();
-      applyOptimistic(
+      const applied = applyOptimistic(
         queryClient,
         exerciseId,
         {
@@ -232,7 +240,8 @@ export const useOptimisticAddPRHistory = (
         },
         base
       );
-      return { exerciseId, base, tempId };
+      // 반영하지 않았으면 되돌릴 것도 없다.
+      return applied ? { exerciseId, base, tempId } : undefined;
     },
     onError: (error, variables, context) => {
       if (context) {

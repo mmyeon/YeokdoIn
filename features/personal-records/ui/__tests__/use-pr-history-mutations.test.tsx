@@ -100,15 +100,16 @@ function deferEach(mock: jest.Mock): Deferred[] {
   return calls;
 }
 
+/** `history` 가 `null` 이면 이력 캐시를 심지 않는다(아직 로딩 중). */
 function setup(
-  history: PRHistoryEntry[] = HISTORY,
+  history: PRHistoryEntry[] | null = HISTORY,
   records: PersonalRecordInfo[] = [SNATCH, CLEAN]
 ) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false, staleTime: Infinity } },
   });
   client.setQueryData(RECORDS_KEY, records);
-  client.setQueryData(HISTORY_KEY, history);
+  if (history) client.setQueryData(HISTORY_KEY, history);
 
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={client}>{children}</QueryClientProvider>
@@ -375,6 +376,24 @@ describe("useOptimisticAddPRHistory", () => {
     act(() => result.current.mutation.mutate(input(110, "2026-09-20")));
 
     await waitFor(() => expect(snatchWeight(ctx.records$())).toBe(110));
+  });
+
+  it("이력이 아직 로딩 중이면 예측하지 않고, 실패해도 레코드를 지우지 않는다", async () => {
+    const calls = deferEach(addPRHistoryEntry);
+    getPRHistory.mockReturnValue(new Promise(() => {}));
+    const ctx = setup(null);
+    const { result, onError } = renderAdd(ctx);
+
+    act(() => result.current.mutation.mutate(input(85, "2026-08-15")));
+    await waitFor(() => expect(calls).toHaveLength(1));
+
+    expect(ctx.history$()).toBeUndefined();
+    expect(ctx.records$()).toEqual([SNATCH, CLEAN]);
+
+    await act(async () => calls[0].reject(new Error("boom")));
+
+    await waitFor(() => expect(onError).toHaveBeenCalled());
+    expect(ctx.records$()).toContainEqual(SNATCH);
   });
 
   it("실패하면 임시 행만 빠지고 onError 가 입력값을 받는다", async () => {
