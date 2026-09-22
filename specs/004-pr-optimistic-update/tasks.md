@@ -32,7 +32,7 @@ spec.md 에 user story 절이 없다(100줄 상한). 아래 US1~US3 은 **조작
 
 ## Phase 1: Setup
 
-- [ ] T001 `jest.config.js` 의 `testMatch` 에 `'**/features/**/__tests__/**/*.test.tsx'` 를 추가한다. **지금은 없어서** 계획대로 `features/personal-records/ui/__tests__/*.test.tsx` 를 만들면 테스트가 실행되지 않고 조용히 통과한 것처럼 보인다. 추가 후 `npx jest --listTests | grep features/` 로 기존 목록이 바뀌지 않았는지 확인한다
+- [X] T001 `jest.config.js` 의 `testMatch` 에 `'**/features/**/__tests__/**/*.test.tsx'` 를 추가한다. **지금은 없어서** 계획대로 `features/personal-records/ui/__tests__/*.test.tsx` 를 만들면 테스트가 실행되지 않고 조용히 통과한 것처럼 보인다. 추가 후 `npx jest --listTests | grep features/` 로 기존 목록이 바뀌지 않았는지 확인한다
 
 ---
 
@@ -42,13 +42,13 @@ spec.md 에 user story 절이 없다(100줄 상한). 아래 US1~US3 은 **조작
 
 **⚠️ CRITICAL**: 이 Phase 가 끝나기 전에는 어떤 user story 도 시작할 수 없다.
 
-- [ ] T002 `features/personal-records/model/__tests__/optimistic-history.test.ts` 를 먼저 작성하고 **실패를 확인한다**. 케이스:
+- [X] T002 `features/personal-records/model/__tests__/optimistic-history.test.ts` 를 먼저 작성하고 **실패를 확인한다**. 케이스:
       `applyHistoryChange` — 과거 날짜 `add` 가 맨 위가 아니라 날짜 순 자리에 들어감, 같은 날짜면 `createdAt` 내림차순, `update` 로 날짜를 바꾸면 자리 이동, `remove`, 입력 배열이 변하지 않음(불변);
       `deriveCurrentPR` — 최대 무게 행 삭제 후 다음 최대, 동점 시 무게가 같음, 0건 → `null`;
       `applyCurrentPR` — `null` 이면 `base.exerciseId` 행 제거, 제거된 상태에 `base` 로 되살리면 `id`·`exerciseName` 복원, 다른 종목 행은 그대로;
       역연산 왕복 — `add`→`remove`, `remove`→`add`, `update`→`update(before)` 후 원래 배열과 `toEqual`
-- [ ] T003 `features/personal-records/model/optimistic-history.ts` 에 `HistoryChange` 타입과 `applyHistoryChange`·`deriveCurrentPR`·`applyCurrentPR` 를 data-model.md 정의 그대로 구현한다. 정렬은 서버 `getPRHistory` 와 같은 `prDate` 내림차순 → `createdAt` 내림차순. 현재 PR 규칙은 서버 `recomputeCache` 와 동일(research R8)하다는 것을 상단 주석에 남긴다. React·I/O 를 import 하지 않는다(헌법 IV)
-- [ ] T004 `hooks/usePersonalRecords.ts` 의 `FAIL_FAST_WHEN_OFFLINE` 를 `export` 한다(주석은 그 자리에 둔다 — 근거가 두 벌이 되면 안 된다). `features/personal-records/ui/use-pr-history-mutations.ts` 를 만들고 세 훅이 공유할 것만 넣는다:
+- [X] T003 `features/personal-records/model/optimistic-history.ts` 에 `HistoryChange` 타입과 `applyHistoryChange`·`deriveCurrentPR`·`applyCurrentPR` 를 data-model.md 정의 그대로 구현한다. 정렬은 서버 `getPRHistory` 와 같은 `prDate` 내림차순 → `createdAt` 내림차순. 현재 PR 규칙은 서버 `recomputeCache` 와 동일(research R8)하다는 것을 상단 주석에 남긴다. React·I/O 를 import 하지 않는다(헌법 IV)
+- [X] T004 `hooks/usePersonalRecords.ts` 의 `FAIL_FAST_WHEN_OFFLINE` 를 `export` 한다(주석은 그 자리에 둔다 — 근거가 두 벌이 되면 안 된다). `features/personal-records/ui/use-pr-history-mutations.ts` 를 만들고 세 훅이 공유할 것만 넣는다:
       `PR_HISTORY_MUTATION_KEY`(세 훅 공통 `mutationKey`, R3);
       `applyOptimistic(queryClient, exerciseId, change, base)` — 이력 캐시에 `applyHistoryChange` → 결과로 `deriveCurrentPR` → 레코드 캐시에 `applyCurrentPR`. **현재 PR 캐시를 직접 고치지 않는다**(data-model "캐시 두 개");
       `prepare(queryClient, exerciseId)` — 두 쿼리 `cancelQueries` 후 레코드 캐시에서 `base` 를 찾아 반환;
@@ -68,7 +68,7 @@ spec.md 에 user story 절이 없다(100줄 상한). 아래 US1~US3 은 **조작
 
 ### Tests for User Story 1 ⚠️ 먼저 작성하고 실패를 확인할 것
 
-- [ ] T005 [US1] `features/personal-records/ui/__tests__/use-pr-history-mutations.test.tsx` 를 만든다(상단 `@jest-environment jsdom` docblock, `useAuth`·`@/actions/personalRecords` 목은 `hooks/__tests__/usePersonalRecords.offline.test.tsx` 방식). 테스트마다 새 `QueryClient` 에 두 캐시를 `setQueryData` 로 심고, `deletePRHistoryEntry` 를 **직접 resolve/reject 하는 지연 promise** 로 목한다. 케이스:
+- [X] T005 [US1] `features/personal-records/ui/__tests__/use-pr-history-mutations.test.tsx` 를 만든다(상단 `@jest-environment jsdom` docblock, `useAuth`·`@/actions/personalRecords` 목은 `hooks/__tests__/usePersonalRecords.offline.test.tsx` 방식). 테스트마다 새 `QueryClient` 에 두 캐시를 `setQueryData` 로 심고, `deletePRHistoryEntry` 를 **직접 resolve/reject 하는 지연 promise** 로 목한다. 케이스:
       응답 전에 이력에서 행이 빠지고 헤더 무게가 다음 최대로 내려가 있다;
       실패하면 두 캐시가 직전 값과 `toEqual` 이고 `onError` 가 `(error, id)` 를 받는다;
       **삭제 A·B 연달아, A만 실패** → B는 빠진 채, A만 돌아온다;
@@ -78,9 +78,9 @@ spec.md 에 user story 절이 없다(100줄 상한). 아래 US1~US3 은 **조작
 
 ### Implementation for User Story 1
 
-- [ ] T006 [US1] `use-pr-history-mutations.ts` 에 `useOptimisticDeletePRHistory(exerciseId, onError)` 를 구현한다. `onMutate(id)` → `prepare` → 지운 행을 이력 캐시에서 찾아 context 에 담고 `remove` 적용. `onError(err, id, context)` → `add(context.removed)` 역연산 후 `onError(err, id)`. `onSettled` → `settleIfLast`. **`exerciseId` 는 context 에 담아 쓴다** — 마지막 1건을 지우면 화면의 `record` 가 사라져 인자로 받은 `exerciseId` 가 `null` 이 되고, v5 는 진행 중 mutation 에 최신 옵션을 넣으므로 클로저 값을 쓰면 되돌릴 캐시 키를 잃는다. 성공 콜백 인자는 받지 않는다(FR-005)
-- [ ] T007 [US1] `app/settings/personal-records/[id]/page.tsx` 의 삭제를 새 훅으로 바꾸고 성공 토스트를 없앤다. 실패 토스트 문구 "기록 삭제에 실패했습니다." 는 유지. `HistoryRow` 의 `isDeleting` prop 과 삭제 버튼 `disabled` 를 제거한다(R7 — 이 잠금은 연속 삭제를 막기만 한다)
-- [ ] T008 [US1] `hooks/usePersonalRecords.ts` 에서 `useDeletePRHistoryEntry` 를 제거한다(사용처는 상세 화면뿐, R5)
+- [X] T006 [US1] `use-pr-history-mutations.ts` 에 `useOptimisticDeletePRHistory(exerciseId, onError)` 를 구현한다. `onMutate(id)` → `prepare` → 지운 행을 이력 캐시에서 찾아 context 에 담고 `remove` 적용. `onError(err, id, context)` → `add(context.removed)` 역연산 후 `onError(err, id)`. `onSettled` → `settleIfLast`. **`exerciseId` 는 context 에 담아 쓴다** — 마지막 1건을 지우면 화면의 `record` 가 사라져 인자로 받은 `exerciseId` 가 `null` 이 되고, v5 는 진행 중 mutation 에 최신 옵션을 넣으므로 클로저 값을 쓰면 되돌릴 캐시 키를 잃는다. 성공 콜백 인자는 받지 않는다(FR-005)
+- [X] T007 [US1] `app/settings/personal-records/[id]/page.tsx` 의 삭제를 새 훅으로 바꾸고 성공 토스트를 없앤다. 실패 토스트 문구 "기록 삭제에 실패했습니다." 는 유지. `HistoryRow` 의 `isDeleting` prop 과 삭제 버튼 `disabled` 를 제거한다(R7 — 이 잠금은 연속 삭제를 막기만 한다)
+- [X] T008 [US1] `hooks/usePersonalRecords.ts` 에서 `useDeletePRHistoryEntry` 를 제거한다(사용처는 상세 화면뿐, R5)
 - [ ] T009 [US1] quickstart 수동 #1(삭제만)·#2·#6 을 수행한다
 
 **Checkpoint**: 삭제만 낙관적이고 추가·수정은 기존 동작. 이대로 배포해도 성립한다.
@@ -97,13 +97,13 @@ spec.md 에 user story 절이 없다(100줄 상한). 아래 US1~US3 은 **조작
 
 ### Tests for User Story 2 ⚠️ 먼저 작성하고 실패를 확인할 것
 
-- [ ] T010 [US2] `use-pr-history-mutations.test.tsx` 에 수정 케이스를 추가한다: 날짜를 바꾸면 응답 전에 행이 새 날짜 자리로 옮겨가 있다, 무게를 최대보다 올리면 헤더가 즉시 오른다, 실패하면 수정 전 행으로 돌아오고 `onError` 가 `(error, { id, patch })` 를 받는다. `hooks/__tests__/usePersonalRecords.offline.test.tsx` 의 오프라인 케이스를 새 훅 대상으로 **옮긴다**(spec 검증 절이 유지를 요구)
+- [X] T010 [US2] `use-pr-history-mutations.test.tsx` 에 수정 케이스를 추가한다: 날짜를 바꾸면 응답 전에 행이 새 날짜 자리로 옮겨가 있다, 무게를 최대보다 올리면 헤더가 즉시 오른다, 실패하면 수정 전 행으로 돌아오고 `onError` 가 `(error, { id, patch })` 를 받는다. `hooks/__tests__/usePersonalRecords.offline.test.tsx` 의 오프라인 케이스를 새 훅 대상으로 **옮긴다**(spec 검증 절이 유지를 요구)
 
 ### Implementation for User Story 2
 
-- [ ] T011 [US2] `useOptimisticUpdatePRHistory(exerciseId, onError)` 를 구현한다. 예측 행은 `{ ...before, ...patch }`, 역연산은 `update(before)`. 나머지는 T006 과 같은 구조(context 의 `exerciseId`, `settleIfLast`)
-- [ ] T012 [US2] 상세 화면에 data-model 의 `RetryForm` 타입(`add`·`edit` 둘 다 선언)과 `retryForm` 상태를 둔다. 수정 제출 시 `mutate` 직후 **즉시** `setEditingId(null)`. `onError(err, { id, patch })` → 실패 토스트 + `editingId = id` + `patch` 를 draft 로 복원해 에디터 `initial` 로 넘긴다. `PRHistoryEntryEditor` 는 `initial` 을 마운트 때만 읽으므로 **`key` 를 바꿔 재마운트**한다(재오픈마다 증가하는 카운터). 에디터의 `isPending` 은 넘기지 않는다 — 폼이 이미 닫혔다. 성공 토스트 제거
-- [ ] T013 [US2] `hooks/usePersonalRecords.ts` 에서 `useUpdatePRHistoryEntry` 를 제거하고 `hooks/__tests__/usePersonalRecords.offline.test.tsx` 를 삭제한다(T010 으로 이관 완료)
+- [X] T011 [US2] `useOptimisticUpdatePRHistory(exerciseId, onError)` 를 구현한다. 예측 행은 `{ ...before, ...patch }`, 역연산은 `update(before)`. 나머지는 T006 과 같은 구조(context 의 `exerciseId`, `settleIfLast`)
+- [X] T012 [US2] 상세 화면에 data-model 의 `RetryForm` 타입(`add`·`edit` 둘 다 선언)과 `retryForm` 상태를 둔다. 수정 제출 시 `mutate` 직후 **즉시** `setEditingId(null)`. `onError(err, { id, patch })` → 실패 토스트 + `editingId = id` + `patch` 를 draft 로 복원해 에디터 `initial` 로 넘긴다. `PRHistoryEntryEditor` 는 `initial` 을 마운트 때만 읽으므로 **`key` 를 바꿔 재마운트**한다(재오픈마다 증가하는 카운터). 에디터의 `isPending` 은 넘기지 않는다 — 폼이 이미 닫혔다. 성공 토스트 제거
+- [X] T013 [US2] `hooks/usePersonalRecords.ts` 에서 `useUpdatePRHistoryEntry` 를 제거하고 `hooks/__tests__/usePersonalRecords.offline.test.tsx` 를 삭제한다(T010 으로 이관 완료)
 - [ ] T014 [US2] quickstart 수동 #1(수정)·#5 를 수행한다
 
 **Checkpoint**: 삭제·수정이 낙관적. 추가는 기존 동작.
@@ -120,12 +120,12 @@ spec.md 에 user story 절이 없다(100줄 상한). 아래 US1~US3 은 **조작
 
 ### Tests for User Story 3 ⚠️ 먼저 작성하고 실패를 확인할 것
 
-- [ ] T015 [US3] `use-pr-history-mutations.test.tsx` 에 추가 케이스를 넣는다: 응답 전에 **음수 id** 행이 날짜 순 자리에 있다, 임시 행 `previousWeight` 가 추가 직전 현재 PR 무게다, 최대보다 무거우면 헤더가 즉시 오른다, 실패하면 임시 행만 빠지고 `onError` 가 입력값을 받는다. `useAddPRHistoryEntry`(목록 화면용)는 이 파일에서 테스트하지 않는다
+- [X] T015 [US3] `use-pr-history-mutations.test.tsx` 에 추가 케이스를 넣는다: 응답 전에 **음수 id** 행이 날짜 순 자리에 있다, 임시 행 `previousWeight` 가 추가 직전 현재 PR 무게다, 최대보다 무거우면 헤더가 즉시 오른다, 실패하면 임시 행만 빠지고 `onError` 가 입력값을 받는다. `useAddPRHistoryEntry`(목록 화면용)는 이 파일에서 테스트하지 않는다
 
 ### Implementation for User Story 3
 
-- [ ] T016 [US3] `useOptimisticAddPRHistory(exerciseId, onError)` 를 구현한다. 임시 행: `id = -Date.now()`, `previousWeight = base.weight`, `source: "manual"`, `createdAt = new Date().toISOString()`. 역연산 `remove(tempId)`. 성공 후 재조회가 임시 행을 실제 행으로 바꾼다
-- [ ] T017 [US3] 상세 화면의 추가를 새 훅으로 바꾼다. 제출 즉시 `setIsAdding(false)`, 실패 시 `RetryForm` `add` 모드로 재오픈(T012 의 `key` 방식), 성공 토스트 제거. `HistoryRow` 에 임시 행(`entry.id < 0`)이면 메뉴 버튼을 `disabled` 로 두는 prop 을 추가한다(R6 — 없는 id 삭제가 서버에서 조용히 성공해 행이 되살아난다)
+- [X] T016 [US3] `useOptimisticAddPRHistory(exerciseId, onError)` 를 구현한다. 임시 행: `id = -Date.now()`, `previousWeight = base.weight`, `source: "manual"`, `createdAt = new Date().toISOString()`. 역연산 `remove(tempId)`. 성공 후 재조회가 임시 행을 실제 행으로 바꾼다
+- [X] T017 [US3] 상세 화면의 추가를 새 훅으로 바꾼다. 제출 즉시 `setIsAdding(false)`, 실패 시 `RetryForm` `add` 모드로 재오픈(T012 의 `key` 방식), 성공 토스트 제거. `HistoryRow` 에 임시 행(`entry.id < 0`)이면 메뉴 버튼을 `disabled` 로 두는 prop 을 추가한다(R6 — 없는 id 삭제가 서버에서 조용히 성공해 행이 되살아난다)
 - [ ] T018 [US3] quickstart 수동 #1(추가)·#3·#4·#7·#8 을 수행한다. #8 은 목록 화면 등록이 **바뀌지 않았음**을 확인하는 것이다(FR-006)
 
 **Checkpoint**: 상세 화면의 세 조작이 전부 낙관적.
@@ -134,9 +134,9 @@ spec.md 에 user story 절이 없다(100줄 상한). 아래 US1~US3 은 **조작
 
 ## Phase 6: Polish & Cross-Cutting
 
-- [ ] T019 `grep -rn "useUpdatePRHistoryEntry\|useDeletePRHistoryEntry" app components features hooks` 가 0건이고, `useAddPRHistoryEntry` 는 `RecordAddDialog.tsx` 에서만 쓰이는지 확인한다. `git diff main -- components/PersonalRecords/RecordAddDialog.tsx` 는 비어 있어야 한다
-- [ ] T020 quickstart 자동 검증을 실행한다: `npx jest features/personal-records`, `npx tsc --noEmit`, `npm run build` — **dev 서버를 내리고 빌드한다**(`.next` 공유 충돌). 셋 다 통과해야 커밋한다
-- [ ] T021 `git diff main --stat` 로 구현(테스트·문서 제외)이 400줄 이내인지 확인한다. 넘으면 멈추고 사용자에게 분할을 묻는다
+- [X] T019 `grep -rn "useUpdatePRHistoryEntry\|useDeletePRHistoryEntry" app components features hooks` 가 0건이고, `useAddPRHistoryEntry` 는 `RecordAddDialog.tsx` 에서만 쓰이는지 확인한다. `git diff main -- components/PersonalRecords/RecordAddDialog.tsx` 는 비어 있어야 한다
+- [X] T020 quickstart 자동 검증을 실행한다: `npx jest features/personal-records`, `npx tsc --noEmit`, `npm run build` — **dev 서버를 내리고 빌드한다**(`.next` 공유 충돌). 셋 다 통과해야 커밋한다
+- [X] T021 `git diff main --stat` 로 구현(테스트·문서 제외)이 400줄 이내인지 확인한다. 넘으면 멈추고 사용자에게 분할을 묻는다
 
 ---
 
