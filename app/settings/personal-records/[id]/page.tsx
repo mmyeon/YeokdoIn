@@ -13,14 +13,11 @@ import PRSparkline from "@/components/PersonalRecords/PRSparkline";
 import { resolvePRDetailViewState } from "@/features/personal-records/model/pr-detail-view-state";
 import { ROUTES } from "@/routes";
 import {
+  useOptimisticAddPRHistory,
   useOptimisticDeletePRHistory,
   useOptimisticUpdatePRHistory,
 } from "@/features/personal-records/ui/use-pr-history-mutations";
-import {
-  useAddPRHistoryEntry,
-  usePRHistory,
-  usePersonalRecords,
-} from "@/hooks/usePersonalRecords";
+import { usePRHistory, usePersonalRecords } from "@/hooks/usePersonalRecords";
 import { PRHistoryEntry } from "@/types/personalRecords";
 
 /** 저장 실패 시 입력값째 다시 열 폼(FR-004). */
@@ -79,17 +76,13 @@ function PRDetailPage() {
     setEditorKey((k) => k + 1);
   };
 
-  const resetMode = () => {
-    setIsAdding(false);
-    setEditingId(null);
-  };
-
-  const addMutation = useAddPRHistoryEntry(
-    () => {
-      toast.success("기록을 추가했습니다.");
-      resetMode();
-    },
-    () => toast.error("기록 추가에 실패했습니다.")
+  const addMutation = useOptimisticAddPRHistory(
+    exerciseId,
+    (_error, { newWeight, prDate, note }) => {
+      toast.error("기록 추가에 실패했습니다.");
+      reopen({ mode: "add", draft: { newWeight, prDate, note } });
+      setIsAdding(true);
+    }
   );
 
   const updateMutation = useOptimisticUpdatePRHistory(
@@ -150,7 +143,10 @@ function PRDetailPage() {
         {!isAdding && exerciseId !== null && (
           <button
             type="button"
-            onClick={() => setIsAdding(true)}
+            onClick={() => {
+              setRetryForm(null);
+              setIsAdding(true);
+            }}
             className="flex items-center gap-1 px-2 py-1 text-yd-primary text-[14px] font-semibold"
           >
             <Plus className="size-3.5" aria-hidden />
@@ -184,9 +180,12 @@ function PRDetailPage() {
         <section className="px-4">
           <div className="rounded-md border border-yd-line p-3">
             <PRHistoryEntryEditor
+              key={editorKey}
+              initial={retryForm?.mode === "add" ? retryForm.draft : undefined}
               submitLabel="추가"
-              isPending={addMutation.isPending}
               onSubmit={(draft) => {
+                setIsAdding(false);
+                setRetryForm(null);
                 addMutation.mutate({
                   exerciseId,
                   newWeight: draft.newWeight,
@@ -194,7 +193,10 @@ function PRDetailPage() {
                   note: draft.note,
                 });
               }}
-              onCancel={() => setIsAdding(false)}
+              onCancel={() => {
+                setIsAdding(false);
+                setRetryForm(null);
+              }}
             />
           </div>
         </section>
@@ -257,6 +259,8 @@ function PRDetailPage() {
                   ) : (
                     <HistoryRow
                       entry={entry}
+                      // 임시 행(음수 id)은 서버 확정 전이라 조작할 수 없다.
+                      isUnconfirmed={entry.id < 0}
                       onEdit={() => {
                         setRetryForm(null);
                         setEditingId(entry.id);
@@ -279,11 +283,12 @@ function PRDetailPage() {
 
 interface HistoryRowProps {
   entry: PRHistoryEntry;
+  isUnconfirmed: boolean;
   onEdit: () => void;
   onDelete: () => void;
 }
 
-function HistoryRow({ entry, onEdit, onDelete }: HistoryRowProps) {
+function HistoryRow({ entry, isUnconfirmed, onEdit, onDelete }: HistoryRowProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -306,8 +311,9 @@ function HistoryRow({ entry, onEdit, onDelete }: HistoryRowProps) {
           <button
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
+            disabled={isUnconfirmed}
             aria-label="기록 메뉴"
-            className="flex size-6 items-center justify-center rounded-full text-yd-text-muted hover:bg-yd-elevated"
+            className="flex size-6 items-center justify-center rounded-full text-yd-text-muted hover:bg-yd-elevated disabled:opacity-50"
           >
             <MoreHorizontal className="size-4" />
           </button>

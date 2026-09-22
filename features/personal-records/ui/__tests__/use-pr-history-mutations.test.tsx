@@ -23,6 +23,7 @@ const getPRHistory = jest.fn();
 const getUserPersonalRecords = jest.fn();
 const deletePRHistoryEntry = jest.fn();
 const updatePRHistoryEntry = jest.fn();
+const addPRHistoryEntry = jest.fn();
 
 jest.mock("@/actions/personalRecords", () => ({
   __esModule: true,
@@ -31,13 +32,14 @@ jest.mock("@/actions/personalRecords", () => ({
   getPRHistory: (...args: unknown[]) => getPRHistory(...args),
   addRecord: jest.fn(),
   deleteRecord: jest.fn(),
-  addPRHistoryEntry: jest.fn(),
+  addPRHistoryEntry: (...args: unknown[]) => addPRHistoryEntry(...args),
   updatePRHistoryEntry: (...args: unknown[]) => updatePRHistoryEntry(...args),
   deletePRHistoryEntry: (...args: unknown[]) => deletePRHistoryEntry(...args),
 }));
 
 import { usePersonalRecords, usePRHistory } from "@/hooks/usePersonalRecords";
 import {
+  useOptimisticAddPRHistory,
   useOptimisticDeletePRHistory,
   useOptimisticUpdatePRHistory,
 } from "../use-pr-history-mutations";
@@ -312,5 +314,83 @@ describe("useOptimisticUpdatePRHistory", () => {
       });
       await waitFor(() => expect(result.current.mutation.isPending).toBe(false));
     });
+  });
+});
+
+describe("useOptimisticAddPRHistory", () => {
+  function renderAdd(ctx: ReturnType<typeof setup>, onError = jest.fn()) {
+    const view = renderHook(
+      () => ({
+        mutation: useOptimisticAddPRHistory(EXERCISE_ID, onError),
+        history: usePRHistory(EXERCISE_ID),
+        records: usePersonalRecords(),
+      }),
+      { wrapper: ctx.wrapper }
+    );
+    return { ...view, onError };
+  }
+
+  const input = (newWeight: number, prDate: string) => ({
+    exerciseId: EXERCISE_ID,
+    newWeight,
+    prDate,
+    note: null,
+  });
+
+  it("응답 전에 음수 id 임시 행이 날짜 순 자리에 들어간다", async () => {
+    deferEach(addPRHistoryEntry);
+    const ctx = setup();
+    const { result } = renderAdd(ctx);
+
+    act(() => result.current.mutation.mutate(input(85, "2026-08-15")));
+
+    await waitFor(() => expect(ctx.history$()).toHaveLength(4));
+    const history = ctx.history$() ?? [];
+    expect(history[1].id).toBeLessThan(0);
+    expect(history.map((e) => e.prDate)).toEqual([
+      "2026-09-10",
+      "2026-08-15",
+      "2026-08-01",
+      "2026-07-01",
+    ]);
+  });
+
+  it("임시 행의 previousWeight 는 추가 직전 현재 PR 무게다", async () => {
+    deferEach(addPRHistoryEntry);
+    const ctx = setup();
+    const { result } = renderAdd(ctx);
+
+    act(() => result.current.mutation.mutate(input(85, "2026-08-15")));
+
+    await waitFor(() => expect(ctx.history$()).toHaveLength(4));
+    const temp = ctx.history$()?.find((e) => e.id < 0);
+    expect(temp?.previousWeight).toBe(100);
+  });
+
+  it("최대보다 무거우면 헤더가 즉시 오른다", async () => {
+    deferEach(addPRHistoryEntry);
+    const ctx = setup();
+    const { result } = renderAdd(ctx);
+
+    act(() => result.current.mutation.mutate(input(110, "2026-09-20")));
+
+    await waitFor(() => expect(snatchWeight(ctx.records$())).toBe(110));
+  });
+
+  it("실패하면 임시 행만 빠지고 onError 가 입력값을 받는다", async () => {
+    const calls = deferEach(addPRHistoryEntry);
+    const ctx = setup();
+    const { result, onError } = renderAdd(ctx);
+    const variables = input(110, "2026-09-20");
+
+    act(() => result.current.mutation.mutate(variables));
+    await waitFor(() => expect(calls).toHaveLength(1));
+
+    const error = new Error("boom");
+    await act(async () => calls[0].reject(error));
+
+    await waitFor(() => expect(onError).toHaveBeenCalledWith(error, variables));
+    expect(ctx.history$()).toEqual(HISTORY);
+    expect(ctx.records$()).toEqual([SNATCH, CLEAN]);
   });
 });

@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-query";
 
 import {
+  addPRHistoryEntry,
   deletePRHistoryEntry,
   updatePRHistoryEntry,
 } from "@/actions/personalRecords";
@@ -174,6 +175,71 @@ export const useOptimisticUpdatePRHistory = (
           queryClient,
           context.exerciseId,
           { type: "update", entry: context.before },
+          context.base
+        );
+      }
+      onError(error, variables);
+    },
+    onSettled: () => settleIfLast(queryClient),
+  });
+};
+
+export type PRHistoryAddInput = Parameters<typeof addPRHistoryEntry>[0];
+
+type AddContext = {
+  exerciseId: number;
+  base: PersonalRecordInfo | undefined;
+  tempId: number;
+};
+
+/**
+ * 임시 행의 id 는 음수라 실제 행과 겹치지 않는다. 성공 후 재조회가 임시 행을
+ * 실제 행으로 바꾼다. 확정 전 임시 행은 화면에서 조작할 수 없게 막아야 한다 —
+ * 없는 id 삭제는 서버에서 조용히 성공해 재조회 후 행이 되살아난다.
+ */
+export const useOptimisticAddPRHistory = (
+  exerciseId: number | null,
+  onError: (error: Error, variables: PRHistoryAddInput) => void
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    ...FAIL_FAST_WHEN_OFFLINE,
+    mutationKey: PR_HISTORY_MUTATION_KEY,
+    mutationFn: addPRHistoryEntry,
+    onMutate: async (
+      input: PRHistoryAddInput
+    ): Promise<AddContext | undefined> => {
+      if (exerciseId === null) return undefined;
+      const base = await prepare(queryClient, exerciseId);
+      const tempId = -Date.now();
+      applyOptimistic(
+        queryClient,
+        exerciseId,
+        {
+          type: "add",
+          entry: {
+            id: tempId,
+            exerciseId,
+            // 서버도 추가 직전 현재 PR 무게를 previous_weight 로 넣는다.
+            previousWeight: base?.weight ?? null,
+            newWeight: input.newWeight,
+            prDate: input.prDate,
+            note: input.note,
+            source: "manual",
+            createdAt: new Date().toISOString(),
+          },
+        },
+        base
+      );
+      return { exerciseId, base, tempId };
+    },
+    onError: (error, variables, context) => {
+      if (context) {
+        applyOptimistic(
+          queryClient,
+          context.exerciseId,
+          { type: "remove", id: context.tempId },
           context.base
         );
       }
