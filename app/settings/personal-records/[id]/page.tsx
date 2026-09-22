@@ -10,9 +10,9 @@ import PRHistoryEntryEditor from "@/components/PersonalRecords/PRHistoryEntryEdi
 import PRSparkline from "@/components/PersonalRecords/PRSparkline";
 import { resolvePRDetailViewState } from "@/features/personal-records/model/pr-detail-view-state";
 import { ROUTES } from "@/routes";
+import { useOptimisticDeletePRHistory } from "@/features/personal-records/ui/use-pr-history-mutations";
 import {
   useAddPRHistoryEntry,
-  useDeletePRHistoryEntry,
   usePRHistory,
   usePersonalRecords,
   useUpdatePRHistoryEntry,
@@ -83,9 +83,8 @@ function PRDetailPage() {
     () => toast.error("기록 수정에 실패했습니다.")
   );
 
-  const deleteMutation = useDeletePRHistoryEntry(
-    () => toast.success("기록을 삭제했습니다."),
-    () => toast.error("기록 삭제에 실패했습니다.")
+  const deleteMutation = useOptimisticDeletePRHistory(exerciseId, () =>
+    toast.error("기록 삭제에 실패했습니다.")
   );
 
   const viewState = resolvePRDetailViewState({
@@ -235,7 +234,6 @@ function PRDetailPage() {
                         if (!window.confirm("이 기록을 삭제할까요?")) return;
                         deleteMutation.mutate(entry.id);
                       }}
-                      isDeleting={deleteMutation.isPending}
                     />
                   )}
                 </li>
@@ -252,10 +250,9 @@ interface HistoryRowProps {
   entry: PRHistoryEntry;
   onEdit: () => void;
   onDelete: () => void;
-  isDeleting: boolean;
 }
 
-function HistoryRow({ entry, onEdit, onDelete, isDeleting }: HistoryRowProps) {
+function HistoryRow({ entry, onEdit, onDelete }: HistoryRowProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -298,8 +295,7 @@ function HistoryRow({ entry, onEdit, onDelete, isDeleting }: HistoryRowProps) {
               </button>
               <button
                 type="button"
-                disabled={isDeleting}
-                className="flex items-center gap-2 px-3 py-2 text-left text-[13px] text-yd-error hover:bg-yd-elevated disabled:opacity-50"
+                className="flex items-center gap-2 px-3 py-2 text-left text-[13px] text-yd-error hover:bg-yd-elevated"
                 onClick={() => {
                   setMenuOpen(false);
                   onDelete();

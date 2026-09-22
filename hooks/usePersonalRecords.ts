@@ -9,7 +9,6 @@ import {
   getPRHistory,
   addPRHistoryEntry,
   updatePRHistoryEntry,
-  deletePRHistoryEntry,
 } from "@/actions/personalRecords";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import useAuth from "@/features/auth/model/useAuth";
@@ -24,7 +23,7 @@ import useAuth from "@/features/auth/model/useAuth";
  * 실패시키고 사용자가 다시 시도하게 한다. 대기열에 쌓아 나중에 보내지 않는다 —
  * 사용자가 저장됐다고 착각한 채 자리를 뜨는 편이 더 나쁘다.
  */
-const FAIL_FAST_WHEN_OFFLINE = { networkMode: "always" } as const;
+export const FAIL_FAST_WHEN_OFFLINE = { networkMode: "always" } as const;
 
 // 개인 기록 조회
 export const usePersonalRecords = () => {
@@ -125,24 +124,6 @@ export const useUpdatePRHistoryEntry = (
       id: number;
       patch: { newWeight?: number; prDate?: string; note?: string | null };
     }) => updatePRHistoryEntry(id, patch),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PERSONAL_RECORDS] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PR_HISTORY] });
-      onSuccess();
-    },
-    onError: (error) => onError(error),
-  });
-};
-
-export const useDeletePRHistoryEntry = (
-  onSuccess: () => void,
-  onError: (error: Error) => void
-) => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    ...FAIL_FAST_WHEN_OFFLINE,
-    mutationFn: deletePRHistoryEntry,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PERSONAL_RECORDS] });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PR_HISTORY] });
