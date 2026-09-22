@@ -6,7 +6,10 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
-import { deletePRHistoryEntry } from "@/actions/personalRecords";
+import {
+  deletePRHistoryEntry,
+  updatePRHistoryEntry,
+} from "@/actions/personalRecords";
 import { FAIL_FAST_WHEN_OFFLINE } from "@/hooks/usePersonalRecords";
 
 import { QUERY_KEYS } from "@/lib/queryKeys";
@@ -119,6 +122,62 @@ export const useOptimisticDeletePRHistory = (
         );
       }
       onError(error, id);
+    },
+    onSettled: () => settleIfLast(queryClient),
+  });
+};
+
+export type PRHistoryUpdate = {
+  id: number;
+  patch: Partial<Pick<PRHistoryEntry, "newWeight" | "prDate" | "note">>;
+};
+
+type UpdateContext = {
+  exerciseId: number;
+  base: PersonalRecordInfo | undefined;
+  before: PRHistoryEntry | undefined;
+};
+
+export const useOptimisticUpdatePRHistory = (
+  exerciseId: number | null,
+  onError: (error: Error, variables: PRHistoryUpdate) => void
+) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    ...FAIL_FAST_WHEN_OFFLINE,
+    mutationKey: PR_HISTORY_MUTATION_KEY,
+    mutationFn: ({ id, patch }: PRHistoryUpdate) =>
+      updatePRHistoryEntry(id, patch),
+    onMutate: async ({
+      id,
+      patch,
+    }: PRHistoryUpdate): Promise<UpdateContext | undefined> => {
+      if (exerciseId === null) return undefined;
+      const base = await prepare(queryClient, exerciseId);
+      const before = queryClient
+        .getQueryData<PRHistoryEntry[]>(historyKey(exerciseId))
+        ?.find((e) => e.id === id);
+      if (before) {
+        applyOptimistic(
+          queryClient,
+          exerciseId,
+          { type: "update", entry: { ...before, ...patch } },
+          base
+        );
+      }
+      return { exerciseId, base, before };
+    },
+    onError: (error, variables, context) => {
+      if (context?.before) {
+        applyOptimistic(
+          queryClient,
+          context.exerciseId,
+          { type: "update", entry: context.before },
+          context.base
+        );
+      }
+      onError(error, variables);
     },
     onSettled: () => settleIfLast(queryClient),
   });

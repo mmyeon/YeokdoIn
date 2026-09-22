@@ -6,18 +6,27 @@ import { ChevronLeft, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react"
 import { toast } from "sonner";
 
 import { Pill } from "@/components/ui/pill";
-import PRHistoryEntryEditor from "@/components/PersonalRecords/PRHistoryEntryEditor";
+import PRHistoryEntryEditor, {
+  type PRHistoryEntryDraft,
+} from "@/components/PersonalRecords/PRHistoryEntryEditor";
 import PRSparkline from "@/components/PersonalRecords/PRSparkline";
 import { resolvePRDetailViewState } from "@/features/personal-records/model/pr-detail-view-state";
 import { ROUTES } from "@/routes";
-import { useOptimisticDeletePRHistory } from "@/features/personal-records/ui/use-pr-history-mutations";
+import {
+  useOptimisticDeletePRHistory,
+  useOptimisticUpdatePRHistory,
+} from "@/features/personal-records/ui/use-pr-history-mutations";
 import {
   useAddPRHistoryEntry,
   usePRHistory,
   usePersonalRecords,
-  useUpdatePRHistoryEntry,
 } from "@/hooks/usePersonalRecords";
 import { PRHistoryEntry } from "@/types/personalRecords";
+
+/** 저장 실패 시 입력값째 다시 열 폼(FR-004). */
+type RetryForm =
+  | { mode: "add"; draft: Partial<PRHistoryEntryDraft> }
+  | { mode: "edit"; id: number; draft: Partial<PRHistoryEntryDraft> };
 
 function parseRecordId(raw: string | string[] | undefined): number | null {
   if (typeof raw !== "string") return null;
@@ -61,6 +70,14 @@ function PRDetailPage() {
 
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [retryForm, setRetryForm] = useState<RetryForm | null>(null);
+  // 에디터는 `initial` 을 마운트 때만 읽는다. 다시 열 때마다 key 를 바꿔 재마운트한다.
+  const [editorKey, setEditorKey] = useState(0);
+
+  const reopen = (form: RetryForm) => {
+    setRetryForm(form);
+    setEditorKey((k) => k + 1);
+  };
 
   const resetMode = () => {
     setIsAdding(false);
@@ -75,12 +92,13 @@ function PRDetailPage() {
     () => toast.error("기록 추가에 실패했습니다.")
   );
 
-  const updateMutation = useUpdatePRHistoryEntry(
-    () => {
-      toast.success("기록을 수정했습니다.");
-      resetMode();
-    },
-    () => toast.error("기록 수정에 실패했습니다.")
+  const updateMutation = useOptimisticUpdatePRHistory(
+    exerciseId,
+    (_error, { id, patch }) => {
+      toast.error("기록 수정에 실패했습니다.");
+      reopen({ mode: "edit", id, draft: patch });
+      setEditingId(id);
+    }
   );
 
   const deleteMutation = useOptimisticDeletePRHistory(exerciseId, () =>
@@ -206,14 +224,21 @@ function PRDetailPage() {
                   {isEditing ? (
                     <div className="rounded-md border border-yd-line p-3">
                       <PRHistoryEntryEditor
-                        initial={{
-                          newWeight: entry.newWeight,
-                          prDate: entry.prDate,
-                          note: entry.note,
-                        }}
+                        key={editorKey}
+                        initial={
+                          retryForm?.mode === "edit" &&
+                          retryForm.id === entry.id
+                            ? retryForm.draft
+                            : {
+                                newWeight: entry.newWeight,
+                                prDate: entry.prDate,
+                                note: entry.note,
+                              }
+                        }
                         submitLabel="수정"
-                        isPending={updateMutation.isPending}
                         onSubmit={(draft) => {
+                          setEditingId(null);
+                          setRetryForm(null);
                           updateMutation.mutate({
                             id: entry.id,
                             patch: {
@@ -223,13 +248,19 @@ function PRDetailPage() {
                             },
                           });
                         }}
-                        onCancel={() => setEditingId(null)}
+                        onCancel={() => {
+                          setEditingId(null);
+                          setRetryForm(null);
+                        }}
                       />
                     </div>
                   ) : (
                     <HistoryRow
                       entry={entry}
-                      onEdit={() => setEditingId(entry.id)}
+                      onEdit={() => {
+                        setRetryForm(null);
+                        setEditingId(entry.id);
+                      }}
                       onDelete={() => {
                         if (!window.confirm("이 기록을 삭제할까요?")) return;
                         deleteMutation.mutate(entry.id);

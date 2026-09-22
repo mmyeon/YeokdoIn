@@ -22,6 +22,7 @@ jest.mock("@/features/auth/model/useAuth", () => ({
 const getPRHistory = jest.fn();
 const getUserPersonalRecords = jest.fn();
 const deletePRHistoryEntry = jest.fn();
+const updatePRHistoryEntry = jest.fn();
 
 jest.mock("@/actions/personalRecords", () => ({
   __esModule: true,
@@ -31,12 +32,15 @@ jest.mock("@/actions/personalRecords", () => ({
   addRecord: jest.fn(),
   deleteRecord: jest.fn(),
   addPRHistoryEntry: jest.fn(),
-  updatePRHistoryEntry: jest.fn(),
+  updatePRHistoryEntry: (...args: unknown[]) => updatePRHistoryEntry(...args),
   deletePRHistoryEntry: (...args: unknown[]) => deletePRHistoryEntry(...args),
 }));
 
 import { usePersonalRecords, usePRHistory } from "@/hooks/usePersonalRecords";
-import { useOptimisticDeletePRHistory } from "../use-pr-history-mutations";
+import {
+  useOptimisticDeletePRHistory,
+  useOptimisticUpdatePRHistory,
+} from "../use-pr-history-mutations";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 
 const EXERCISE_ID = 10;
@@ -229,6 +233,84 @@ describe("useOptimisticDeletePRHistory", () => {
       });
       await waitFor(() => expect(result.current.mutation.isPending).toBe(false));
       expect(ctx.history$()).toEqual(HISTORY);
+    });
+  });
+});
+
+describe("useOptimisticUpdatePRHistory", () => {
+  function renderUpdate(ctx: ReturnType<typeof setup>, onError = jest.fn()) {
+    const view = renderHook(
+      () => ({
+        mutation: useOptimisticUpdatePRHistory(EXERCISE_ID, onError),
+        history: usePRHistory(EXERCISE_ID),
+        records: usePersonalRecords(),
+      }),
+      { wrapper: ctx.wrapper }
+    );
+    return { ...view, onError };
+  }
+
+  it("날짜를 바꾸면 응답 전에 새 날짜 자리로 옮겨간다", async () => {
+    deferEach(updatePRHistoryEntry);
+    const ctx = setup();
+    const { result } = renderUpdate(ctx);
+
+    act(() =>
+      result.current.mutation.mutate({ id: 1, patch: { prDate: "2026-09-15" } })
+    );
+
+    await waitFor(() => expect(ids(ctx.history$())).toEqual([1, 3, 2]));
+  });
+
+  it("무게를 최대보다 올리면 헤더가 즉시 오른다", async () => {
+    deferEach(updatePRHistoryEntry);
+    const ctx = setup();
+    const { result } = renderUpdate(ctx);
+
+    act(() =>
+      result.current.mutation.mutate({ id: 1, patch: { newWeight: 130 } })
+    );
+
+    await waitFor(() => expect(snatchWeight(ctx.records$())).toBe(130));
+  });
+
+  it("실패하면 수정 전 행으로 돌아오고 onError 가 (error, { id, patch }) 를 받는다", async () => {
+    const calls = deferEach(updatePRHistoryEntry);
+    const ctx = setup();
+    const { result, onError } = renderUpdate(ctx);
+    const variables = {
+      id: 1,
+      patch: { newWeight: 130, prDate: "2026-09-15", note: "메모" },
+    };
+
+    act(() => result.current.mutation.mutate(variables));
+    await waitFor(() => expect(calls).toHaveLength(1));
+
+    const error = new Error("boom");
+    await act(async () => calls[0].reject(error));
+
+    await waitFor(() => expect(onError).toHaveBeenCalledWith(error, variables));
+    expect(ctx.history$()).toEqual(HISTORY);
+    expect(ctx.records$()).toEqual([SNATCH, CLEAN]);
+  });
+
+  describe("오프라인", () => {
+    beforeEach(() => onlineManager.setOnline(false));
+    afterEach(() => onlineManager.setOnline(true));
+
+    it("저장이 멈추지 않고 실패를 알린다", async () => {
+      updatePRHistoryEntry.mockRejectedValue(new Error("Failed to fetch"));
+      const ctx = setup();
+      const { result, onError } = renderUpdate(ctx);
+
+      act(() =>
+        result.current.mutation.mutate({ id: 1, patch: { newWeight: 130 } })
+      );
+
+      await waitFor(() => expect(onError).toHaveBeenCalled(), {
+        timeout: 2000,
+      });
+      await waitFor(() => expect(result.current.mutation.isPending).toBe(false));
     });
   });
 });

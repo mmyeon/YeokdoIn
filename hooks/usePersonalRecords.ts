@@ -8,7 +8,6 @@ import {
   getUserPersonalRecords,
   getPRHistory,
   addPRHistoryEntry,
-  updatePRHistoryEntry,
 } from "@/actions/personalRecords";
 import { QUERY_KEYS } from "@/lib/queryKeys";
 import useAuth from "@/features/auth/model/useAuth";
@@ -100,30 +99,6 @@ export const useAddPRHistoryEntry = (
   return useMutation({
     ...FAIL_FAST_WHEN_OFFLINE,
     mutationFn: addPRHistoryEntry,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PERSONAL_RECORDS] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PR_HISTORY] });
-      onSuccess();
-    },
-    onError: (error) => onError(error),
-  });
-};
-
-export const useUpdatePRHistoryEntry = (
-  onSuccess: () => void,
-  onError: (error: Error) => void
-) => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    ...FAIL_FAST_WHEN_OFFLINE,
-    mutationFn: ({
-      id,
-      patch,
-    }: {
-      id: number;
-      patch: { newWeight?: number; prDate?: string; note?: string | null };
-    }) => updatePRHistoryEntry(id, patch),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PERSONAL_RECORDS] });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PR_HISTORY] });
