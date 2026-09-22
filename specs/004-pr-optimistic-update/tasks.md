@@ -81,7 +81,7 @@ spec.md 에 user story 절이 없다(100줄 상한). 아래 US1~US3 은 **조작
 - [X] T006 [US1] `use-pr-history-mutations.ts` 에 `useOptimisticDeletePRHistory(exerciseId, onError)` 를 구현한다. `onMutate(id)` → `prepare` → 지운 행을 이력 캐시에서 찾아 context 에 담고 `remove` 적용. `onError(err, id, context)` → `add(context.removed)` 역연산 후 `onError(err, id)`. `onSettled` → `settleIfLast`. **`exerciseId` 는 context 에 담아 쓴다** — 마지막 1건을 지우면 화면의 `record` 가 사라져 인자로 받은 `exerciseId` 가 `null` 이 되고, v5 는 진행 중 mutation 에 최신 옵션을 넣으므로 클로저 값을 쓰면 되돌릴 캐시 키를 잃는다. 성공 콜백 인자는 받지 않는다(FR-005)
 - [X] T007 [US1] `app/settings/personal-records/[id]/page.tsx` 의 삭제를 새 훅으로 바꾸고 성공 토스트를 없앤다. 실패 토스트 문구 "기록 삭제에 실패했습니다." 는 유지. `HistoryRow` 의 `isDeleting` prop 과 삭제 버튼 `disabled` 를 제거한다(R7 — 이 잠금은 연속 삭제를 막기만 한다)
 - [X] T008 [US1] `hooks/usePersonalRecords.ts` 에서 `useDeletePRHistoryEntry` 를 제거한다(사용처는 상세 화면뿐, R5)
-- [ ] T009 [US1] quickstart 수동 #1(삭제만)·#2·#6 을 수행한다
+- [X] T009 [US1] quickstart 수동 #1(삭제만)·#2·#6 을 수행한다
 
 **Checkpoint**: 삭제만 낙관적이고 추가·수정은 기존 동작. 이대로 배포해도 성립한다.
 
@@ -104,7 +104,7 @@ spec.md 에 user story 절이 없다(100줄 상한). 아래 US1~US3 은 **조작
 - [X] T011 [US2] `useOptimisticUpdatePRHistory(exerciseId, onError)` 를 구현한다. 예측 행은 `{ ...before, ...patch }`, 역연산은 `update(before)`. 나머지는 T006 과 같은 구조(context 의 `exerciseId`, `settleIfLast`)
 - [X] T012 [US2] 상세 화면에 data-model 의 `RetryForm` 타입(`add`·`edit` 둘 다 선언)과 `retryForm` 상태를 둔다. 수정 제출 시 `mutate` 직후 **즉시** `setEditingId(null)`. `onError(err, { id, patch })` → 실패 토스트 + `editingId = id` + `patch` 를 draft 로 복원해 에디터 `initial` 로 넘긴다. `PRHistoryEntryEditor` 는 `initial` 을 마운트 때만 읽으므로 **`key` 를 바꿔 재마운트**한다(재오픈마다 증가하는 카운터). 에디터의 `isPending` 은 넘기지 않는다 — 폼이 이미 닫혔다. 성공 토스트 제거
 - [X] T013 [US2] `hooks/usePersonalRecords.ts` 에서 `useUpdatePRHistoryEntry` 를 제거하고 `hooks/__tests__/usePersonalRecords.offline.test.tsx` 를 삭제한다(T010 으로 이관 완료)
-- [ ] T014 [US2] quickstart 수동 #1(수정)·#5 를 수행한다
+- [X] T014 [US2] quickstart 수동 #1(수정)·#5 를 수행한다
 
 **Checkpoint**: 삭제·수정이 낙관적. 추가는 기존 동작.
 
@@ -126,7 +126,7 @@ spec.md 에 user story 절이 없다(100줄 상한). 아래 US1~US3 은 **조작
 
 - [X] T016 [US3] `useOptimisticAddPRHistory(exerciseId, onError)` 를 구현한다. 임시 행: `id = -Date.now()`, `previousWeight = base.weight`, `source: "manual"`, `createdAt = new Date().toISOString()`. 역연산 `remove(tempId)`. 성공 후 재조회가 임시 행을 실제 행으로 바꾼다
 - [X] T017 [US3] 상세 화면의 추가를 새 훅으로 바꾼다. 제출 즉시 `setIsAdding(false)`, 실패 시 `RetryForm` `add` 모드로 재오픈(T012 의 `key` 방식), 성공 토스트 제거. `HistoryRow` 에 임시 행(`entry.id < 0`)이면 메뉴 버튼을 `disabled` 로 두는 prop 을 추가한다(R6 — 없는 id 삭제가 서버에서 조용히 성공해 행이 되살아난다)
-- [ ] T018 [US3] quickstart 수동 #1(추가)·#3·#4·#7·#8 을 수행한다. #8 은 목록 화면 등록이 **바뀌지 않았음**을 확인하는 것이다(FR-006)
+- [X] T018 [US3] quickstart 수동 #1(추가)·#3·#4·#7·#8 을 수행한다. #8 은 목록 화면 등록이 **바뀌지 않았음**을 확인하는 것이다(FR-006)
 
 **Checkpoint**: 상세 화면의 세 조작이 전부 낙관적.
 
