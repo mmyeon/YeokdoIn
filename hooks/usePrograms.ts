@@ -9,9 +9,11 @@ import {
   deleteProgram,
   listPrograms,
   getProgram,
+  saveProgram,
   saveTextProgram,
   updateTextProgram,
   type ProgramRow,
+  type ProgramInput,
   type SaveTextProgramInput,
   type UpdateTextProgramInput,
 } from '@/features/programs/api/programs';
@@ -42,6 +44,23 @@ export function useSaveTextProgram({
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: SaveTextProgramInput) => saveTextProgram(input),
+    onSuccess: (row) => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROGRAMS] });
+      onSuccess?.(row);
+    },
+    onError: (error: Error) => {
+      onError?.(error);
+    },
+  });
+}
+
+export function useSaveProgram({
+  onSuccess,
+  onError,
+}: SaveTextProgramHookOptions = {}) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: ProgramInput) => saveProgram(input),
     onSuccess: (row) => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROGRAMS] });
       onSuccess?.(row);
