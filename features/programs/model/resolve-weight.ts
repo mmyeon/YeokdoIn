@@ -12,7 +12,6 @@ export type WeightResolution =
       refName: string;
     }
   | { kind: "no-percentage"; refName: string }
-  | { kind: "unresolved-alias"; missingName: string }
   | { kind: "no-pr"; exerciseId: number; refName: string };
 
 export interface ResolveWeightInput {
@@ -20,8 +19,6 @@ export interface ResolveWeightInput {
   movements: Movement[];
   /** percentage for the specific set-entry being resolved */
   percentage: number | null;
-  /** lowercase alias/movement-name → exerciseId */
-  aliasMap: Readonly<Record<string, number>>;
   /** exerciseId → prReferenceId (allows redirecting to another exercise's PR) */
   prRefMap: Readonly<Record<number, number>>;
   /** exerciseId → current PR in kg */
@@ -29,28 +26,21 @@ export interface ResolveWeightInput {
 }
 
 /**
- * 파싱된 블록의 movements + 단일 set-entry 퍼센트 + 별칭/PR 매핑으로 처방 중량을 해결한다.
- * UI 계층에서 BlockCard가 어떤 상태(계산됨 / 퍼센트 없음 / 별칭 미연결 / PR 없음)인지 분기할 수 있도록
+ * 블록의 movements + 단일 set-entry 퍼센트 + PR 매핑으로 처방 중량을 해결한다.
+ * UI 계층에서 BlockCard가 어떤 상태(계산됨 / 퍼센트 없음 / PR 없음)인지 분기할 수 있도록
  * 태그드 유니온으로 반환한다.
  */
 export function resolveWeight({
   movements,
   percentage,
-  aliasMap,
   prRefMap,
   prMap,
 }: ResolveWeightInput): WeightResolution {
   const ref = resolveRefMovement({ movements });
-  const refName = ref.name;
-  const aliasKey = refName.trim().toLowerCase();
-  const exerciseId = aliasMap[aliasKey];
+  const { name: refName, exerciseId } = ref;
 
   if (percentage === null) {
     return { kind: "no-percentage", refName };
-  }
-
-  if (exerciseId === undefined) {
-    return { kind: "unresolved-alias", missingName: refName };
   }
 
   const prExerciseId = prRefMap[exerciseId] ?? exerciseId;

@@ -22,17 +22,12 @@ describe("flattenProgram", () => {
     ],
   };
 
-  const aliasMap: Record<string, number> = {
-    "power snatch": 1,
-    "snatch pull": 2,
-  };
   const prRefMap: Record<number, number> = { 1: 1, 2: 2 };
   const prMap: Record<number, number> = { 1: 100, 2: 120 };
 
   it("블록별 ExercisePosition 하나를 만든다 (조합 운동은 하나로 통합)", () => {
     const positions = flattenProgram({
       program: snatchProgram,
-      aliasMap,
       prRefMap,
       prMap,
     });
@@ -47,7 +42,6 @@ describe("flattenProgram", () => {
   it("setEntries 를 개별 세트로 펼치고 setNumber 를 1부터 매긴다", () => {
     const [first] = flattenProgram({
       program: snatchProgram,
-      aliasMap,
       prRefMap,
       prMap,
     });
@@ -68,7 +62,7 @@ describe("flattenProgram", () => {
         },
       ],
     };
-    const positions = flattenProgram({ program: multiEntryProgram, aliasMap, prRefMap, prMap });
+    const positions = flattenProgram({ program: multiEntryProgram, prRefMap, prMap });
     expect(positions).toHaveLength(2);
 
     const [first, second] = positions;
@@ -88,7 +82,6 @@ describe("flattenProgram", () => {
   it("퍼센트와 PR 로부터 prescribedKg 를 계산한다", () => {
     const [first] = flattenProgram({
       program: snatchProgram,
-      aliasMap,
       prRefMap,
       prMap,
     });
@@ -99,7 +92,6 @@ describe("flattenProgram", () => {
   it("복합 블록은 참조 동작(두 번째 movement) 기준으로 계산한다", () => {
     const [, blockB] = flattenProgram({
       program: snatchProgram,
-      aliasMap,
       prRefMap,
       prMap,
     });

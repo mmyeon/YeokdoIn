@@ -18,7 +18,6 @@ import { RunnerFocusView } from "./RunnerFocusView";
 
 interface ProgramRunnerProps {
   program: Program;
-  aliasMap: Readonly<Record<string, number>>;
   prRefMap: Readonly<Record<number, number>>;
   prMap: Readonly<Record<number, number>>;
 }
@@ -39,14 +38,14 @@ function buildInitialRecords(
 
 const DEFAULT_BAR_WEIGHT = 20;
 
-export function ProgramRunner({ program, aliasMap, prRefMap, prMap }: ProgramRunnerProps) {
+export function ProgramRunner({ program, prRefMap, prMap }: ProgramRunnerProps) {
   const router = useRouter();
   const { data: savedBarWeight } = useBarbellWeight();
   const barWeight = savedBarWeight ?? DEFAULT_BAR_WEIGHT;
 
   const positions = useMemo(
-    () => flattenProgram({ program, aliasMap, prRefMap, prMap }),
-    [program, aliasMap, prRefMap, prMap],
+    () => flattenProgram({ program, prRefMap, prMap }),
+    [program, prRefMap, prMap],
   );
 
   const [records, setRecords] = useState<SetRecord[][]>(() =>
