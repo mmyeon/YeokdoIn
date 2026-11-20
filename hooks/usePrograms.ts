@@ -94,8 +94,9 @@ export function useUpdateProgram({
   return useMutation({
     mutationFn: (input: UpdateProgramInput) => updateProgram(input),
     onSuccess: (row) => {
+      // 보기 모드로 돌아갈 때 낡은 내용이 비치지 않게 먼저 채운다.
+      queryClient.setQueryData([QUERY_KEYS.PROGRAMS, row.id], row);
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROGRAMS] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROGRAMS, row.id] });
       onSuccess?.(row);
     },
     onError: (error: Error) => {
