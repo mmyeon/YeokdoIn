@@ -62,7 +62,19 @@ describe('toLibraryItem', () => {
     expect(toLibraryItem(textRow(['back press 5x3'])).isRunnable).toBe(false);
   });
 
-  it('레거시 행만 isRunnable 이 true 다', () => {
+  it('러너가 읽을 수 없는 parsed_data 는 isRunnable 이 false 이고 줄이 없다', () => {
+    const item = toLibraryItem(
+      legacyRow({
+        parsed_data: {
+          blocks: [{ movements: [{ name: 'snatch', modifiers: [] }], setEntries: [] }],
+        },
+      }),
+    );
+    expect(item.isRunnable).toBe(false);
+    expect(item.lines).toEqual([]);
+  });
+
+  it('구조화 행만 isRunnable 이 true 다', () => {
     expect(toLibraryItem(legacyRow()).isRunnable).toBe(true);
   });
 });

@@ -15,7 +15,7 @@ export type ProgramView =
 
 /**
  * DB 행을 화면이 그릴 세 상태 중 하나로 옮긴다.
- * 텍스트 판별은 `isTextProgram` 과 같이 `lines` 만 본다. 목록의 실행 가능 여부와 어긋나지 않게 하려는 것이다.
+ * 목록·홈의 실행 가능 여부도 이 함수로 판정한다.
  */
 export function parseProgramRow(row: ProgramRow): ProgramView {
   const base: ProgramViewBase = {

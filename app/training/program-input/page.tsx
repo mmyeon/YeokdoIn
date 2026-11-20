@@ -1,12 +1,13 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ProgramForm } from '@/features/programs/ui/ProgramForm';
 import { ProgramSavedSheet } from '@/features/programs/ui/ProgramSavedSheet';
 import { useProgramDraft } from '@/features/programs/ui/useProgramDraft';
 import { useSaveProgram } from '@/hooks/usePrograms';
+import { ROUTES } from '@/routes';
 
 const LEAVE_WARNING = '등록을 그만두면 입력한 내용이 사라집니다. 나가시겠습니까?';
 
@@ -15,6 +16,8 @@ export default function ProgramInputPage() {
   const [draft, dispatch] = useProgramDraft();
   const [savedId, setSavedId] = useState<number | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  // isPending 은 다음 렌더에야 바뀌어서 연타 두 번이 모두 통과한다.
+  const submitting = useRef(false);
 
   const isDiscardable = draft.blocks.length > 0 && savedId === null;
 
@@ -28,15 +31,16 @@ export default function ProgramInputPage() {
     return () => window.removeEventListener('beforeunload', handler);
   }, [isDiscardable]);
 
-  const handleSheetDismiss = useCallback(() => setSavedId(null), []);
-
   const { mutate: save, isPending } = useSaveProgram({
     onSuccess: (row) => {
       setSaveError(null);
       setSavedId(row.id);
     },
     // 실패해도 초안을 그대로 두고 재시도하게 한다.
-    onError: (e) => setSaveError(e.message || '저장에 실패했습니다.'),
+    onError: (e) => {
+      submitting.current = false;
+      setSaveError(e.message || '저장에 실패했습니다.');
+    },
   });
 
   const handleBack = () => {
@@ -65,13 +69,19 @@ export default function ProgramInputPage() {
         isSaving={isPending}
         saveError={saveError}
         onSubmit={(input) => {
+          if (submitting.current) return;
+          submitting.current = true;
           setSaveError(null);
           save(input);
         }}
       />
 
       {savedId !== null && (
-        <ProgramSavedSheet savedId={savedId} onDismiss={handleSheetDismiss} />
+        // 저장된 초안이 남은 폼으로 돌아가면 같은 프로그램을 또 저장할 수 있다.
+        <ProgramSavedSheet
+          savedId={savedId}
+          onDismiss={() => router.push(ROUTES.TRAINING.PROGRAMS)}
+        />
       )}
     </main>
   );

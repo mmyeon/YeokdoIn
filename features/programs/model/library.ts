@@ -1,13 +1,11 @@
-import type { Program } from '@/features/notation/model/types';
 import type { ProgramRow } from '@/features/programs/api/programs';
 import { serializeProgram } from '@/features/programs/model/serialize';
-import { isTextProgram } from '@/features/programs/model/text-program';
+import { parseProgramRow } from '@/features/programs/model/parse-program-row';
 
 export interface LibraryItem {
   id: number;
   createdAt: string;
   lines: string[];
-  /** 레거시 구조화 프로그램만 러너로 진입할 수 있다. */
   isRunnable: boolean;
 }
 
@@ -15,25 +13,23 @@ export type LibraryFilter = 'all' | 'week' | 'snatch' | 'cj' | 'squat';
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
-function legacyLines(row: ProgramRow): string[] {
-  const program = row.parsed_data as unknown as Program;
-  return serializeProgram(program)
-    .split('\n')
-    .map((l) => l.trim())
-    .filter(Boolean);
-}
-
 /**
- * 두 저장 형태를 모두 목록 표시용 항목으로 옮긴다.
- * 텍스트 프로그램은 `lines` 를 그대로 쓴다 — 재구성하지 않는다.
+ * 실행 가능 여부는 러너가 읽을 수 있는지와 같아야 한다.
+ * 상세 화면과 같은 `parseProgramRow` 로 판정한다.
  */
 export function toLibraryItem(row: ProgramRow): LibraryItem {
-  const isText = isTextProgram(row);
+  const view = parseProgramRow(row);
+  const lines =
+    view.kind === 'text'
+      ? view.lines
+      : view.kind === 'structured'
+        ? serializeProgram(view.program).split('\n').filter(Boolean)
+        : [];
   return {
     id: row.id,
     createdAt: row.created_at,
-    lines: isText ? (row.lines ?? []) : legacyLines(row),
-    isRunnable: !isText,
+    lines,
+    isRunnable: view.kind === 'structured',
   };
 }
 
