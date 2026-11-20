@@ -1,9 +1,6 @@
 'use server';
 
-import { z } from 'zod';
-
 import { supabaseServerClient } from '@/features/auth/supabase/ServerClient';
-import { sanitizeItems } from '@/features/programs/model/sanitize-items';
 import { handleDatabaseError } from '@/utils/database';
 import { buildProgram } from '@/features/programs/model/build-program';
 import {
@@ -116,55 +113,6 @@ export async function updateProgram({
 
   if (error) handleDatabaseError(error);
   if (!data) throw new Error('프로그램을 수정하지 못했습니다.');
-  return data as ProgramRow;
-}
-
-const updateTextProgramSchema = z.object({
-  id: z.number().int(),
-  lines: z.array(z.string()),
-  title: z.string().nullable().optional(),
-});
-
-export type UpdateTextProgramInput = z.infer<typeof updateTextProgramSchema>;
-
-/**
- * 저장된 텍스트 프로그램을 갱신한다. 새 행을 만들지 않는다.
- *
- * `source_text` 는 갱신 대상이 아니다 — 정의가 「사용자 편집 이전」이므로
- * 사후 수정으로 덮으면 편집 비율의 측정 근거가 사라진다.
- */
-export async function updateTextProgram(
-  input: UpdateTextProgramInput,
-): Promise<ProgramRow> {
-  const supabase = await supabaseServerClient();
-  const userId = await requireUserId();
-
-  const parsed = updateTextProgramSchema.safeParse(input);
-  if (!parsed.success) {
-    throw new Error('Program data is invalid.');
-  }
-
-  const lines = sanitizeItems(parsed.data.lines);
-  if (lines.length === 0) {
-    throw new Error('A program needs at least one item.');
-  }
-
-  const existing = await getProgram(parsed.data.id);
-  if (!existing) throw new Error('Program not found.');
-  if (existing.lines === null) {
-    throw new Error('This program cannot be edited as text.');
-  }
-
-  const { data, error } = await supabase
-    .from('programs')
-    .update({ lines, title: parsed.data.title ?? existing.title })
-    .eq('id', parsed.data.id)
-    .eq('user_id', userId)
-    .select('*')
-    .single();
-
-  if (error) handleDatabaseError(error);
-  if (!data) throw new Error('Failed to update program.');
   return data as ProgramRow;
 }
 

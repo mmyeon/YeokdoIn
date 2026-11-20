@@ -12,10 +12,8 @@ import {
   saveProgram,
   updateProgram,
   type UpdateProgramInput,
-  updateTextProgram,
   type ProgramRow,
   type ProgramInput,
-  type UpdateTextProgramInput,
 } from '@/features/programs/api/programs';
 import { QUERY_KEYS } from '@/lib/queryKeys';
 import useAuth from '@/features/auth/model/useAuth';
@@ -60,29 +58,6 @@ export function useProgram(id: number) {
     queryKey: [QUERY_KEYS.PROGRAMS, id],
     queryFn: (): Promise<ProgramRow | null> => getProgram(id),
     enabled: !!user && Number.isFinite(id),
-  });
-}
-
-interface UpdateTextProgramHookOptions {
-  onSuccess?: (row: ProgramRow) => void;
-  onError?: (error: Error) => void;
-}
-
-export function useUpdateTextProgram({
-  onSuccess,
-  onError,
-}: UpdateTextProgramHookOptions = {}) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: (input: UpdateTextProgramInput) => updateTextProgram(input),
-    onSuccess: (row) => {
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROGRAMS] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROGRAMS, row.id] });
-      onSuccess?.(row);
-    },
-    onError: (error: Error) => {
-      onError?.(error);
-    },
   });
 }
 
