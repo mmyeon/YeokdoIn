@@ -10,6 +10,8 @@ import {
   listPrograms,
   getProgram,
   saveProgram,
+  updateProgram,
+  type UpdateProgramInput,
   updateTextProgram,
   type ProgramRow,
   type ProgramInput,
@@ -73,6 +75,24 @@ export function useUpdateTextProgram({
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: UpdateTextProgramInput) => updateTextProgram(input),
+    onSuccess: (row) => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROGRAMS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROGRAMS, row.id] });
+      onSuccess?.(row);
+    },
+    onError: (error: Error) => {
+      onError?.(error);
+    },
+  });
+}
+
+export function useUpdateProgram({
+  onSuccess,
+  onError,
+}: SaveProgramHookOptions = {}) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: UpdateProgramInput) => updateProgram(input),
     onSuccess: (row) => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROGRAMS] });
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROGRAMS, row.id] });
