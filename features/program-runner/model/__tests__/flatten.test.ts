@@ -5,15 +5,15 @@ describe("flattenProgram", () => {
   const snatchProgram: Program = {
     blocks: [
       {
-        movements: [{ name: "Power Snatch", modifiers: [] }],
+        movements: [{ exerciseId: 1, name: "Power Snatch" }],
         setEntries: [
           { percentage: 60, reps: { type: "complex", reps: [3, 1] }, sets: 3 },
         ],
       },
       {
         movements: [
-          { name: "Snatch Pull", modifiers: [] },
-          { name: "Power Snatch", modifiers: [] },
+          { exerciseId: 2, name: "Snatch Pull" },
+          { exerciseId: 1, name: "Power Snatch" },
         ],
         setEntries: [
           { percentage: 70, reps: { type: "simple", reps: 2 }, sets: 2 },
@@ -41,7 +41,7 @@ describe("flattenProgram", () => {
     expect(positions[1].blockIdx).toBe(1);
     expect(positions[1].exerciseIdx).toBe(0);
     expect(positions[1].totalExercises).toBe(1);
-    expect(positions[1].movement.name).toBe("Snatch Pull + Power Snatch");
+    expect(positions[1].displayName).toBe("Snatch Pull + Power Snatch");
   });
 
   it("setEntries 를 개별 세트로 펼치고 setNumber 를 1부터 매긴다", () => {
@@ -60,7 +60,7 @@ describe("flattenProgram", () => {
     const multiEntryProgram: Program = {
       blocks: [
         {
-          movements: [{ name: "Power Snatch", modifiers: [] }],
+          movements: [{ exerciseId: 1, name: "Power Snatch" }],
           setEntries: [
             { percentage: 60, reps: { type: "simple", reps: 3 }, sets: 3 },
             { percentage: 70, reps: { type: "simple", reps: 2 }, sets: 2 },

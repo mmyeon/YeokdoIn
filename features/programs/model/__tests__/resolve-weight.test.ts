@@ -1,7 +1,7 @@
 import { resolveWeight } from "../resolve-weight";
 import type { Movement } from "@/features/notation/model/types";
 
-const mv = (name: string): Movement => ({ name, modifiers: [] });
+const mv = (name: string): Movement => ({ exerciseId: 1, name });
 
 describe("resolveWeight", () => {
   it("퍼센트와 PR이 모두 있으면 kg을 계산해 반환한다", () => {
@@ -96,7 +96,7 @@ describe("resolveWeight", () => {
 
   it("pr_reference_id가 다른 운동을 가리키면 참조 운동의 PR로 계산한다", () => {
     const result = resolveWeight({
-      movements: [{ name: "hang power snatch", modifiers: [] }],
+      movements: [{ exerciseId: 1, name: "hang power snatch" }],
       percentage: 70,
       aliasMap: { "hang power snatch": 66 },
       prRefMap: { 66: 58 },   // 66 → Snatch (58)
@@ -111,7 +111,7 @@ describe("resolveWeight", () => {
 
   it("prRefMap에 없는 운동은 exerciseId를 직접 prMap에서 조회한다", () => {
     const result = resolveWeight({
-      movements: [{ name: "back squat", modifiers: [] }],
+      movements: [{ exerciseId: 1, name: "back squat" }],
       percentage: 90,
       aliasMap: { "back squat": 77 },
       prRefMap: { 77: 77 },
@@ -126,7 +126,7 @@ describe("resolveWeight", () => {
 
   it("prRefMap에 없고 prMap에도 없으면 no-pr를 반환한다", () => {
     const result = resolveWeight({
-      movements: [{ name: "farmer carry", modifiers: [] }],
+      movements: [{ exerciseId: 1, name: "farmer carry" }],
       percentage: 80,
       aliasMap: { "farmer carry": 999 },
       prRefMap: {},

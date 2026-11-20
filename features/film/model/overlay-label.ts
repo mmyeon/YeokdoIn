@@ -1,6 +1,4 @@
-import type { Movement } from "@/features/notation/model/types";
 import type { SetPlan } from "@/features/program-runner/model/types";
-import { formatMovementName } from "@/features/program-runner/model/format";
 
 /**
  * `Snatch · 100kg · 80% · Set 1/3` 형식의 오버레이 라벨을 반환한다.
@@ -8,20 +6,10 @@ import { formatMovementName } from "@/features/program-runner/model/format";
  * @param kg 해당 세트의 무게(kg). null이면 생략한다.
  */
 export function formatOverlayLabel(
-  movement: Movement,
+  displayName: string,
   set: SetPlan,
   kg: number | null,
 ): string {
-  const { name, before, after } = formatMovementName(movement);
-
-  const displayName = [
-    before.join(" "),
-    name,
-    after.length > 0 ? `(${after.join(", ")})` : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
-
   return [
     displayName,
     kg != null ? `${kg}kg` : "",

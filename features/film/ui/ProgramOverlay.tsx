@@ -28,7 +28,7 @@ export function ProgramOverlay({
   onNext,
 }: ProgramOverlayProps) {
   const set = position.sets[setIdx];
-  const label = set ? formatOverlayLabel(position.movement, set, kg) : "";
+  const label = set ? formatOverlayLabel(position.displayName, set, kg) : "";
 
   return (
     <div

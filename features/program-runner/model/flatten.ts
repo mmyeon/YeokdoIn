@@ -1,4 +1,4 @@
-import type { Movement, Program } from "@/features/notation/model/types";
+import type { Program } from "@/features/notation/model/types";
 import { resolveWeight } from "@/features/programs/model/resolve-weight";
 import type { ExercisePosition, SetPlan } from "./types";
 
@@ -27,10 +27,7 @@ export function flattenProgram({
   program.blocks.forEach((block, blockIdx) => {
     const totalExercises = block.setEntries.length;
 
-    const movement: Movement =
-      block.movements.length === 1
-        ? block.movements[0]
-        : { name: block.movements.map((m) => m.name).join(" + "), modifiers: [] };
+    const displayName = block.movements.map((m) => m.name).join(" + ");
 
     block.setEntries.forEach((entry, entryIdx) => {
       const resolved = resolveWeight({
@@ -59,7 +56,7 @@ export function flattenProgram({
         totalBlocks,
         totalExercises,
         blockMovements: block.movements,
-        movement,
+        displayName,
         sets,
       });
     });

@@ -28,7 +28,7 @@ function legacyRow(overrides: Partial<ProgramRow> = {}): ProgramRow {
     parsed_data: {
       blocks: [
         {
-          movements: [{ name: 'Back Squat', modifiers: [] }],
+          movements: [{ exerciseId: 1, name: 'Back Squat' }],
           setEntries: [
             { percentage: 80, reps: { type: 'simple', reps: 5 }, sets: 5 },
           ],

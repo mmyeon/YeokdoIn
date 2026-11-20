@@ -14,12 +14,7 @@ function makePosition(setCount: number): ExercisePosition {
     totalBlocks: 1,
     totalExercises: 1,
     blockMovements: [],
-    movement: {
-      id: "m1",
-      name: "Back Squat",
-      alias: null,
-      sets: [],
-    } as unknown as ExercisePosition["movement"],
+    displayName: "Back Squat",
     sets: Array.from({ length: setCount }, (_, i) => ({
       setNumber: i + 1,
       totalSets: setCount,

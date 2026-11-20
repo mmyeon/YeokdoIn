@@ -1,32 +1,31 @@
 import { z } from 'zod';
 
+export const MAX_PERCENTAGE = 200;
+export const MAX_REPS = 99;
+export const MAX_SETS = 99;
+
+const repsCountSchema = z.number().int().min(1).max(MAX_REPS);
+
 export const repSchemeSchema = z.union([
   z.object({
     type: z.literal('simple'),
-    reps: z.number().int().positive(),
+    reps: repsCountSchema,
   }),
   z.object({
     type: z.literal('complex'),
-    reps: z.array(z.number().int().positive()).min(1),
+    reps: z.array(repsCountSchema).min(1),
   }),
 ]);
 
-export const modifierPositionSchema = z.enum(['before', 'after']);
-
-export const movementModifierSchema = z.object({
-  name: z.string().min(1),
-  position: modifierPositionSchema,
-});
-
 export const movementSchema = z.object({
+  exerciseId: z.number().int().positive(),
   name: z.string().min(1),
-  modifiers: z.array(movementModifierSchema),
 });
 
 export const setEntrySchema = z.object({
-  percentage: z.number().nullable(),
+  percentage: z.number().positive().max(MAX_PERCENTAGE).nullable(),
   reps: repSchemeSchema,
-  sets: z.number().int().positive(),
+  sets: z.number().int().min(1).max(MAX_SETS),
 });
 
 export const blockSchema = z.object({
