@@ -21,51 +21,6 @@ async function requireUserId(): Promise<string> {
   return userId;
 }
 
-const saveTextProgramSchema = z.object({
-  sourceText: z.string(),
-  lines: z.array(z.string()),
-  title: z.string().nullable().optional(),
-});
-
-export type SaveTextProgramInput = z.infer<typeof saveTextProgramSchema>;
-
-/**
- * 붙여넣기로 확정한 항목을 텍스트 그대로 저장한다.
- * 내용을 해석하거나 구조화하지 않는다 — `parsed_data` 는 항상 `NULL` 이다.
- */
-export async function saveTextProgram(
-  input: SaveTextProgramInput,
-): Promise<ProgramRow> {
-  const supabase = await supabaseServerClient();
-  const userId = await requireUserId();
-
-  const parsed = saveTextProgramSchema.safeParse(input);
-  if (!parsed.success) {
-    throw new Error('Program data is invalid.');
-  }
-
-  const lines = sanitizeItems(parsed.data.lines);
-  if (lines.length === 0) {
-    throw new Error('A program needs at least one item.');
-  }
-
-  const { data, error } = await supabase
-    .from('programs')
-    .insert({
-      user_id: userId,
-      title: parsed.data.title ?? null,
-      lines,
-      source_text: parsed.data.sourceText,
-      parsed_data: null,
-    })
-    .select('*')
-    .single();
-
-  if (error) handleDatabaseError(error);
-  if (!data) throw new Error('Failed to save program.');
-  return data as ProgramRow;
-}
-
 export type { ProgramInput } from '@/features/programs/model/program-input';
 
 /**

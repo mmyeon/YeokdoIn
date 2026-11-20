@@ -85,7 +85,7 @@ describe('buildActivityIndex', () => {
   });
 
   /**
-   * 제목은 대부분 null 이다(`saveTextProgram` 의 title 이 optional). 제목만 믿으면
+   * 제목은 대부분 null 이다(텍스트 프로그램의 title 이 optional). 제목만 믿으면
    * 요약이 "프로그램 1건"으로 뭉개져 FR-008 이 성립하지 않는다.
    */
   it('제목이 없으면 lines 첫 줄을 label 로 쓴다', () => {

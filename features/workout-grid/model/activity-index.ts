@@ -29,7 +29,7 @@ export type ProgramActivitySource = Pick<
  * 온전히 있으므로 `id` 로 링크만 건다.
  *
  * `label` 의 소스는 `title`, 없으면 `lines` 의 첫 비어있지 않은 줄이다. 제목은
- * 대부분 `null` 이라(`saveTextProgram` 의 `title` 이 optional) 제목만 믿으면
+ * 대부분 `null` 이라(텍스트 프로그램의 `title` 이 optional) 제목만 믿으면
  * 요약이 건수로 뭉개진다.
  */
 function toDayProgram(program: ProgramActivitySource): DayProgram {

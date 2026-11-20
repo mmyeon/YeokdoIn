@@ -31,7 +31,7 @@ export function flattenProgram({
       const resolved = resolveWeight({
         movements: block.movements,
         percentage: entry.percentage,
-              prRefMap,
+        prRefMap,
         prMap,
       });
       const prescribedKg = resolved.kind === "computed" ? resolved.kg : null;
