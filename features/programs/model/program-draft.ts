@@ -3,7 +3,7 @@ import {
   MAX_REPS,
   MAX_SETS,
 } from '@/features/notation/model/schemas';
-import type { Movement, SetEntry } from '@/features/notation/model/types';
+import type { Movement, Program, SetEntry } from '@/features/notation/model/types';
 import type { ProgramInput } from '@/features/programs/model/program-input';
 
 /** 입력칸이 들고 있는 값이라 숫자도 문자열이다. 숫자 변환은 저장 직전 한 번만 한다. */
@@ -156,6 +156,25 @@ export function createDraftReducer(newKey: () => string) {
           };
         });
     }
+  };
+}
+
+/** `toProgramInput` 의 역변환. 저장된 Program 으로 폼 초안을 채운다. */
+export function draftFromProgram(program: Program, newKey: () => string): ProgramDraft {
+  return {
+    blocks: program.blocks.map((block) => ({
+      key: newKey(),
+      movements: block.movements.map((m) => ({ ...m })),
+      entries: block.setEntries.map((entry) => ({
+        key: newKey(),
+        percentage: entry.percentage === null ? '' : String(entry.percentage),
+        reps:
+          entry.reps.type === 'simple'
+            ? [String(entry.reps.reps)]
+            : entry.reps.reps.map(String),
+        sets: String(entry.sets),
+      })),
+    })),
   };
 }
 

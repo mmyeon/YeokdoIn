@@ -1,10 +1,11 @@
 import {
   createDraftReducer,
+  draftFromProgram,
   toProgramInput,
   type DraftAction,
   type ProgramDraft,
 } from '@/features/programs/model/program-draft';
-import type { Movement } from '@/features/notation/model/types';
+import type { Movement, Program } from '@/features/notation/model/types';
 
 const SNATCH: Movement = { exerciseId: 1, name: 'Snatch' };
 const CLEAN: Movement = { exerciseId: 2, name: 'Power Clean' };
@@ -284,5 +285,86 @@ describe('toProgramInput', () => {
       expect(result.errors.e1).toBeUndefined();
       expect(Object.keys(result.errors.e2).sort()).toEqual(['reps.0', 'sets']);
     }
+  });
+});
+
+describe('draftFromProgram', () => {
+  const sequentialKey = () => {
+    let n = 0;
+    return () => `d${(n += 1)}`;
+  };
+
+  function roundTrip(program: Program) {
+    const result = toProgramInput(draftFromProgram(program, sequentialKey()));
+    if (!result.ok) throw new Error('왕복 변환이 실패했다');
+    return result.input;
+  }
+
+  it('단순 블록을 왕복해도 종목 id 와 세트 줄이 같다', () => {
+    const program: Program = {
+      blocks: [
+        {
+          movements: [SNATCH],
+          setEntries: [
+            { percentage: 70, reps: { type: 'simple', reps: 2 }, sets: 3 },
+            { percentage: 75.5, reps: { type: 'simple', reps: 1 }, sets: 2 },
+          ],
+        },
+      ],
+    };
+    const input = roundTrip(program);
+    expect(input.blocks).toEqual([
+      { exerciseIds: [1], setEntries: program.blocks[0].setEntries },
+    ]);
+  });
+
+  it('복합 블록을 왕복해도 동작 순서와 렙 배열이 같다', () => {
+    const program: Program = {
+      blocks: [
+        {
+          movements: [CLEAN, JERK],
+          setEntries: [{ percentage: 80, reps: { type: 'complex', reps: [2, 1] }, sets: 4 }],
+        },
+      ],
+    };
+    const input = roundTrip(program);
+    expect(input.blocks).toEqual([
+      { exerciseIds: [2, 3], setEntries: program.blocks[0].setEntries },
+    ]);
+  });
+
+  it('퍼센트가 null 인 줄은 빈 문자열이 되고 다시 null 로 돌아온다', () => {
+    const program: Program = {
+      blocks: [
+        {
+          movements: [SNATCH],
+          setEntries: [{ percentage: null, reps: { type: 'simple', reps: 5 }, sets: 3 }],
+        },
+      ],
+    };
+    const draft = draftFromProgram(program, sequentialKey());
+    expect(draft.blocks[0].entries[0].percentage).toBe('');
+    expect(roundTrip(program).blocks[0].setEntries[0].percentage).toBeNull();
+  });
+
+  it('블록과 줄마다 서로 다른 키를 준다', () => {
+    const program: Program = {
+      blocks: [
+        {
+          movements: [SNATCH],
+          setEntries: [
+            { percentage: 70, reps: { type: 'simple', reps: 2 }, sets: 3 },
+            { percentage: 75, reps: { type: 'simple', reps: 2 }, sets: 3 },
+          ],
+        },
+        {
+          movements: [CLEAN],
+          setEntries: [{ percentage: 60, reps: { type: 'simple', reps: 3 }, sets: 3 }],
+        },
+      ],
+    };
+    const draft = draftFromProgram(program, sequentialKey());
+    const keys = draft.blocks.flatMap((b) => [b.key, ...b.entries.map((e) => e.key)]);
+    expect(new Set(keys).size).toBe(keys.length);
   });
 });
