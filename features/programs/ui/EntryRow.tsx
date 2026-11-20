@@ -35,7 +35,6 @@ export function EntryRow({ block, entry, errors, canRemove, dispatch }: EntryRow
             onChange={(e) =>
               dispatch({ type: 'changeEntry', ...target, field: 'percentage', value: e.target.value })
             }
-            placeholder="%"
             aria-label="퍼센트"
             aria-invalid={errors?.percentage !== undefined}
             className={cn(inputClass(errors?.percentage !== undefined, 'w-[72px] pr-5'))}
@@ -106,5 +105,6 @@ function labeledMessages(errors: EntryErrors): string[] {
   const repMessages = Object.entries(errors).filter(([key]) => key.startsWith('reps.'));
   repMessages.forEach(([, message]) => messages.push(`렙: ${message}`));
   if (errors.sets) messages.push(`세트: ${errors.sets}`);
-  return messages;
+  // 복합 블록에서 렙 칸 여러 개가 같은 오류를 내도 한 번만 보여준다.
+  return [...new Set(messages)];
 }
