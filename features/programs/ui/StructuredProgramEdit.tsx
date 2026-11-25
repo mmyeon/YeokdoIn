@@ -15,7 +15,6 @@ const DISCARD_WARNING = '수정한 내용이 사라집니다. 취소할까요?';
 
 interface StructuredProgramEditProps {
   view: Structured;
-  /** 저장 성공과 취소 모두 보기 모드로 돌아간다. */
   onDone: () => void;
 }
 

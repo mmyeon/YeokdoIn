@@ -11,7 +11,6 @@ interface ExerciseName {
   name: string;
 }
 
-/** 입력의 종목 id 에 DB 이름을 찍어 Program 으로 만든다. 순서는 입력 그대로다. */
 export function buildProgram(
   input: ProgramInput,
   exercises: readonly ExerciseName[],

@@ -36,7 +36,6 @@ export default function ProgramInputPage() {
       setSaveError(null);
       setSavedId(row.id);
     },
-    // 실패해도 초안을 그대로 두고 재시도하게 한다.
     onError: (e) => {
       submitting.current = false;
       setSaveError(e.message || '저장에 실패했습니다.');

@@ -25,11 +25,6 @@ export interface ResolveWeightInput {
   prMap: Readonly<Record<number, number>>;
 }
 
-/**
- * 블록의 movements + 단일 set-entry 퍼센트 + PR 매핑으로 처방 중량을 해결한다.
- * UI 계층에서 BlockCard가 어떤 상태(계산됨 / 퍼센트 없음 / PR 없음)인지 분기할 수 있도록
- * 태그드 유니온으로 반환한다.
- */
 export function resolveWeight({
   movements,
   percentage,

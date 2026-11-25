@@ -159,7 +159,6 @@ export function createDraftReducer(newKey: () => string) {
   };
 }
 
-/** `toProgramInput` 의 역변환. 저장된 Program 으로 폼 초안을 채운다. */
 export function draftFromProgram(program: Program, newKey: () => string): ProgramDraft {
   return {
     blocks: program.blocks.map((block) => ({
@@ -208,7 +207,7 @@ function parsePercentage(raw: string): number | null | string {
   return value;
 }
 
-/** 퍼센트가 비어 있으면 null 이다. 보조 운동은 % 없이 적는다. */
+/** 보조 운동은 % 없이 적는다. */
 export function toProgramInput(draft: ProgramDraft): ProgramInputResult {
   if (draft.blocks.length === 0) {
     return { ok: false, message: '종목을 하나 이상 추가하세요.', errors: {} };

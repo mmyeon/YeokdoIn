@@ -8,7 +8,6 @@ export type ExerciseRow = Tables<"exercises">;
 
 /**
  * 큐레이트된 exercises 세트를 반환한다 (seed 기반, 공개 SELECT RLS).
- * 프로그램 입력 UI 의 종목 선택 옵션과 PR 참조 맵의 공급원이 된다.
  */
 export async function listExercises(): Promise<ExerciseRow[]> {
   const supabase = await supabaseServerClient();

@@ -21,7 +21,6 @@ async function requireUserId(): Promise<string> {
 
 export type { ProgramInput } from '@/features/programs/model/program-input';
 
-/** 입력을 검증하고 종목 이름을 DB 에서 찍어 Program 으로 만든다. 클라이언트의 이름은 믿지 않는다. */
 async function buildProgramFromInput(
   input: ProgramInput,
 ): Promise<{ program: Program; title: string | null }> {
@@ -44,10 +43,6 @@ async function buildProgramFromInput(
   return { program: built.program, title: parsed.data.title ?? null };
 }
 
-/**
- * 구조화 입력을 저장한다.
- * 텍스트 프로그램과 구분되도록 `lines`, `source_text` 는 NULL 이다.
- */
 export async function saveProgram(input: ProgramInput): Promise<ProgramRow> {
   const supabase = await supabaseServerClient();
   const userId = await requireUserId();
@@ -72,11 +67,6 @@ export async function saveProgram(input: ProgramInput): Promise<ProgramRow> {
 
 export type UpdateProgramInput = ProgramInput & { id: number };
 
-/**
- * 저장된 구조화 프로그램을 같은 행에서 갱신한다.
- * 텍스트 프로그램(`lines` 가 NULL 이 아님)은 거부한다.
- * 제목을 보내지 않으면 기존 제목을 유지한다.
- */
 export async function updateProgram({
   id,
   ...input

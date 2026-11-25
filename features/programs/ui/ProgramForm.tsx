@@ -19,7 +19,6 @@ interface ProgramFormProps {
   draft: ProgramDraft;
   dispatch: (action: DraftAction) => void;
   isSaving: boolean;
-  /** 저장 실패 메시지. 초안은 그대로 유지된다. */
   saveError: string | null;
   onSubmit: (input: ProgramInput) => void;
 }
