@@ -1,7 +1,7 @@
 /**
  * 프로그램 기록을 **날짜별로 접은** 인덱스. 순수 함수 — I/O 도 React 도 없다.
  *
- * 읽는 필드는 `id`·`created_at`·`title`·`lines` 넷뿐이다. `updated_at` 은 쓰지 않는다 —
+ * 읽는 필드는 `id`·`created_at`·`title`·`lines`·`parsed_data` 다섯뿐이다. `updated_at` 은 쓰지 않는다 —
  * FR-002 가 판정 기준을 **생성 시각**으로 못 박았고, 프로그램을 나중에 고쳤다고
  * 칸이 다른 날로 옮겨가면 안 되기 때문이다. 타입을 `ProgramRow` 전체가 아니라
  * `Pick` 으로 좁혀둔 것이 그 규칙을 컴파일러 쪽에 남기는 장치다.
@@ -11,6 +11,7 @@
  */
 
 import type { ProgramRow } from '@/features/programs/api/programs';
+import { toLibraryItem } from '@/features/programs/model/library';
 
 import { localDateKey } from './local-date-key';
 import type { DayActivity, DayProgram } from './types';
@@ -18,7 +19,7 @@ import type { DayActivity, DayProgram } from './types';
 /** 이 기능이 프로그램에서 읽는 전부. */
 export type ProgramActivitySource = Pick<
   ProgramRow,
-  'id' | 'created_at' | 'title' | 'lines'
+  'id' | 'created_at' | 'title' | 'lines' | 'parsed_data'
 >;
 
 /**
@@ -28,13 +29,13 @@ export type ProgramActivitySource = Pick<
  * 상세가 그리드보다 길어진다(spec 결정 기록). 본문은 기록 상세 화면에 이미
  * 온전히 있으므로 `id` 로 링크만 건다.
  *
- * `label` 의 소스는 `title`, 없으면 `lines` 의 첫 비어있지 않은 줄이다. 제목은
+ * `label` 의 소스는 `title`, 없으면 프로그램 요약의 첫 비어있지 않은 줄이다. 제목은
  * 대부분 `null` 이라(텍스트 프로그램의 `title` 이 optional) 제목만 믿으면
  * 요약이 건수로 뭉개진다.
  */
 function toDayProgram(program: ProgramActivitySource): DayProgram {
   const title = program.title?.trim();
-  const firstLine = program.lines?.map((line) => line.trim()).find(Boolean);
+  const firstLine = toLibraryItem(program).lines.map((line) => line.trim()).find(Boolean);
 
   return { id: program.id, label: title || firstLine || null };
 }

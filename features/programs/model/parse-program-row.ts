@@ -17,7 +17,12 @@ export type ProgramView =
  * DB 행을 화면이 그릴 세 상태 중 하나로 옮긴다.
  * 목록·홈의 실행 가능 여부도 이 함수로 판정한다.
  */
-export function parseProgramRow(row: ProgramRow): ProgramView {
+export type ProgramRowContent = Pick<
+  ProgramRow,
+  'id' | 'title' | 'created_at' | 'lines' | 'parsed_data'
+>;
+
+export function parseProgramRow(row: ProgramRowContent): ProgramView {
   const base: ProgramViewBase = {
     id: row.id,
     title: row.title,

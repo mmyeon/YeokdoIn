@@ -1,6 +1,8 @@
-import type { ProgramRow } from '@/features/programs/api/programs';
 import { serializeProgram } from '@/features/programs/model/serialize';
-import { parseProgramRow } from '@/features/programs/model/parse-program-row';
+import {
+  parseProgramRow,
+  type ProgramRowContent,
+} from '@/features/programs/model/parse-program-row';
 
 export interface LibraryItem {
   id: number;
@@ -13,11 +15,8 @@ export type LibraryFilter = 'all' | 'week' | 'snatch' | 'cj' | 'squat';
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
-/**
- * 실행 가능 여부는 러너가 읽을 수 있는지와 같아야 한다.
- * 상세 화면과 같은 `parseProgramRow` 로 판정한다.
- */
-export function toLibraryItem(row: ProgramRow): LibraryItem {
+/** 실행 가능 여부는 러너가 읽을 수 있는지와 같아야 한다. */
+export function toLibraryItem(row: ProgramRowContent): LibraryItem {
   const view = parseProgramRow(row);
   const lines =
     view.kind === 'text'
