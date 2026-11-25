@@ -1,7 +1,7 @@
 import { resolveRefMovement } from "../resolve-movement";
 import type { Movement } from "@/features/notation/model/types";
 
-const mv = (name: string): Movement => ({ name, modifiers: [] });
+const mv = (name: string): Movement => ({ exerciseId: 1, name });
 
 describe("resolveRefMovement", () => {
   it("단일 동작 블록에서는 그 동작을 반환한다", () => {

@@ -1,10 +1,9 @@
-import type { Movement, Program } from "@/features/notation/model/types";
+import type { Program } from "@/features/notation/model/types";
 import { resolveWeight } from "@/features/programs/model/resolve-weight";
 import type { ExercisePosition, SetPlan } from "./types";
 
 export interface FlattenProgramInput {
   program: Program;
-  aliasMap: Readonly<Record<string, number>>;
   prRefMap: Readonly<Record<number, number>>;
   prMap: Readonly<Record<number, number>>;
 }
@@ -17,7 +16,6 @@ export interface FlattenProgramInput {
  */
 export function flattenProgram({
   program,
-  aliasMap,
   prRefMap,
   prMap,
 }: FlattenProgramInput): ExercisePosition[] {
@@ -27,16 +25,12 @@ export function flattenProgram({
   program.blocks.forEach((block, blockIdx) => {
     const totalExercises = block.setEntries.length;
 
-    const movement: Movement =
-      block.movements.length === 1
-        ? block.movements[0]
-        : { name: block.movements.map((m) => m.name).join(" + "), modifiers: [] };
+    const displayName = block.movements.map((m) => m.name).join(" + ");
 
     block.setEntries.forEach((entry, entryIdx) => {
       const resolved = resolveWeight({
         movements: block.movements,
         percentage: entry.percentage,
-        aliasMap,
         prRefMap,
         prMap,
       });
@@ -59,7 +53,7 @@ export function flattenProgram({
         totalBlocks,
         totalExercises,
         blockMovements: block.movements,
-        movement,
+        displayName,
         sets,
       });
     });

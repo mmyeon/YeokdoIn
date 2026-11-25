@@ -13,16 +13,10 @@ export interface SetEntry {
   sets: number;
 }
 
-export type ModifierPosition = 'before' | 'after';
-
-export interface MovementModifier {
-  name: string;
-  position: ModifierPosition;
-}
-
 export interface Movement {
+  exerciseId: number;
+  /** 저장 시점에 서버가 exercises.name 에서 찍은 표시용 이름. 계산에는 exerciseId 만 쓴다. */
   name: string;
-  modifiers: MovementModifier[];
 }
 
 export type RepScheme =

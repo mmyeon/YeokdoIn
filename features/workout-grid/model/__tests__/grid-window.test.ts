@@ -41,6 +41,7 @@ function gridFor(instants: readonly string[]) {
       created_at,
       title: null,
       lines: null,
+      parsed_data: null,
     })),
     SEOUL,
   );

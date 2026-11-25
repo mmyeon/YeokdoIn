@@ -6,7 +6,7 @@ import { Barbell } from "@/components/ui/barbell";
 import { SetDot } from "@/components/ui/set-dot";
 
 import type { ExercisePosition, SetRecord } from "../model/types";
-import { formatMovementName, formatReps } from "../model/format";
+import { formatReps } from "../model/format";
 
 interface RunnerFocusViewProps {
   position: ExercisePosition;
@@ -31,19 +31,10 @@ export function RunnerFocusView({
   onNext,
   onLogSet,
 }: RunnerFocusViewProps) {
-  const { movement, sets } = position;
-  const { name, before, after } = formatMovementName(movement);
+  const { displayName, sets } = position;
   const current = sets[currentSetIdx];
   const currentRecord = records[currentSetIdx];
   const displayKg: number | null = currentRecord?.kg ?? current?.prescribedKg ?? null;
-
-  const displayName = [
-    before.join(" "),
-    name,
-    after.length > 0 ? `(${after.join(", ")})` : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
 
   return (
     <div className="flex flex-1 flex-col">

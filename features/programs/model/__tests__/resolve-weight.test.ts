@@ -1,14 +1,13 @@
 import { resolveWeight } from "../resolve-weight";
 import type { Movement } from "@/features/notation/model/types";
 
-const mv = (name: string): Movement => ({ name, modifiers: [] });
+const mv = (exerciseId: number, name: string): Movement => ({ exerciseId, name });
 
 describe("resolveWeight", () => {
   it("퍼센트와 PR이 모두 있으면 kg을 계산해 반환한다", () => {
     const result = resolveWeight({
-      movements: [mv("back squat")],
+      movements: [mv(1, "Back Squat")],
       percentage: 70,
-      aliasMap: { "back squat": 1 },
       prRefMap: { 1: 1 },
       prMap: { 1: 100 },
     });
@@ -23,43 +22,28 @@ describe("resolveWeight", () => {
 
   it("퍼센트가 없으면 no-percentage를 반환한다", () => {
     const result = resolveWeight({
-      movements: [mv("sots press")],
+      movements: [mv(2, "Sots Press")],
       percentage: null,
-      aliasMap: { "sots press": 2 },
       prRefMap: { 2: 2 },
       prMap: { 2: 50 },
     });
-    expect(result.kind).toBe("no-percentage");
+    expect(result).toEqual({ kind: "no-percentage", refName: "Sots Press" });
   });
 
-  it("별칭 매핑이 없으면 unresolved-alias와 동작명을 반환한다", () => {
+  it("PR이 없으면 no-pr과 종목 id를 반환한다", () => {
     const result = resolveWeight({
-      movements: [mv("P.Sn")],
+      movements: [mv(3, "Clean & Jerk")],
       percentage: 60,
-      aliasMap: {},
       prRefMap: {},
       prMap: {},
     });
-    expect(result).toEqual({ kind: "unresolved-alias", missingName: "P.Sn" });
-  });
-
-  it("별칭은 있지만 PR이 없으면 no-pr을 반환한다", () => {
-    const result = resolveWeight({
-      movements: [mv("clean & jerk")],
-      percentage: 60,
-      aliasMap: { "clean & jerk": 3 },
-      prRefMap: {},
-      prMap: {},
-    });
-    expect(result.kind).toBe("no-pr");
-    if (result.kind === "no-pr") expect(result.exerciseId).toBe(3);
+    expect(result).toEqual({ kind: "no-pr", exerciseId: 3, refName: "Clean & Jerk" });
   });
 
   it("복합 블록에서는 두 번째 동작의 PR을 사용한다", () => {
     const result = resolveWeight({
-      movements: [mv("snatch pull"), mv("power snatch")],
+      movements: [mv(10, "Snatch Pull"), mv(20, "Power Snatch")],
       percentage: 60,
-      aliasMap: { "snatch pull": 10, "power snatch": 20 },
       prRefMap: { 10: 10, 20: 20 },
       prMap: { 10: 200, 20: 85 },
     });
@@ -71,22 +55,10 @@ describe("resolveWeight", () => {
     }
   });
 
-  it("별칭 매핑은 대소문자 구분 없이 동작한다", () => {
-    const result = resolveWeight({
-      movements: [mv("BACK SQUAT")],
-      percentage: 70,
-      aliasMap: { "back squat": 1 },
-      prRefMap: { 1: 1 },
-      prMap: { 1: 100 },
-    });
-    expect(result.kind).toBe("computed");
-  });
-
   it("결과 kg은 0.5kg 단위로 반올림된다", () => {
     const result = resolveWeight({
-      movements: [mv("back squat")],
+      movements: [mv(1, "Back Squat")],
       percentage: 60,
-      aliasMap: { "back squat": 1 },
       prRefMap: { 1: 1 },
       prMap: { 1: 87 },
     });
@@ -96,10 +68,9 @@ describe("resolveWeight", () => {
 
   it("pr_reference_id가 다른 운동을 가리키면 참조 운동의 PR로 계산한다", () => {
     const result = resolveWeight({
-      movements: [{ name: "hang power snatch", modifiers: [] }],
+      movements: [mv(66, "Hang Power Snatch")],
       percentage: 70,
-      aliasMap: { "hang power snatch": 66 },
-      prRefMap: { 66: 58 },   // 66 → Snatch (58)
+      prRefMap: { 66: 58 }, // 66 → Snatch (58)
       prMap: { 58: 100 },
     });
     expect(result.kind).toBe("computed");
@@ -111,10 +82,9 @@ describe("resolveWeight", () => {
 
   it("prRefMap에 없는 운동은 exerciseId를 직접 prMap에서 조회한다", () => {
     const result = resolveWeight({
-      movements: [{ name: "back squat", modifiers: [] }],
+      movements: [mv(77, "Back Squat")],
       percentage: 90,
-      aliasMap: { "back squat": 77 },
-      prRefMap: { 77: 77 },
+      prRefMap: {},
       prMap: { 77: 200 },
     });
     expect(result.kind).toBe("computed");
@@ -122,16 +92,5 @@ describe("resolveWeight", () => {
       expect(result.pr).toBe(200);
       expect(result.exerciseId).toBe(77);
     }
-  });
-
-  it("prRefMap에 없고 prMap에도 없으면 no-pr를 반환한다", () => {
-    const result = resolveWeight({
-      movements: [{ name: "farmer carry", modifiers: [] }],
-      percentage: 80,
-      aliasMap: { "farmer carry": 999 },
-      prRefMap: {},
-      prMap: {},
-    });
-    expect(result.kind).toBe("no-pr");
   });
 });

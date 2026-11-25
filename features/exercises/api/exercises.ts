@@ -8,7 +8,6 @@ export type ExerciseRow = Tables<"exercises">;
 
 /**
  * 큐레이트된 exercises 세트를 반환한다 (seed 기반, 공개 SELECT RLS).
- * resolver 의 aliasMap 과 프로그램 UI 의 exercise 선택 옵션 공급원이 된다.
  */
 export async function listExercises(): Promise<ExerciseRow[]> {
   const supabase = await supabaseServerClient();

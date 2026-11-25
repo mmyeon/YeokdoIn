@@ -10,7 +10,6 @@ import { cn } from "@/lib/utils";
 
 import type { ExercisePosition, SetRecord } from "../model/types";
 import {
-  formatMovementName,
   formatReps,
   formatSetsBySchemeLabel,
 } from "../model/format";
@@ -43,8 +42,7 @@ export function RunnerStandardView({
   onSelectSet,
   onSetKg,
 }: RunnerStandardViewProps) {
-  const { movement, sets } = position;
-  const { name, before, after } = formatMovementName(movement);
+  const { displayName, sets } = position;
   const current = sets[currentSetIdx];
   const currentRecord = records[currentSetIdx];
   const displayKg: number | null = currentRecord?.kg ?? current?.prescribedKg ?? null;
@@ -69,20 +67,8 @@ export function RunnerStandardView({
     <div className="flex flex-1 flex-col">
       <div className="px-5 pb-1 pt-2">
         <h1 className="text-[28px] font-bold leading-[1.05] tracking-tight text-yd-text">
-          {before.length > 0 && (
-            <span className="text-yd-text-muted">{before.join(" ")} </span>
-          )}
-          {name}
+          {displayName}
         </h1>
-        {after.length > 0 && (
-          <div className="mt-1 flex flex-wrap gap-1.5">
-            {after.map((m) => (
-              <Pill key={m} size="sm" variant="outlined">
-                ({m})
-              </Pill>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Big kg number for CURRENT set */}

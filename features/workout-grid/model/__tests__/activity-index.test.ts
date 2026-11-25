@@ -1,4 +1,4 @@
-import { buildActivityIndex } from '../activity-index';
+import { buildActivityIndex, type ProgramActivitySource } from '../activity-index';
 
 /**
  * FR-001 의 핵심은 "하루에 여러 건이어도 칸은 하나"다.
@@ -15,8 +15,9 @@ function program(
   title: string | null = null,
   lines: string[] | null = null,
   id = nextId++,
+  parsed_data: ProgramActivitySource['parsed_data'] = null,
 ) {
-  return { id, created_at: createdAt, title, lines };
+  return { id, created_at: createdAt, title, lines, parsed_data };
 }
 
 describe('buildActivityIndex', () => {
@@ -85,7 +86,7 @@ describe('buildActivityIndex', () => {
   });
 
   /**
-   * 제목은 대부분 null 이다(`saveTextProgram` 의 title 이 optional). 제목만 믿으면
+   * 제목은 대부분 null 이다(텍스트 프로그램의 title 이 optional). 제목만 믿으면
    * 요약이 "프로그램 1건"으로 뭉개져 FR-008 이 성립하지 않는다.
    */
   it('제목이 없으면 lines 첫 줄을 label 로 쓴다', () => {
@@ -95,6 +96,23 @@ describe('buildActivityIndex', () => {
     );
 
     expect(index.get('2026-09-17')?.programs[0].label).toBe('Snatch 5x3');
+  });
+
+  it('제목 없는 구조화 프로그램은 첫 블록 요약을 label 로 쓴다', () => {
+    const structured = {
+      blocks: [
+        {
+          movements: [{ exerciseId: 10, name: 'Snatch' }],
+          setEntries: [{ percentage: 80, reps: { type: 'simple', reps: 2 }, sets: 3 }],
+        },
+      ],
+    };
+    const index = buildActivityIndex(
+      [program('2026-09-17T01:00:00Z', null, null, nextId++, structured)],
+      SEOUL,
+    );
+
+    expect(index.get('2026-09-17')?.programs[0].label).toBe('Snatch 80% 2x3');
   });
 
   it('제목이 있으면 lines 보다 제목이 우선한다', () => {

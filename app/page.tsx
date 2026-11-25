@@ -20,7 +20,7 @@ import { VideoAnalysisCard } from "@/features/home/ui/VideoAnalysisCard";
 import { WorkoutGrid } from "@/features/workout-grid/ui/WorkoutGrid";
 import { ROUTES } from "@/routes";
 import type { ProgramRow } from "@/features/programs/api/programs";
-import { isTextProgram } from "@/features/programs/model/text-program";
+import { parseProgramRow } from "@/features/programs/model/parse-program-row";
 import type { PersonalRecordInfo } from "@/types/personalRecords";
 
 const DATE_FORMATTER = new Intl.DateTimeFormat("en-US", {
@@ -75,7 +75,7 @@ function toLibraryItems(programs: ProgramRow[]): ProgramLibraryItem[] {
     meta: new Date(p.created_at).toLocaleDateString("en-US"),
     pct: 0,
     active: idx === 0,
-    isRunnable: !isTextProgram(p),
+    isRunnable: parseProgramRow(p).kind === "structured",
   }));
 }
 

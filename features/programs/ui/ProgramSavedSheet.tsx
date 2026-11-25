@@ -46,10 +46,10 @@ export function ProgramSavedSheet({ savedId, onDismiss }: ProgramSavedSheetProps
           <button
             type="button"
             autoFocus
-            onClick={() => router.push(ROUTES.TRAINING.PROGRAM_DETAIL(savedId))}
+            onClick={() => router.push(ROUTES.TRAINING.PROGRAM_RUNNER(savedId))}
             className="flex h-[52px] w-full items-center justify-center rounded-2xl bg-yd-primary text-[15px] font-extrabold text-yd-on-primary shadow-[0_8px_24px_var(--yd-primary-soft)]"
           >
-            저장본 보기 →
+            운동 시작 →
           </button>
           <button
             type="button"

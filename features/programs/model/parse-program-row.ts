@@ -1,0 +1,38 @@
+import type { ProgramRow } from '@/features/programs/api/programs';
+import { programSchema } from '@/features/notation/model/schemas';
+import type { Program } from '@/features/notation/model/types';
+
+interface ProgramViewBase {
+  id: number;
+  title: string | null;
+  createdAt: string;
+}
+
+export type ProgramView =
+  | (ProgramViewBase & { kind: 'structured'; program: Program })
+  | (ProgramViewBase & { kind: 'text'; lines: string[] })
+  | (ProgramViewBase & { kind: 'unreadable' });
+
+/**
+ * DB 행을 화면이 그릴 세 상태 중 하나로 옮긴다.
+ * 목록·홈의 실행 가능 여부도 이 함수로 판정한다.
+ */
+export type ProgramRowContent = Pick<
+  ProgramRow,
+  'id' | 'title' | 'created_at' | 'lines' | 'parsed_data'
+>;
+
+export function parseProgramRow(row: ProgramRowContent): ProgramView {
+  const base: ProgramViewBase = {
+    id: row.id,
+    title: row.title,
+    createdAt: row.created_at,
+  };
+
+  if (row.lines !== null) return { ...base, kind: 'text', lines: row.lines };
+
+  const parsed = programSchema.safeParse(row.parsed_data);
+  if (parsed.success) return { ...base, kind: 'structured', program: parsed.data };
+
+  return { ...base, kind: 'unreadable' };
+}

@@ -9,11 +9,11 @@ import {
   deleteProgram,
   listPrograms,
   getProgram,
-  saveTextProgram,
-  updateTextProgram,
+  saveProgram,
+  updateProgram,
+  type UpdateProgramInput,
   type ProgramRow,
-  type SaveTextProgramInput,
-  type UpdateTextProgramInput,
+  type ProgramInput,
 } from '@/features/programs/api/programs';
 import { QUERY_KEYS } from '@/lib/queryKeys';
 import useAuth from '@/features/auth/model/useAuth';
@@ -30,18 +30,18 @@ export function usePrograms() {
   });
 }
 
-interface SaveTextProgramHookOptions {
+interface SaveProgramHookOptions {
   onSuccess?: (row: ProgramRow) => void;
   onError?: (error: Error) => void;
 }
 
-export function useSaveTextProgram({
+export function useSaveProgram({
   onSuccess,
   onError,
-}: SaveTextProgramHookOptions = {}) {
+}: SaveProgramHookOptions = {}) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: SaveTextProgramInput) => saveTextProgram(input),
+    mutationFn: (input: ProgramInput) => saveProgram(input),
     onSuccess: (row) => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROGRAMS] });
       onSuccess?.(row);
@@ -61,21 +61,17 @@ export function useProgram(id: number) {
   });
 }
 
-interface UpdateTextProgramHookOptions {
-  onSuccess?: (row: ProgramRow) => void;
-  onError?: (error: Error) => void;
-}
-
-export function useUpdateTextProgram({
+export function useUpdateProgram({
   onSuccess,
   onError,
-}: UpdateTextProgramHookOptions = {}) {
+}: SaveProgramHookOptions = {}) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: UpdateTextProgramInput) => updateTextProgram(input),
+    mutationFn: (input: UpdateProgramInput) => updateProgram(input),
     onSuccess: (row) => {
+      // 보기 모드로 돌아갈 때 낡은 내용이 비치지 않게 먼저 채운다.
+      queryClient.setQueryData([QUERY_KEYS.PROGRAMS, row.id], row);
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROGRAMS] });
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PROGRAMS, row.id] });
       onSuccess?.(row);
     },
     onError: (error: Error) => {

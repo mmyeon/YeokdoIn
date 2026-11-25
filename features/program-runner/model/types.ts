@@ -11,8 +11,8 @@ export interface ExercisePosition {
   totalExercises: number;
   /** All movements of the owning block (needed to resolve percentage-ref). */
   blockMovements: Movement[];
-  /** The movement to render at this position. */
-  movement: Movement;
+  /** 화면에 보일 이름. 복합 블록은 동작 이름을 " + " 로 이은 것. */
+  displayName: string;
   /** Expanded, per-set prescriptions for this exercise. */
   sets: SetPlan[];
 }

@@ -6,7 +6,7 @@ describe('serializeProgram', () => {
     const program: Program = {
       blocks: [
         {
-          movements: [{ name: 'back squat', modifiers: [] }],
+          movements: [{ exerciseId: 11, name: 'back squat' }],
           setEntries: [
             { percentage: 70, reps: { type: 'simple', reps: 5 }, sets: 3 },
           ],
@@ -21,8 +21,8 @@ describe('serializeProgram', () => {
       blocks: [
         {
           movements: [
-            { name: 'snatch pull', modifiers: [] },
-            { name: 'power snatch', modifiers: [] },
+            { exerciseId: 65, name: 'snatch pull' },
+            { exerciseId: 2, name: 'power snatch' },
           ],
           setEntries: [
             { percentage: 60, reps: { type: 'complex', reps: [3, 1] }, sets: 3 },
@@ -35,105 +35,17 @@ describe('serializeProgram', () => {
     );
   });
 
-  it('앞 modifier 는 동작 이름 앞에 붙는다', () => {
-    const program: Program = {
-      blocks: [
-        {
-          movements: [
-            {
-              name: 'snatch',
-              modifiers: [{ name: 'pause', position: 'before' }],
-            },
-          ],
-          setEntries: [
-            { percentage: null, reps: { type: 'simple', reps: 5 }, sets: 3 },
-          ],
-        },
-      ],
-    };
-    expect(serializeProgram(program)).toBe('pause snatch 5x3');
-  });
-
-  it('뒤 modifier 는 동작 이름 뒤에 붙는다', () => {
-    const program: Program = {
-      blocks: [
-        {
-          movements: [
-            {
-              name: 'back squat',
-              modifiers: [{ name: 'pause', position: 'after' }],
-            },
-          ],
-          setEntries: [
-            { percentage: null, reps: { type: 'simple', reps: 5 }, sets: 3 },
-          ],
-        },
-      ],
-    };
-    expect(serializeProgram(program)).toBe('back squat pause 5x3');
-  });
-
-  it('앞/뒤 modifier 가 모두 있을 때 각 위치에 순서대로 붙는다', () => {
-    const program: Program = {
-      blocks: [
-        {
-          movements: [
-            {
-              name: 'snatch',
-              modifiers: [
-                { name: 'no foot', position: 'before' },
-                { name: 'pause', position: 'before' },
-                { name: 'hold', position: 'after' },
-              ],
-            },
-          ],
-          setEntries: [
-            { percentage: 70, reps: { type: 'simple', reps: 3 }, sets: 3 },
-          ],
-        },
-      ],
-    };
-    expect(serializeProgram(program)).toBe(
-      'no foot pause snatch hold 70% 3x3',
-    );
-  });
-
-  it('복합 블록에서 각 movement 의 modifier 가 해당 movement 에만 적용된다', () => {
-    const program: Program = {
-      blocks: [
-        {
-          movements: [
-            {
-              name: 'snatch pull',
-              modifiers: [{ name: 'pause', position: 'after' }],
-            },
-            {
-              name: 'power snatch',
-              modifiers: [{ name: 'no foot', position: 'before' }],
-            },
-          ],
-          setEntries: [
-            { percentage: 60, reps: { type: 'complex', reps: [3, 1] }, sets: 3 },
-          ],
-        },
-      ],
-    };
-    expect(serializeProgram(program)).toBe(
-      'snatch pull pause & no foot power snatch 60% (3+1)x3',
-    );
-  });
-
   it('여러 블록을 줄바꿈으로 결합한다', () => {
     const program: Program = {
       blocks: [
         {
-          movements: [{ name: 'snatch', modifiers: [] }],
+          movements: [{ exerciseId: 27, name: 'snatch' }],
           setEntries: [
             { percentage: 70, reps: { type: 'simple', reps: 3 }, sets: 4 },
           ],
         },
         {
-          movements: [{ name: 'front squat', modifiers: [] }],
+          movements: [{ exerciseId: 33, name: 'front squat' }],
           setEntries: [
             { percentage: 80, reps: { type: 'simple', reps: 3 }, sets: 3 },
           ],
@@ -149,7 +61,7 @@ describe('serializeProgram', () => {
     const program: Program = {
       blocks: [
         {
-          movements: [{ name: 'back squat', modifiers: [] }],
+          movements: [{ exerciseId: 11, name: 'back squat' }],
           setEntries: [
             { percentage: 50, reps: { type: 'simple', reps: 3 }, sets: 3 },
             { percentage: 60, reps: { type: 'simple', reps: 3 }, sets: 3 },

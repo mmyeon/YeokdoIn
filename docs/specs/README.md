@@ -9,7 +9,8 @@
 
 | 문서 | 날짜 | 상태 | 요지 |
 | --- | --- | --- | --- |
-| [001-program-photo-input](../../specs/001-program-photo-input/spec.md) | 09-08 | ✅ **구현됨** | 화이트보드 프로그램 입력. 붙여넣기 → 줄 단위 확인 → 텍스트 그대로 저장. `programs.lines`/`source_text` 추가, 폼 입력 대체, 레거시 구조화 프로그램은 읽기 전용 |
+| [structured-manual-entry-decision](./2026-11-20-structured-manual-entry-decision.md) | 11-20 | 🟢 **현재 방향 · 구현됨** | 프로그램 입력을 구조화 수동 입력으로 바꾼다. 종목은 DB 목록에서 고르고 정식 명칭만 쓴다. 붙여넣기·오인식 검출·약어 매칭은 없앴다. 사진은 폼 미리 채우기로만 재검토 |
+| [001-program-photo-input](../../specs/001-program-photo-input/spec.md) | 09-08 | ❌ **대체됨** | → structured-manual-entry-decision 으로 대체 (2026-11-20). 화이트보드 프로그램 입력. 붙여넣기 → 줄 단위 확인 → 텍스트 그대로 저장. `programs.lines`/`source_text` 추가, 폼 입력 대체, 레거시 구조화 프로그램은 읽기 전용 |
 | [program-text-paste-design](./2026-07-24-program-text-paste-design.md) | 07-24 | ❌ **대체됨** | 붙여넣은 날것 텍스트를 세트별 불렛으로 렌더. → `specs/001-program-photo-input/spec.md` 로 대체 (2026-09-02) |
 | [exercise-vocabulary-unification-design](./2026-05-19-exercise-vocabulary-unification-design.md) | 05-19 | ⚠️ **유효 · 미구현** | 수동입력(Catalyst `exercises`)과 OCR(`base_exercises`) 어휘 이원화 해소 |
 | [gym-exercise-ocr-parsing-design](./2026-05-18-gym-exercise-ocr-parsing-design.md) | 05-18 | ⚠️ **부분 유효** | `base_exercises`/`gym_exercises` 어휘 설계와 modifier 4분류는 살아있음. OCR 전제만 무효 |
